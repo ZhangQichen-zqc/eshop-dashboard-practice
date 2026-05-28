@@ -1,0 +1,219 @@
+:root {
+  color: #172033;
+  background: #f5f7fb;
+  font-family: Inter, "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+input,
+select {
+  border: 1px solid #d7deea;
+  border-radius: 10px;
+  font: inherit;
+  padding: 10px 12px;
+}
+
+button {
+  background: #1f6feb;
+  border: 0;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+button:hover {
+  background: #195bc2;
+}
+
+.shell {
+  margin: 0 auto;
+  max-width: 1280px;
+  padding: 28px;
+}
+
+.hero {
+  align-items: center;
+  background: linear-gradient(135deg, #13233f, #2359b8);
+  border-radius: 28px;
+  color: #fff;
+  display: grid;
+  gap: 28px;
+  grid-template-columns: 1fr 340px;
+  padding: 34px;
+}
+
+.hero h1 {
+  font-size: 44px;
+  margin: 8px 0 12px;
+}
+
+.hero p {
+  color: #dfe9ff;
+  line-height: 1.7;
+  max-width: 740px;
+}
+
+.eyebrow {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.login-card,
+.panel,
+.product-card,
+.toolbar,
+.toast {
+  background: #fff;
+  border: 1px solid #e7ecf5;
+  border-radius: 20px;
+  box-shadow: 0 18px 50px rgba(19, 35, 63, 0.08);
+}
+
+.login-card {
+  color: #172033;
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+}
+
+.toast {
+  margin: 20px 0;
+  padding: 14px 18px;
+}
+
+.toolbar {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 220px 1fr;
+  margin: 22px 0;
+  padding: 16px;
+}
+
+.layout {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 1fr 360px;
+}
+
+h2 {
+  margin: 0 0 16px;
+}
+
+.grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+.product-card {
+  display: grid;
+  overflow: hidden;
+}
+
+.product-card img {
+  aspect-ratio: 4 / 3;
+  background: #edf1f8;
+  object-fit: cover;
+  width: 100%;
+}
+
+.product-body {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.product-body span,
+.muted,
+.metric span,
+.order span {
+  color: #68758a;
+  font-size: 13px;
+}
+
+.product-body h3 {
+  margin: 0;
+}
+
+.product-body p {
+  color: #536176;
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.price-row,
+.cart-line,
+.metric,
+.order {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.price-row strong {
+  color: #d63b2a;
+  font-size: 24px;
+}
+
+.side {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.panel {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+}
+
+.cart-line {
+  border-bottom: 1px solid #eef2f8;
+  gap: 10px;
+  padding-bottom: 10px;
+}
+
+.cart-line input {
+  width: 72px;
+}
+
+.total {
+  border-top: 1px solid #eef2f8;
+  font-size: 20px;
+  font-weight: 800;
+  padding-top: 12px;
+}
+
+.primary {
+  background: #d63b2a;
+}
+
+.primary:hover {
+  background: #b92e20;
+}
+
+.order,
+.metric {
+  border-bottom: 1px solid #eef2f8;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+@media (max-width: 900px) {
+  .hero,
+  .layout,
+  .toolbar {
+    grid-template-columns: 1fr;
+  }
+}

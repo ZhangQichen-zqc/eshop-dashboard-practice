@@ -1,0 +1,1 @@
+- [Report every step before executing](memory/feedback_report_every_step.md) — User wants to be informed of every action before it is taken
