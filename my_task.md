@@ -7,959 +7,959 @@
 ## 阶段零：环境搭建与验证
 
 ### 0.1 基础环境检查
-1. 检查 Node.js 版本：`node --version`（>= 18）
-2. 检查 npm 版本：`npm --version`（>= 9）
-3. 检查 Python 版本：`python3 --version`（>= 3.10）
-4. 检查 pip 版本：`pip --version`
-5. 检查 Git 版本：`git --version`
-6. 检查 Docker 版本：`docker --version`
-7. 检查 Docker Compose 版本：`docker compose version`
-8. 确认当前在项目根目录：`pwd`
-9. 确认 `git config user.name` 为 zhangqichen
-10. 确认 `git config user.email` 为 3159620141@qq.com
-11. 确认远程仓库可用：`git remote -v`
+- [x] **1.** 检查 Node.js 版本：`node --version`（>= 18）
+- [x] **2.** 检查 npm 版本：`npm --version`（>= 9）
+- [x] **3.** 检查 Python 版本：`python3 --version`（>= 3.10）
+- [x] **4.** 检查 pip 版本：`pip --version`
+- [x] **5.** 检查 Git 版本：`git --version`
+- [x] **6.** 检查 Docker 版本：`docker --version`
+- [x] **7.** 检查 Docker Compose 版本：`docker compose version`
+- [x] **8.** 确认当前在项目根目录：`pwd`
+- [x] **9.** 确认 `git config user.name` 为 zhangqichen
+- [x] **10.** 确认 `git config user.email` 为 3159620141@qq.com
+- [x] **11.** 确认远程仓库可用：`git remote -v`
 
 ### 0.2 Python 虚拟环境
-12. 确认 venv/ 已存在：`ls venv/`
-13. 确保 `.gitignore` 已包含 `venv/`
-14. 创建 `analytics_dashboard/requirements.txt`
-15. 添加 `fastapi==0.115.6`
-16. 添加 `uvicorn[standard]==0.34.0`
-17. 添加 `pandas>=2.0`
-18. 添加 `numpy>=1.24`
-19. 添加 `scikit-learn>=1.3`
-20. 添加 `matplotlib>=3.7`
-21. 添加 `seaborn>=0.12`
-22. 添加 `requests>=2.31`
-23. 添加 `jupyter>=1.0`
-24. 添加 `openpyxl>=3.1`
-25. 添加 `mlxtend>=0.22`
-26. 添加 `statsmodels>=0.14`
-27. 添加 `scipy>=1.11`
-28. 激活虚拟环境并安装依赖：`source venv/bin/activate && pip install -r analytics_dashboard/requirements.txt`
-29. 验证依赖导入：`python3 -c "import fastapi, pandas, sklearn, matplotlib"`
-30. 提交：安装 Python 依赖完成
+- [x] **12.** 确认 venv/ 已存在：`ls venv/`
+- [x] **13.** 确保 `.gitignore` 已包含 `venv/`
+- [x] **14.** 创建 `analytics_dashboard/requirements.txt`
+- [x] **15.** 添加 `fastapi==0.115.6`
+- [x] **16.** 添加 `uvicorn[standard]==0.34.0`
+- [x] **17.** 添加 `pandas>=2.0`
+- [x] **18.** 添加 `numpy>=1.24`
+- [x] **19.** 添加 `scikit-learn>=1.3`
+- [x] **20.** 添加 `matplotlib>=3.7`
+- [x] **21.** 添加 `seaborn>=0.12`
+- [x] **22.** 添加 `requests>=2.31`
+- [x] **23.** 添加 `jupyter>=1.0`
+- [x] **24.** 添加 `openpyxl>=3.1`
+- [x] **25.** 添加 `mlxtend>=0.22`
+- [x] **26.** 添加 `statsmodels>=0.14`
+- [x] **27.** 添加 `scipy>=1.11`
+- [x] **28.** 激活虚拟环境并安装依赖：`source venv/bin/activate && pip install -r analytics_dashboard/requirements.txt`
+- [x] **29.** 验证依赖导入：`python3 -c "import fastapi, pandas, sklearn, matplotlib"`
+- [ ] 30. 提交：安装 Python 依赖完成
 
 ### 0.3 数据库种子数据验证
-31. 确认 SQLite 数据库存在：`ls -la server/data/eshop.sqlite`
-32. 用 sqlite3 查看所有表：`sqlite3 server/data/eshop.sqlite ".tables"`
-33. 验证 users 行数：`sqlite3 server/data/eshop.sqlite "SELECT COUNT(*) FROM users;"`
-34. 验证 orders 行数：`sqlite3 server/data/eshop.sqlite "SELECT COUNT(*) FROM orders;"`
-35. 验证 page_events 行数：`sqlite3 server/data/eshop.sqlite "SELECT COUNT(*) FROM page_events;"`
-36. 验证分析视图存在：`sqlite3 server/data/eshop.sqlite "SELECT name FROM sqlite_master WHERE type='view';"`
-37. 记录数据规模到 `docs/data_inventory.md`
+- [x] **31.** 确认 SQLite 数据库存在：`ls -la server/data/eshop.sqlite`
+- [x] **32.** 用 sqlite3 查看所有表：`sqlite3 server/data/eshop.sqlite ".tables"`
+- [x] **33.** 验证 users 行数：`sqlite3 server/data/eshop.sqlite "SELECT COUNT(*) FROM users;"`
+- [x] **34.** 验证 orders 行数：`sqlite3 server/data/eshop.sqlite "SELECT COUNT(*) FROM orders;"`
+- [x] **35.** 验证 page_events 行数：`sqlite3 server/data/eshop.sqlite "SELECT COUNT(*) FROM page_events;"`
+- [x] **36.** 验证分析视图存在：`sqlite3 server/data/eshop.sqlite "SELECT name FROM sqlite_master WHERE type='view';"`
+- [x] **37.** 记录数据规模到 `docs/data_inventory.md`
 
 ### 0.4 安装 Node 依赖并启动商城
-38. 执行 `npm install --prefix server` 安装商城后端依赖
-39. 执行 `npm install --prefix client` 安装前端依赖
-40. 启动商城 API：`npm run start:mall-api`
-41. 新终端验证健康检查：`curl http://127.0.0.1:38173/api/health`
-42. 测试 ETL help 接口：`curl http://127.0.0.1:38173/api/etl/help`
-43. 测试 ETL tables 接口：`curl http://127.0.0.1:38173/api/etl/tables`
-44. 测试 ETL metrics 接口：`curl http://127.0.0.1:38173/api/etl/metrics`
-45. 测试 ETL quality 接口：`curl http://127.0.0.1:38173/api/etl/quality`
-46. 停止商城 API（Ctrl+C）
-47. 提交：商城 API 和 ETL 接口验证通过
+- [x] **38.** 执行 `npm install --prefix server` 安装商城后端依赖
+- [x] **39.** 执行 `npm install --prefix client` 安装前端依赖
+- [x] **40.** 启动商城 API：`npm run start:mall-api`
+- [x] **41.** 新终端验证健康检查：`curl http://127.0.0.1:38173/api/health`
+- [x] **42.** 测试 ETL help 接口：`curl http://127.0.0.1:38173/api/etl/help`
+- [x] **43.** 测试 ETL tables 接口：`curl http://127.0.0.1:38173/api/etl/tables`
+- [x] **44.** 测试 ETL metrics 接口：`curl http://127.0.0.1:38173/api/etl/metrics`
+- [x] **45.** 测试 ETL quality 接口：`curl http://127.0.0.1:38173/api/etl/quality`
+- [x] **46.** 停止商城 API（Ctrl+C）
+- [ ] 47. 提交：商城 API 和 ETL 接口验证通过
 
 ---
 
 ## 阶段一：数据探索与理解 —— 对应讲义第 1 章
 
 ### 1.1 创建 Jupyter 探索环境
-48. 创建 `notebooks/` 目录
-49. 创建 `notebooks/01_data_exploration.ipynb`
-50. 在 notebook 中导入 pandas、numpy、sqlite3
-51. 编写 SQLite 直连函数 `connect_db()`
-52. 编写 CSV 批量读取函数 `load_all_csv()`
-53. 编写 ETL API 调用函数 `fetch_etl_table(table_name)`
-54. 验证三种读取方式结果一致
+- [ ] 48. 创建 `notebooks/` 目录
+- [ ] 49. 创建 `notebooks/01_data_exploration.ipynb`
+- [ ] 50. 在 notebook 中导入 pandas、numpy、sqlite3
+- [ ] 51. 编写 SQLite 直连函数 `connect_db()`
+- [ ] 52. 编写 CSV 批量读取函数 `load_all_csv()`
+- [ ] 53. 编写 ETL API 调用函数 `fetch_etl_table(table_name)`
+- [ ] 54. 验证三种读取方式结果一致
 
 ### 1.2 遍历全部数据资产
-55. 列出全部 34 张表的名称和记录数
-56. 为每张表标注类型：dimension / fact / source / summary
-57. 读取 `dim_user` 查看字段和样例数据
-58. 读取 `dim_product` 查看字段和样例数据
-59. 读取 `dim_date` 查看字段和样例数据
-60. 读取 `dim_campaign` 查看字段和样例数据
-61. 读取 `fact_order` 查看字段和样例数据
-62. 读取 `fact_order_item` 查看字段和样例数据
-63. 读取 `fact_traffic` 查看字段和样例数据
-64. 读取 `fact_coupon_use` 查看字段和样例数据
-65. 读取 `fact_refund` 查看字段和样例数据
-66. 读取 `fact_fulfillment` 查看字段和样例数据
-67. 读取 `fact_inventory_movement` 查看字段和样例数据
-68. 读取 `fact_product_review` 查看字段和样例数据
-69. 读取 `fact_ads_spend` 查看字段和样例数据
-70. 读取 `daily_business_summary` 查看字段和样例数据
+- [ ] 55. 列出全部 34 张表的名称和记录数
+- [ ] 56. 为每张表标注类型：dimension / fact / source / summary
+- [ ] 57. 读取 `dim_user` 查看字段和样例数据
+- [ ] 58. 读取 `dim_product` 查看字段和样例数据
+- [ ] 59. 读取 `dim_date` 查看字段和样例数据
+- [ ] 60. 读取 `dim_campaign` 查看字段和样例数据
+- [ ] 61. 读取 `fact_order` 查看字段和样例数据
+- [ ] 62. 读取 `fact_order_item` 查看字段和样例数据
+- [ ] 63. 读取 `fact_traffic` 查看字段和样例数据
+- [ ] 64. 读取 `fact_coupon_use` 查看字段和样例数据
+- [ ] 65. 读取 `fact_refund` 查看字段和样例数据
+- [ ] 66. 读取 `fact_fulfillment` 查看字段和样例数据
+- [ ] 67. 读取 `fact_inventory_movement` 查看字段和样例数据
+- [ ] 68. 读取 `fact_product_review` 查看字段和样例数据
+- [ ] 69. 读取 `fact_ads_spend` 查看字段和样例数据
+- [ ] 70. 读取 `daily_business_summary` 查看字段和样例数据
 
 ### 1.3 理解核心指标口径
-71. 按标准口径计算 GMV：`SUM(paid_amount) WHERE status IN ('paid','completed')`
-72. 计算净销售额：GMV - 退款金额
-73. 计算毛利：`SUM((unit_price-unit_cost)*quantity - discount_amount)`
-74. 计算订单数、买家数、客单价、退款率、转化率
-75. 将指标口径定义写入 `docs/metric_definitions.md`
+- [ ] 71. 按标准口径计算 GMV：`SUM(paid_amount) WHERE status IN ('paid','completed')`
+- [ ] 72. 计算净销售额：GMV - 退款金额
+- [ ] 73. 计算毛利：`SUM((unit_price-unit_cost)*quantity - discount_amount)`
+- [ ] 74. 计算订单数、买家数、客单价、退款率、转化率
+- [ ] 75. 将指标口径定义写入 `docs/metric_definitions.md`
 
 ### 1.4 初步业务发现
-76. 计算数据时间范围（MIN / MAX order_date）
-77. 计算总 GMV、总订单数、总买家数
-78. 绘制 24 个月月度 GMV 折线图
-79. 绘制各渠道 GMV 占比饼图
-80. 绘制各品类 GMV 贡献柱状图
-81. 写出 500 字初步业务发现
-82. 提交：数据探索与业务理解阶段完成
+- [ ] 76. 计算数据时间范围（MIN / MAX order_date）
+- [ ] 77. 计算总 GMV、总订单数、总买家数
+- [ ] 78. 绘制 24 个月月度 GMV 折线图
+- [ ] 79. 绘制各渠道 GMV 占比饼图
+- [ ] 80. 绘制各品类 GMV 贡献柱状图
+- [ ] 81. 写出 500 字初步业务发现
+- [ ] 82. 提交：数据探索与业务理解阶段完成
 
 ---
 
 ## 阶段二：ETL 数据接入层开发
 
 ### 2.1 创建仪表盘项目骨架
-83. 创建 `analytics_dashboard/` 目录
-84. 创建 `analytics_dashboard/app/__init__.py`
-85. 创建 `analytics_dashboard/app/main.py`
-86. 创建 `analytics_dashboard/app/data_access.py`
-87. 创建 `analytics_dashboard/app/utils.py`
-88. 创建 `analytics_dashboard/app/config.py`
-89. 创建 `analytics_dashboard/app/subprojects/__init__.py`
-90. 创建 `analytics_dashboard/static/` 目录
-91. 创建 `analytics_dashboard/tests/__init__.py`
+- [ ] 83. 创建 `analytics_dashboard/` 目录
+- [ ] 84. 创建 `analytics_dashboard/app/__init__.py`
+- [ ] 85. 创建 `analytics_dashboard/app/main.py`
+- [ ] 86. 创建 `analytics_dashboard/app/data_access.py`
+- [ ] 87. 创建 `analytics_dashboard/app/utils.py`
+- [ ] 88. 创建 `analytics_dashboard/app/config.py`
+- [ ] 89. 创建 `analytics_dashboard/app/subprojects/__init__.py`
+- [ ] 90. 创建 `analytics_dashboard/static/` 目录
+- [ ] 91. 创建 `analytics_dashboard/tests/__init__.py`
 
 ### 2.2 实现 config.py
-92. 定义项目根目录路径常量
-93. 定义 SQLite 数据库路径（支持 `ESHOP_DB_PATH` 环境变量）
-94. 定义 ETL API 基础 URL 配置
-95. 定义数据缓存目录路径
-96. 定义日志级别和服务端口配置
-97. 定义 CORS 允许来源
+- [ ] 92. 定义项目根目录路径常量
+- [ ] 93. 定义 SQLite 数据库路径（支持 `ESHOP_DB_PATH` 环境变量）
+- [ ] 94. 定义 ETL API 基础 URL 配置
+- [ ] 95. 定义数据缓存目录路径
+- [ ] 96. 定义日志级别和服务端口配置
+- [ ] 97. 定义 CORS 允许来源
 
 ### 2.3 实现 utils.py 工具函数
-98. 实现 `safe_divide(a, b, default=0)` 安全除法
-99. 实现 `format_money(value)` 金额格式化
-100. 实现 `format_percent(value)` 百分比格式化
-101. 实现 `parse_date(value)` 日期解析
-102. 实现 `compute_quantiles(series)` 分位数计算
-103. 实现 `standardize(series)` 标准化
-104. 实现 `moving_average(series, window=7)` 移动平均
-105. 实现 `mom_change(current, previous)` 环比
-106. 实现 `yoy_change(current, last_year)` 同比
-107. 实现 `missing_summary(df)` 缺失值统计
-108. 实现 `detect_outliers_iqr(series)` IQR 异常值检测
-109. 实现 `detect_outliers_zscore(series, threshold=3)` Z-score 异常值检测
-110. 实现 `@cache_result(ttl)` 缓存装饰器
-111. 实现 `setup_logging()` 日志配置
-112. 实现 JSON 序列化辅助函数（处理 numpy 类型）
+- [ ] 98. 实现 `safe_divide(a, b, default=0)` 安全除法
+- [ ] 99. 实现 `format_money(value)` 金额格式化
+- [ ] 100. 实现 `format_percent(value)` 百分比格式化
+- [ ] 101. 实现 `parse_date(value)` 日期解析
+- [ ] 102. 实现 `compute_quantiles(series)` 分位数计算
+- [ ] 103. 实现 `standardize(series)` 标准化
+- [ ] 104. 实现 `moving_average(series, window=7)` 移动平均
+- [ ] 105. 实现 `mom_change(current, previous)` 环比
+- [ ] 106. 实现 `yoy_change(current, last_year)` 同比
+- [ ] 107. 实现 `missing_summary(df)` 缺失值统计
+- [ ] 108. 实现 `detect_outliers_iqr(series)` IQR 异常值检测
+- [ ] 109. 实现 `detect_outliers_zscore(series, threshold=3)` Z-score 异常值检测
+- [ ] 110. 实现 `@cache_result(ttl)` 缓存装饰器
+- [ ] 111. 实现 `setup_logging()` 日志配置
+- [ ] 112. 实现 JSON 序列化辅助函数（处理 numpy 类型）
 
 ### 2.4 实现 data_access.py —— SQLite 模式
-113. 实现 `get_db_connection(readonly=True)` 只读连接
-114. 实现 `query_table(table_name, limit, offset, order_by, filters)` 分页查询
-115. 实现 `query_table_schema(table_name)` 表结构查询
-116. 实现 `query_metrics()` 核心指标查询
-117. 实现 `query_quality_report()` 质量报告查询
-118. 实现 `query_daily_summary(start_date, end_date, channels)` 经营日报
-119. 实现 `load_dim_user()` 加载用户维度
-120. 实现 `load_dim_product()` 加载商品维度
-121. 实现 `load_dim_date()` 加载日期维度
-122. 实现 `load_dim_campaign()` 加载活动维度
-123. 实现 `load_fact_order()` 加载订单事实
-124. 实现 `load_fact_order_item()` 加载订单行事实
-125. 实现 `load_fact_traffic()` 加载流量事实
-126. 实现 `load_fact_coupon_use()` 加载优惠券事实
-127. 实现 `load_fact_refund()` 加载退款事实
-128. 实现 `load_fact_fulfillment()` 加载履约事实
-129. 实现 `load_fact_inventory_movement()` 加载库存流水
-130. 实现 `load_fact_product_review()` 加载评论事实
-131. 实现 `load_fact_ads_spend()` 加载广告花费
-132. 为所有加载函数添加参数化过滤（日期范围、渠道、类目）
+- [ ] 113. 实现 `get_db_connection(readonly=True)` 只读连接
+- [ ] 114. 实现 `query_table(table_name, limit, offset, order_by, filters)` 分页查询
+- [ ] 115. 实现 `query_table_schema(table_name)` 表结构查询
+- [ ] 116. 实现 `query_metrics()` 核心指标查询
+- [ ] 117. 实现 `query_quality_report()` 质量报告查询
+- [ ] 118. 实现 `query_daily_summary(start_date, end_date, channels)` 经营日报
+- [ ] 119. 实现 `load_dim_user()` 加载用户维度
+- [ ] 120. 实现 `load_dim_product()` 加载商品维度
+- [ ] 121. 实现 `load_dim_date()` 加载日期维度
+- [ ] 122. 实现 `load_dim_campaign()` 加载活动维度
+- [ ] 123. 实现 `load_fact_order()` 加载订单事实
+- [ ] 124. 实现 `load_fact_order_item()` 加载订单行事实
+- [ ] 125. 实现 `load_fact_traffic()` 加载流量事实
+- [ ] 126. 实现 `load_fact_coupon_use()` 加载优惠券事实
+- [ ] 127. 实现 `load_fact_refund()` 加载退款事实
+- [ ] 128. 实现 `load_fact_fulfillment()` 加载履约事实
+- [ ] 129. 实现 `load_fact_inventory_movement()` 加载库存流水
+- [ ] 130. 实现 `load_fact_product_review()` 加载评论事实
+- [ ] 131. 实现 `load_fact_ads_spend()` 加载广告花费
+- [ ] 132. 为所有加载函数添加参数化过滤（日期范围、渠道、类目）
 
 ### 2.5 实现 data_access.py —— ETL API 模式
-133. 实现 `ETLClient` 类封装 HTTP 请求
-134. 实现 `ETLClient.get_tables()` 获取表列表
-135. 实现 `ETLClient.get_schema(table)` 获取表结构
-136. 实现 `ETLClient.query(table, **params)` 分页查询
-137. 实现 `ETLClient.export_csv(table, save_path)` 导出 CSV
-138. 实现 `ETLClient.get_metrics()` 获取核心指标
-139. 实现 `ETLClient.get_quality()` 获取质量报告
-140. 实现 API 请求重试（最多 3 次）
-141. 实现 API 超时处理（30 秒）
-142. 实现 API 不可用时自动降级到 SQLite 模式
+- [ ] 133. 实现 `ETLClient` 类封装 HTTP 请求
+- [ ] 134. 实现 `ETLClient.get_tables()` 获取表列表
+- [ ] 135. 实现 `ETLClient.get_schema(table)` 获取表结构
+- [ ] 136. 实现 `ETLClient.query(table, **params)` 分页查询
+- [ ] 137. 实现 `ETLClient.export_csv(table, save_path)` 导出 CSV
+- [ ] 138. 实现 `ETLClient.get_metrics()` 获取核心指标
+- [ ] 139. 实现 `ETLClient.get_quality()` 获取质量报告
+- [ ] 140. 实现 API 请求重试（最多 3 次）
+- [ ] 141. 实现 API 超时处理（30 秒）
+- [ ] 142. 实现 API 不可用时自动降级到 SQLite 模式
 
 ### 2.6 实现 data_access.py —— CSV 模式
-143. 实现 `load_csv_table(table_name)` 从 exports/ 读取
-144. 实现 CSV 内存缓存避免重复读取
-145. 实现 CSV 字段类型自动推断和转换
-146. 实现数据源降级链：ETL API → SQLite → CSV
+- [ ] 143. 实现 `load_csv_table(table_name)` 从 exports/ 读取
+- [ ] 144. 实现 CSV 内存缓存避免重复读取
+- [ ] 145. 实现 CSV 字段类型自动推断和转换
+- [ ] 146. 实现数据源降级链：ETL API → SQLite → CSV
 
 ### 2.7 创建 FastAPI 入口 main.py
-147. 实现 FastAPI 应用实例化和 CORS 配置
-148. 实现启动事件：预热缓存
-149. 实现关闭事件：清理连接
-150. 实现 `GET /` 根路由
-151. 实现 `GET /health` 健康检查
-152. 实现 `GET /api/summary` 经营概览
-153. 实现 `GET /api/tables` 数据表列表
-154. 实现 `GET /api/tables/{name}` 表结构
-155. 实现 `GET /api/query/{table_name}` 数据查询
-156. 实现 `GET /api/quality` 数据质量
-157. 实现 `GET /api/subprojects` 子项目列表
-158. 实现 `GET /api/subprojects/{id}` 子项目详情
-159. 实现 `POST /api/reload` 手动刷新缓存
-160. 实现 `GET /api/export/{table_name}` 数据导出
-161. 实现全局异常处理中间件
-162. 实现请求日志中间件
-163. 验证所有路由可用
-164. 提交：FastAPI 骨架和数据读取层完成
+- [ ] 147. 实现 FastAPI 应用实例化和 CORS 配置
+- [ ] 148. 实现启动事件：预热缓存
+- [ ] 149. 实现关闭事件：清理连接
+- [ ] 150. 实现 `GET /` 根路由
+- [ ] 151. 实现 `GET /health` 健康检查
+- [ ] 152. 实现 `GET /api/summary` 经营概览
+- [ ] 153. 实现 `GET /api/tables` 数据表列表
+- [ ] 154. 实现 `GET /api/tables/{name}` 表结构
+- [ ] 155. 实现 `GET /api/query/{table_name}` 数据查询
+- [ ] 156. 实现 `GET /api/quality` 数据质量
+- [ ] 157. 实现 `GET /api/subprojects` 子项目列表
+- [ ] 158. 实现 `GET /api/subprojects/{id}` 子项目详情
+- [ ] 159. 实现 `POST /api/reload` 手动刷新缓存
+- [ ] 160. 实现 `GET /api/export/{table_name}` 数据导出
+- [ ] 161. 实现全局异常处理中间件
+- [ ] 162. 实现请求日志中间件
+- [ ] 163. 验证所有路由可用
+- [ ] 164. 提交：FastAPI 骨架和数据读取层完成
 
 ---
 
 ## 阶段三：数据质量检查与清洗 R0 —— 对应讲义第 2 章
 
 ### 3.1 完整性检查
-165. 实现检查每张表行数是否在预期范围
-166. 检查 users 关键字段缺失率（phone/gender/birth_year/province）
-167. 检查 orders 金额字段缺失率
-168. 检查 page_events 匿名流量比例
-169. 生成缺失值报告 DataFrame
+- [ ] 165. 实现检查每张表行数是否在预期范围
+- [ ] 166. 检查 users 关键字段缺失率（phone/gender/birth_year/province）
+- [ ] 167. 检查 orders 金额字段缺失率
+- [ ] 168. 检查 page_events 匿名流量比例
+- [ ] 169. 生成缺失值报告 DataFrame
 
 ### 3.2 唯一性检查
-170. 检查 users 表 user_id 是否重复
-171. 检查 orders 表 order_id 是否重复
-172. 检查 sku 表 sku_id 是否重复
-173. 检查 campaigns 表 campaign_id 是否重复
-174. 生成唯一性检查报告
+- [ ] 170. 检查 users 表 user_id 是否重复
+- [ ] 171. 检查 orders 表 order_id 是否重复
+- [ ] 172. 检查 sku 表 sku_id 是否重复
+- [ ] 173. 检查 campaigns 表 campaign_id 是否重复
+- [ ] 174. 生成唯一性检查报告
 
 ### 3.3 准确性检查
-175. 检查 paid_amount 是否有负数
-176. 检查 subtotal 是否有负数
-177. 检查订单行金额与订单头金额一致性
-178. 检查退款金额是否超过支付金额
-179. 检查 sku 库存是否有负数
-180. 检查 price >= cost 约束
-181. 生成准确性报告
+- [ ] 175. 检查 paid_amount 是否有负数
+- [ ] 176. 检查 subtotal 是否有负数
+- [ ] 177. 检查订单行金额与订单头金额一致性
+- [ ] 178. 检查退款金额是否超过支付金额
+- [ ] 179. 检查 sku 库存是否有负数
+- [ ] 180. 检查 price >= cost 约束
+- [ ] 181. 生成准确性报告
 
 ### 3.4 时效性检查
-182. 检查 orders 时间范围
-183. 检查 page_events 时间范围
-184. 检查 ads_spend 时间范围
-185. 检查最新订单日期距今天数
-186. 生成时效性报告
+- [ ] 182. 检查 orders 时间范围
+- [ ] 183. 检查 page_events 时间范围
+- [ ] 184. 检查 ads_spend 时间范围
+- [ ] 185. 检查最新订单日期距今天数
+- [ ] 186. 生成时效性报告
 
 ### 3.5 一致性检查
-187. 检查 orders.user_id 外键完整性
-188. 检查 order_items.sku_id 外键完整性
-189. 检查 ads_spend.campaign_id 外键完整性
+- [ ] 187. 检查 orders.user_id 外键完整性
+- [ ] 188. 检查 order_items.sku_id 外键完整性
+- [ ] 189. 检查 ads_spend.campaign_id 外键完整性
 
 ### 3.6 业务逻辑检查
-190. 检查订单状态分布是否合理
-191. 检查 paid_at >= created_at 时间约束
-192. 检查流量漏斗事件数量是否逐层递减
+- [ ] 190. 检查订单状态分布是否合理
+- [ ] 191. 检查 paid_at >= created_at 时间约束
+- [ ] 192. 检查流量漏斗事件数量是否逐层递减
 
 ### 3.7 数据清洗流水线
-193. 实现缺失值处理（删除/均值/中位数/众数填充）
-194. 实现 IQR 异常值处理
-195. 实现 Z-score 异常值处理
-196. 实现类别变量编码（One-hot / Ordinal）
-197. 实现特征缩放（Standard / MinMax / Robust）
-198. 实现相关性特征选择
-199. 实现方差过滤特征选择
-200. 构建完整的 `run_preprocessing_pipeline(df, config)` 流水线
-201. 测试流水线输入输出
+- [ ] 193. 实现缺失值处理（删除/均值/中位数/众数填充）
+- [ ] 194. 实现 IQR 异常值处理
+- [ ] 195. 实现 Z-score 异常值处理
+- [ ] 196. 实现类别变量编码（One-hot / Ordinal）
+- [ ] 197. 实现特征缩放（Standard / MinMax / Robust）
+- [ ] 198. 实现相关性特征选择
+- [ ] 199. 实现方差过滤特征选择
+- [ ] 200. 构建完整的 `run_preprocessing_pipeline(df, config)` 流水线
+- [ ] 201. 测试流水线输入输出
 
 ### 3.8 前端质量报告页
-202. 添加 `GET /api/r0/quality-report` 路由
-203. 实现质量检查结果展示表格（pass/warn/fail）
-204. 实现缺失值热力图
-205. 实现数据分布概览
-206. 实现清洗前后对比
-207. 提交：R0 数据质量检查与清洗完成
+- [ ] 202. 添加 `GET /api/r0/quality-report` 路由
+- [ ] 203. 实现质量检查结果展示表格（pass/warn/fail）
+- [ ] 204. 实现缺失值热力图
+- [ ] 205. 实现数据分布概览
+- [ ] 206. 实现清洗前后对比
+- [ ] 207. 提交：R0 数据质量检查与清洗完成
 
 ---
 
 ## 阶段四：特征工程 —— 用户与商品宽表 —— 对应讲义第 3 章
 
 ### 4.1 RFM 特征
-208. 实现 `compute_rfm(orders_df, reference_date)` 计算基础 RFM
-209. 计算 Recency：距参考日期的最近购买天数
-210. 计算 Frequency：订单次数
-211. 计算 Monetary：累计支付金额
-212. 实现 RFM 评分（按分位数分 1-5 分）
-213. 生成 8 类 RFM 分群标签
+- [ ] 208. 实现 `compute_rfm(orders_df, reference_date)` 计算基础 RFM
+- [ ] 209. 计算 Recency：距参考日期的最近购买天数
+- [ ] 210. 计算 Frequency：订单次数
+- [ ] 211. 计算 Monetary：累计支付金额
+- [ ] 212. 实现 RFM 评分（按分位数分 1-5 分）
+- [ ] 213. 生成 8 类 RFM 分群标签
 
 ### 4.2 行为特征
-214. 从 traffic 统计总行为次数 `total_events`
-215. 统计 `view_home/view_product/add_to_cart/checkout/pay_success` 各事件次数
-216. 统计活跃天数 `active_days`
-217. 统计日均行为数 `avg_daily_events`
-218. 统计设备占比 `device_mobile/desktop_ratio`
-219. 统计 `search_count` 搜索次数
+- [ ] 214. 从 traffic 统计总行为次数 `total_events`
+- [ ] 215. 统计 `view_home/view_product/add_to_cart/checkout/pay_success` 各事件次数
+- [ ] 216. 统计活跃天数 `active_days`
+- [ ] 217. 统计日均行为数 `avg_daily_events`
+- [ ] 218. 统计设备占比 `device_mobile/desktop_ratio`
+- [ ] 219. 统计 `search_count` 搜索次数
 
 ### 4.3 时间窗口行为特征
-220. 计算最近 7/30/90 天行为次数
-221. 计算最近 7/30 天浏览次数
-222. 计算最近 7/30 天加购次数
-223. 计算最近 7/30 天活跃天数
+- [ ] 220. 计算最近 7/30/90 天行为次数
+- [ ] 221. 计算最近 7/30 天浏览次数
+- [ ] 222. 计算最近 7/30 天加购次数
+- [ ] 223. 计算最近 7/30 天活跃天数
 
 ### 4.4 优惠券特征
-224. 统计领券数 `coupons_issued_count`
-225. 统计用券数 `coupons_used_count`
-226. 计算用券率 `coupon_use_rate`
-227. 计算平均券优惠额 `avg_coupon_discount`
-228. 计算累计券节省额
-229. 计算距上次用券天数
+- [ ] 224. 统计领券数 `coupons_issued_count`
+- [ ] 225. 统计用券数 `coupons_used_count`
+- [ ] 226. 计算用券率 `coupon_use_rate`
+- [ ] 227. 计算平均券优惠额 `avg_coupon_discount`
+- [ ] 228. 计算累计券节省额
+- [ ] 229. 计算距上次用券天数
 
 ### 4.5 品类偏好特征
-230. 识别每个用户的 TOP 品类
-231. 计算品类多样性 `category_diversity`
-232. 计算平均购买单价 `avg_unit_price`
-233. 计算高端价格带购买占比 `high_price_ratio`
-234. 计算低端价格带购买占比 `low_price_ratio`
+- [ ] 230. 识别每个用户的 TOP 品类
+- [ ] 231. 计算品类多样性 `category_diversity`
+- [ ] 232. 计算平均购买单价 `avg_unit_price`
+- [ ] 233. 计算高端价格带购买占比 `high_price_ratio`
+- [ ] 234. 计算低端价格带购买占比 `low_price_ratio`
 
 ### 4.6 购物行为特征
-235. 计算月均购买频次
-236. 计算平均下单间隔天数
-237. 计算首次购买距今天数
-238. 计算用户生命周期天数
-239. 计算周末订单占比
-240. 计算是否有退款历史
-241. 计算退款次数
+- [ ] 235. 计算月均购买频次
+- [ ] 236. 计算平均下单间隔天数
+- [ ] 237. 计算首次购买距今天数
+- [ ] 238. 计算用户生命周期天数
+- [ ] 239. 计算周末订单占比
+- [ ] 240. 计算是否有退款历史
+- [ ] 241. 计算退款次数
 
 ### 4.7 合并用户宽表
-242. 将 dim_user 属性与 RFM 合并
-243. 合并行为特征
-244. 合并时间窗口特征
-245. 合并优惠券特征
-246. 合并品类偏好特征
-247. 合并购物行为特征
-248. 验证主键唯一性（user_id 不重复）
-249. 验证行数 = 20000
-250. 验证缺失值正确处理（无订单用户填 0）
-251. 保存用户宽表为 CSV
+- [ ] 242. 将 dim_user 属性与 RFM 合并
+- [ ] 243. 合并行为特征
+- [ ] 244. 合并时间窗口特征
+- [ ] 245. 合并优惠券特征
+- [ ] 246. 合并品类偏好特征
+- [ ] 247. 合并购物行为特征
+- [ ] 248. 验证主键唯一性（user_id 不重复）
+- [ ] 249. 验证行数 = 20000
+- [ ] 250. 验证缺失值正确处理（无订单用户填 0）
+- [ ] 251. 保存用户宽表为 CSV
 
 ### 4.8 特征重要性预分析
-252. 计算特征间相关性矩阵
-253. 绘制相关性热力图
-254. 识别高相关特征对（r > 0.8），考虑去重
-255. 用随机森林计算特征重要性排名
-256. 输出 TOP 15 特征
+- [ ] 252. 计算特征间相关性矩阵
+- [ ] 253. 绘制相关性热力图
+- [ ] 254. 识别高相关特征对（r > 0.8），考虑去重
+- [ ] 255. 用随机森林计算特征重要性排名
+- [ ] 256. 输出 TOP 15 特征
 
 ### 4.9 商品建模宽表
-257. 构建商品宽表（一行一个 SKU）
-258. 计算每个 SKU 的总销量/销售额/毛利
-259. 计算每个 SKU 的平均评分/退款率/库存周转率
-260. 计算每个 SKU 的销售趋势
-261. 提交：特征工程用户与商品宽表完成
+- [ ] 257. 构建商品宽表（一行一个 SKU）
+- [ ] 258. 计算每个 SKU 的总销量/销售额/毛利
+- [ ] 259. 计算每个 SKU 的平均评分/退款率/库存周转率
+- [ ] 260. 计算每个 SKU 的销售趋势
+- [ ] 261. 提交：特征工程用户与商品宽表完成
 
 ---
 
 ## 阶段五：经营驾驶舱 R1 —— 对应讲义第 2 章
 
 ### 5.1 后端计算
-262. 在 `subprojects/business_health.py` 计算 8 个核心 KPI
-263. 计算月度趋势（GMV、订单数、客单价、毛利）
-264. 计算渠道 GMV 贡献率和排名
-265. 计算类目 GMV 贡献率和排名
-266. 计算会员等级贡献
-267. 计算 TOP/BOTTOM 10 商品
-268. 实现日/周/月粒度聚合
-269. 实现环比增长计算
-270. 实现异常月份检测（环比波动 > 10%）
+- [ ] 262. 在 `subprojects/business_health.py` 计算 8 个核心 KPI
+- [ ] 263. 计算月度趋势（GMV、订单数、客单价、毛利）
+- [ ] 264. 计算渠道 GMV 贡献率和排名
+- [ ] 265. 计算类目 GMV 贡献率和排名
+- [ ] 266. 计算会员等级贡献
+- [ ] 267. 计算 TOP/BOTTOM 10 商品
+- [ ] 268. 实现日/周/月粒度聚合
+- [ ] 269. 实现环比增长计算
+- [ ] 270. 实现异常月份检测（环比波动 > 10%）
 
 ### 5.2 驾驶舱 API
-271. 添加 `GET /api/r1/kpi` 返回 8 个指标卡
-272. 添加 `GET /api/r1/trends` 趋势数据
-273. 添加 `GET /api/r1/channel-breakdown` 渠道拆解
-274. 添加 `GET /api/r1/category-breakdown` 品类拆解
-275. 添加 `GET /api/r1/top-products` / `bottom-products`
-276. 添加 `GET /api/r1/anomaly-alerts` 异常告警
+- [ ] 271. 添加 `GET /api/r1/kpi` 返回 8 个指标卡
+- [ ] 272. 添加 `GET /api/r1/trends` 趋势数据
+- [ ] 273. 添加 `GET /api/r1/channel-breakdown` 渠道拆解
+- [ ] 274. 添加 `GET /api/r1/category-breakdown` 品类拆解
+- [ ] 275. 添加 `GET /api/r1/top-products` / `bottom-products`
+- [ ] 276. 添加 `GET /api/r1/anomaly-alerts` 异常告警
 
 ### 5.3 驾驶舱前端页面
-277. 实现 8 个 KPI 指标卡（值 + 环比箭头 + 百分比）
-278. 实现月度 GMV 趋势折线图
-279. 实现渠道 GMV 占比环形图
-280. 实现品类贡献柱状图
-281. 实现 TOP/BOTTOM 商品表格
-282. 实现日期范围选择器
-283. 实现渠道/品类/会员/省份/价格带多选筛选器
-284. 实现筛选器联动刷新所有图表
-285. 实现从趋势图钻取到日明细
-286. 实现明细数据 CSV 导出
-287. 提交：R1 经营驾驶舱完成
+- [ ] 277. 实现 8 个 KPI 指标卡（值 + 环比箭头 + 百分比）
+- [ ] 278. 实现月度 GMV 趋势折线图
+- [ ] 279. 实现渠道 GMV 占比环形图
+- [ ] 280. 实现品类贡献柱状图
+- [ ] 281. 实现 TOP/BOTTOM 商品表格
+- [ ] 282. 实现日期范围选择器
+- [ ] 283. 实现渠道/品类/会员/省份/价格带多选筛选器
+- [ ] 284. 实现筛选器联动刷新所有图表
+- [ ] 285. 实现从趋势图钻取到日明细
+- [ ] 286. 实现明细数据 CSV 导出
+- [ ] 287. 提交：R1 经营驾驶舱完成
 
 ---
 
 ## 阶段六：流量漏斗诊断 R2 —— 对应讲义第 1 章
 
 ### 6.1 漏斗计算
-288. 在 `subprojects/traffic_funnel.py` 计算 5 层漏斗各层 session 数
-289. 计算整体转化率和各环节转化率
-290. 计算按渠道分组的漏斗
-291. 计算按设备分组的漏斗
-292. 计算按活动分组的漏斗
-293. 计算按月漏斗趋势
+- [ ] 288. 在 `subprojects/traffic_funnel.py` 计算 5 层漏斗各层 session 数
+- [ ] 289. 计算整体转化率和各环节转化率
+- [ ] 290. 计算按渠道分组的漏斗
+- [ ] 291. 计算按设备分组的漏斗
+- [ ] 292. 计算按活动分组的漏斗
+- [ ] 293. 计算按月漏斗趋势
 
 ### 6.2 流失诊断
-294. 识别高曝光低加购商品
-295. 识别高加购低结算商品
-296. 识别高结算放弃会话
-297. 定位最大流失环节
+- [ ] 294. 识别高曝光低加购商品
+- [ ] 295. 识别高加购低结算商品
+- [ ] 296. 识别高结算放弃会话
+- [ ] 297. 定位最大流失环节
 
 ### 6.3 再营销
-298. 识别"最近浏览但无订单"用户
-299. 识别"加购未支付"用户
-300. 识别"结算放弃"用户
-301. 生成再营销候选名单
-302. 实现名单 CSV 导出
+- [ ] 298. 识别"最近浏览但无订单"用户
+- [ ] 299. 识别"加购未支付"用户
+- [ ] 300. 识别"结算放弃"用户
+- [ ] 301. 生成再营销候选名单
+- [ ] 302. 实现名单 CSV 导出
 
 ### 6.4 漏斗 API
-303. 添加 `GET /api/r2/funnel` 漏斗数据
-304. 添加 `GET /api/r2/funnel?group_by=channel` 分组漏斗
-305. 添加 `GET /api/r2/dropoff-analysis` 流失诊断
-306. 添加 `GET /api/r2/remarketing-list` 再营销名单
+- [ ] 303. 添加 `GET /api/r2/funnel` 漏斗数据
+- [ ] 304. 添加 `GET /api/r2/funnel?group_by=channel` 分组漏斗
+- [ ] 305. 添加 `GET /api/r2/dropoff-analysis` 流失诊断
+- [ ] 306. 添加 `GET /api/r2/remarketing-list` 再营销名单
 
 ### 6.5 漏斗前端
-307. 实现 5 层漏斗可视化图
-308. 实现渠道分组漏斗对比（6 条线）
-309. 实现设备分组漏斗对比
-310. 实现流失环节高亮告警
-311. 实现高曝光低加购商品表格
-312. 实现再营销候选用户表格
-313. 实现"标记再营销"按钮
-314. 提交：R2 流量漏斗完成
+- [ ] 307. 实现 5 层漏斗可视化图
+- [ ] 308. 实现渠道分组漏斗对比（6 条线）
+- [ ] 309. 实现设备分组漏斗对比
+- [ ] 310. 实现流失环节高亮告警
+- [ ] 311. 实现高曝光低加购商品表格
+- [ ] 312. 实现再营销候选用户表格
+- [ ] 313. 实现"标记再营销"按钮
+- [ ] 314. 提交：R2 流量漏斗完成
 
 ---
 
 ## 阶段七：RFM 用户运营 R3 —— 对应讲义第 3/5 章
 
 ### 7.1 RFM 分层
-315. 在 `subprojects/rfm_user_ops.py` 实现 `compute_rfm_layers()`
-316. 生成 8 种用户分群（核心价值/潜力/沉睡/流失等）
-317. 为每类用户撰写画像描述
-318. 统计每类用户人数、GMV 贡献、毛利贡献
-319. 为每类设计运营策略
+- [ ] 315. 在 `subprojects/rfm_user_ops.py` 实现 `compute_rfm_layers()`
+- [ ] 316. 生成 8 种用户分群（核心价值/潜力/沉睡/流失等）
+- [ ] 317. 为每类用户撰写画像描述
+- [ ] 318. 统计每类用户人数、GMV 贡献、毛利贡献
+- [ ] 319. 为每类设计运营策略
 
 ### 7.2 Cohort 留存
-320. 按注册月份分组 Cohort
-321. 计算第 1/2/3/6/12 月留存率
-322. 生成 Cohort 留存矩阵
-323. 生成 Cohort 热力图数据
+- [ ] 320. 按注册月份分组 Cohort
+- [ ] 321. 计算第 1/2/3/6/12 月留存率
+- [ ] 322. 生成 Cohort 留存矩阵
+- [ ] 323. 生成 Cohort 热力图数据
 
 ### 7.3 用户画像
-324. 实现单个用户完整画像函数
-325. 实现分群对比雷达图数据（6 维度）
-326. 实现用户搜索和筛选
+- [ ] 324. 实现单个用户完整画像函数
+- [ ] 325. 实现分群对比雷达图数据（6 维度）
+- [ ] 326. 实现用户搜索和筛选
 
 ### 7.4 运营动作
-327. 实现批量打标签功能
-328. 实现用户名单导出
-329. 实现优惠券发放建议生成
-330. 实现运营动作写入 admin_action_logs
+- [ ] 327. 实现批量打标签功能
+- [ ] 328. 实现用户名单导出
+- [ ] 329. 实现优惠券发放建议生成
+- [ ] 330. 实现运营动作写入 admin_action_logs
 
 ### 7.5 RFM API
-331. 添加 `GET /api/r3/rfm-layers` 分群数据
-332. 添加 `GET /api/r3/cohort-retention` 留存数据
-333. 添加 `GET /api/r3/user-profile/{user_id}` 用户画像
-334. 添加 `GET /api/r3/segment-comparison` 分群对比
-335. 添加 `POST /api/r3/batch-tag` 批量打标签
+- [ ] 331. 添加 `GET /api/r3/rfm-layers` 分群数据
+- [ ] 332. 添加 `GET /api/r3/cohort-retention` 留存数据
+- [ ] 333. 添加 `GET /api/r3/user-profile/{user_id}` 用户画像
+- [ ] 334. 添加 `GET /api/r3/segment-comparison` 分群对比
+- [ ] 335. 添加 `POST /api/r3/batch-tag` 批量打标签
 
 ### 7.6 RFM 前端
-336. 实现 8 个分群概览卡片
-337. 实现 Cohort 留存热力图
-338. 实现分群对比雷达图
-339. 实现用户搜索 + 列表 + 详情弹窗
-340. 实现批量标签和导出功能
-341. 提交：R3 RFM 用户运营完成
+- [ ] 336. 实现 8 个分群概览卡片
+- [ ] 337. 实现 Cohort 留存热力图
+- [ ] 338. 实现分群对比雷达图
+- [ ] 339. 实现用户搜索 + 列表 + 详情弹窗
+- [ ] 340. 实现批量标签和导出功能
+- [ ] 341. 提交：R3 RFM 用户运营完成
 
 ---
 
 ## 阶段八：分类预测模型 R4 —— 对应讲义第 4 章
 
 ### 8.1 样本准备
-342. 在 `subprojects/repurchase_prediction.py` 定义参考日期
-343. 定义观察窗口（参考日期前的历史）
-344. 定义预测窗口（参考日期后 60 天）
-345. 构造标签 `will_repurchase_in_60d`（0/1）
-346. 验证无数据泄漏（特征不含预测窗口信息）
-347. 输出正负样本比例
+- [ ] 342. 在 `subprojects/repurchase_prediction.py` 定义参考日期
+- [ ] 343. 定义观察窗口（参考日期前的历史）
+- [ ] 344. 定义预测窗口（参考日期后 60 天）
+- [ ] 345. 构造标签 `will_repurchase_in_60d`（0/1）
+- [ ] 346. 验证无数据泄漏（特征不含预测窗口信息）
+- [ ] 347. 输出正负样本比例
 
 ### 8.2 特征准备与训练
-348. 从用户宽表选取特征列
-349. One-Hot 编码类别特征
-350. StandardScaler 标准化数值特征
-351. 时间切分训练/测试集（70%/30%）
-352. 训练逻辑回归
-353. 训练决策树
-354. 训练随机森林
-355. 训练梯度提升
+- [ ] 348. 从用户宽表选取特征列
+- [ ] 349. One-Hot 编码类别特征
+- [ ] 350. StandardScaler 标准化数值特征
+- [ ] 351. 时间切分训练/测试集（70%/30%）
+- [ ] 352. 训练逻辑回归
+- [ ] 353. 训练决策树
+- [ ] 354. 训练随机森林
+- [ ] 355. 训练梯度提升
 
 ### 8.3 模型评估
-356. 输出每个模型的 AUC/Precision/Recall/F1
-357. 绘制 ROC 曲线
-358. 绘制混淆矩阵
-359. 输出特征重要性 TOP 15
-360. 绘制 Precision-Recall 曲线
-361. 计算 Top 5%/10%/20% 触达的 Precision 和 Recall
-362. 计算每种触达比例的预估 ROI
+- [ ] 356. 输出每个模型的 AUC/Precision/Recall/F1
+- [ ] 357. 绘制 ROC 曲线
+- [ ] 358. 绘制混淆矩阵
+- [ ] 359. 输出特征重要性 TOP 15
+- [ ] 360. 绘制 Precision-Recall 曲线
+- [ ] 361. 计算 Top 5%/10%/20% 触达的 Precision 和 Recall
+- [ ] 362. 计算每种触达比例的预估 ROI
 
 ### 8.4 模型落地
-363. 用最优模型为全部用户打分
-364. 生成高潜复购用户名单（按概率排序）
-365. 生成触达名单（Top 5% 阈值）
-366. 实现阈值滑块和 ROI 实时计算
+- [ ] 363. 用最优模型为全部用户打分
+- [ ] 364. 生成高潜复购用户名单（按概率排序）
+- [ ] 365. 生成触达名单（Top 5% 阈值）
+- [ ] 366. 实现阈值滑块和 ROI 实时计算
 
 ### 8.5 分类 API
-367. 添加 `GET /api/r4/prediction-list` 预测名单
-368. 添加 `POST /api/r4/adjust-threshold` 调节阈值
-369. 添加 `POST /api/r4/roi-simulation` ROI 模拟
+- [ ] 367. 添加 `GET /api/r4/prediction-list` 预测名单
+- [ ] 368. 添加 `POST /api/r4/adjust-threshold` 调节阈值
+- [ ] 369. 添加 `POST /api/r4/roi-simulation` ROI 模拟
 
 ### 8.6 分类前端
-370. 实现模型选择下拉框
-371. 实现评估指标卡片
-372. 实现混淆矩阵和 ROC 曲线
-373. 实现特征重要性柱状图
-374. 实现阈值滑块 + ROI 实时更新
-375. 实现触达名单表格和导出
-376. 提交：R4 复购预测模型完成
+- [ ] 370. 实现模型选择下拉框
+- [ ] 371. 实现评估指标卡片
+- [ ] 372. 实现混淆矩阵和 ROC 曲线
+- [ ] 373. 实现特征重要性柱状图
+- [ ] 374. 实现阈值滑块 + ROI 实时更新
+- [ ] 375. 实现触达名单表格和导出
+- [ ] 376. 提交：R4 复购预测模型完成
 
 ---
 
 ## 阶段九：客户聚类 R5 —— 对应讲义第 5 章
 
 ### 9.1 用户聚类
-377. 在 `subprojects/customer_clustering.py` 实现 `cluster_users()`
-378. 选取聚类特征并标准化
-379. 肘部法确定最佳 K（2-10）
-380. 计算轮廓系数辅助选 K
-381. 计算 Calinski-Harabasz 指数
-382. 运行 K-Means
-383. 为每个簇画像命名
+- [ ] 377. 在 `subprojects/customer_clustering.py` 实现 `cluster_users()`
+- [ ] 378. 选取聚类特征并标准化
+- [ ] 379. 肘部法确定最佳 K（2-10）
+- [ ] 380. 计算轮廓系数辅助选 K
+- [ ] 381. 计算 Calinski-Harabasz 指数
+- [ ] 382. 运行 K-Means
+- [ ] 383. 为每个簇画像命名
 
 ### 9.2 商品聚类
-384. 实现 `cluster_products()`
-385. 选取特征（销量/毛利/价格/评分/退款率/周转率）
-386. 运行 K-Means
-387. 为商品簇命名（利润款/引流款/长尾款/风险款/清仓款）
-388. 每簇绑定经营策略
+- [ ] 384. 实现 `cluster_products()`
+- [ ] 385. 选取特征（销量/毛利/价格/评分/退款率/周转率）
+- [ ] 386. 运行 K-Means
+- [ ] 387. 为商品簇命名（利润款/引流款/长尾款/风险款/清仓款）
+- [ ] 388. 每簇绑定经营策略
 
 ### 9.3 算法对比
-389. 使用层次聚类重新聚类
-390. 绘制 Dendrogram
-391. 使用 DBSCAN 聚类
-392. 三种方法对比（轮廓系数）
+- [ ] 389. 使用层次聚类重新聚类
+- [ ] 390. 绘制 Dendrogram
+- [ ] 391. 使用 DBSCAN 聚类
+- [ ] 392. 三种方法对比（轮廓系数）
 
 ### 9.4 聚类 API
-393. 添加 `GET /api/r5/user-clusters` 用户分群
-394. 添加 `GET /api/r5/product-clusters` 商品分群
-395. 添加 `GET /api/r5/cluster-profile/{id}` 簇画像
+- [ ] 393. 添加 `GET /api/r5/user-clusters` 用户分群
+- [ ] 394. 添加 `GET /api/r5/product-clusters` 商品分群
+- [ ] 395. 添加 `GET /api/r5/cluster-profile/{id}` 簇画像
 
 ### 9.5 聚类前端
-396. 实现 K 值选择滑块 + 肘部法图
-397. 实现簇规模柱状图
-398. 实现簇特征雷达图对比
-399. 实现簇用户列表
-400. 实现商品簇策略标签展示
-401. 提交：R5 聚类分群完成
+- [ ] 396. 实现 K 值选择滑块 + 肘部法图
+- [ ] 397. 实现簇规模柱状图
+- [ ] 398. 实现簇特征雷达图对比
+- [ ] 399. 实现簇用户列表
+- [ ] 400. 实现商品簇策略标签展示
+- [ ] 401. 提交：R5 聚类分群完成
 
 ---
 
 ## 阶段十：关联规则 R6 —— 对应讲义第 6 章
 
 ### 10.1 购物篮构建
-402. 在 `subprojects/association_rules.py` 按 order_id 聚合 SKU
-403. 筛选 2 个以上商品的订单
-404. 构建按类目的购物篮
-405. 构建按价格带的购物篮
+- [ ] 402. 在 `subprojects/association_rules.py` 按 order_id 聚合 SKU
+- [ ] 403. 筛选 2 个以上商品的订单
+- [ ] 404. 构建按类目的购物篮
+- [ ] 405. 构建按价格带的购物篮
 
 ### 10.2 Apriori 挖掘
-406. 设置 min_support=0.01 执行频繁项集挖掘
-407. 生成关联规则（min_confidence=0.3）
-408. 计算 support/confidence/lift/leverage/conviction
-409. 按 lift 降序排列
-410. 筛选 lift > 1.2 的有效规则
-411. 剔除冗余规则
+- [ ] 406. 设置 min_support=0.01 执行频繁项集挖掘
+- [ ] 407. 生成关联规则（min_confidence=0.3）
+- [ ] 408. 计算 support/confidence/lift/leverage/conviction
+- [ ] 409. 按 lift 降序排列
+- [ ] 410. 筛选 lift > 1.2 的有效规则
+- [ ] 411. 剔除冗余规则
 
 ### 10.3 推荐生成
-412. 生成"买了 A 也买 B"推荐列表
-413. 生成捆绑销售建议（高 lift + 高 confidence）
-414. 生成凑单推荐（低价 + 高概率 + GMV 提升）
-415. 生成交叉销售建议（跨类目 + 高 lift）
-416. 筛选"数学好但业务不适合"的规则（至少 5 条）
+- [ ] 412. 生成"买了 A 也买 B"推荐列表
+- [ ] 413. 生成捆绑销售建议（高 lift + 高 confidence）
+- [ ] 414. 生成凑单推荐（低价 + 高概率 + GMV 提升）
+- [ ] 415. 生成交叉销售建议（跨类目 + 高 lift）
+- [ ] 416. 筛选"数学好但业务不适合"的规则（至少 5 条）
 
 ### 10.4 关联规则 API
-417. 添加 `GET /api/r6/association-rules` 规则列表
-418. 添加 `GET /api/r6/frequent-itemsets` 频繁项集
-419. 添加 `GET /api/r6/bundle-recommendations` 捆绑推荐
-420. 添加 `GET /api/r6/product-recommendations/{sku_id}` 单品推荐
+- [ ] 417. 添加 `GET /api/r6/association-rules` 规则列表
+- [ ] 418. 添加 `GET /api/r6/frequent-itemsets` 频繁项集
+- [ ] 419. 添加 `GET /api/r6/bundle-recommendations` 捆绑推荐
+- [ ] 420. 添加 `GET /api/r6/product-recommendations/{sku_id}` 单品推荐
 
 ### 10.5 关联规则前端
-421. 实现支持度/置信度/提升度阈值滑块
-422. 实现散点图（X=support, Y=confidence, 气泡=lift）
-423. 实现关联规则表格
-424. 实现商品关联网络图
-425. 实现"选商品，看推荐"交互
-426. 实现捆绑推荐卡片
-427. 提交：R6 关联规则完成
+- [ ] 421. 实现支持度/置信度/提升度阈值滑块
+- [ ] 422. 实现散点图（X=support, Y=confidence, 气泡=lift）
+- [ ] 423. 实现关联规则表格
+- [ ] 424. 实现商品关联网络图
+- [ ] 425. 实现"选商品，看推荐"交互
+- [ ] 426. 实现捆绑推荐卡片
+- [ ] 427. 提交：R6 关联规则完成
 
 ---
 
 ## 阶段十一：时间序列预测 R7 —— 对应讲义第 7 章
 
 ### 11.1 时间序列构建
-428. 在 `subprojects/sales_forecast.py` 构建日 GMV 序列
-429. 构建品类日销量序列
-430. 构建 SKU 日销量序列
-431. 填充缺失日期（用 0）
+- [ ] 428. 在 `subprojects/sales_forecast.py` 构建日 GMV 序列
+- [ ] 429. 构建品类日销量序列
+- [ ] 430. 构建 SKU 日销量序列
+- [ ] 431. 填充缺失日期（用 0）
 
 ### 11.2 趋势与季节分析
-432. 计算 7 日和 30 日移动平均
-433. 时间序列分解（趋势+季节+残差）
-434. 分析周末效应
-435. 分析月度趋势
-436. 标注活动冲击
+- [ ] 432. 计算 7 日和 30 日移动平均
+- [ ] 433. 时间序列分解（趋势+季节+残差）
+- [ ] 434. 分析周末效应
+- [ ] 435. 分析月度趋势
+- [ ] 436. 标注活动冲击
 
 ### 11.3 平稳性与 ACF/PACF
-437. 执行 ADF 检验
-438. 执行 KPSS 检验
-439. 不平稳则执行差分
-440. 绘制 ACF/PACF 图
-441. 识别 ARIMA 参数 (p,d,q)
+- [ ] 437. 执行 ADF 检验
+- [ ] 438. 执行 KPSS 检验
+- [ ] 439. 不平稳则执行差分
+- [ ] 440. 绘制 ACF/PACF 图
+- [ ] 441. 识别 ARIMA 参数 (p,d,q)
 
 ### 11.4 ARIMA 与对比模型
-442. 训练 ARIMA 模型
-443. 残差诊断（时序图+直方图+Q-Q图+Ljung-Box）
-444. 预测未来 7/14/30 天（含置信区间）
-445. 训练朴素预测基线
-446. 训练指数平滑模型
-447. 四种模型误差对比
+- [ ] 442. 训练 ARIMA 模型
+- [ ] 443. 残差诊断（时序图+直方图+Q-Q图+Ljung-Box）
+- [ ] 444. 预测未来 7/14/30 天（含置信区间）
+- [ ] 445. 训练朴素预测基线
+- [ ] 446. 训练指数平滑模型
+- [ ] 447. 四种模型误差对比
 
 ### 11.5 品类和 SKU 预测
-448. TOP 5 品类销量预测
-449. TOP 20 SKU 销量预测
-450. 计算各预测的 MAE/MAPE/RMSE
+- [ ] 448. TOP 5 品类销量预测
+- [ ] 449. TOP 20 SKU 销量预测
+- [ ] 450. 计算各预测的 MAE/MAPE/RMSE
 
 ### 11.6 安全库存与补货
-451. 计算需求波动系数 CV
-452. 计算安全库存量（95% 服务水平，Z=1.65）
-453. 为 TOP 20 SKU 计算建议安全库存
-454. 生成"紧急补货"清单
-455. 生成"库存过剩"清单
-456. 计算缺货风险指数
+- [ ] 451. 计算需求波动系数 CV
+- [ ] 452. 计算安全库存量（95% 服务水平，Z=1.65）
+- [ ] 453. 为 TOP 20 SKU 计算建议安全库存
+- [ ] 454. 生成"紧急补货"清单
+- [ ] 455. 生成"库存过剩"清单
+- [ ] 456. 计算缺货风险指数
 
 ### 11.7 预测 API
-457. 添加 `GET /api/r7/gmv-forecast` GMV 预测
-458. 添加 `GET /api/r7/category-forecast/{id}` 品类预测
-459. 添加 `GET /api/r7/sku-forecast/{id}` SKU 预测
-460. 添加 `GET /api/r7/safety-stock` 安全库存
-461. 添加 `GET /api/r7/replenishment-list` 补货清单
+- [ ] 457. 添加 `GET /api/r7/gmv-forecast` GMV 预测
+- [ ] 458. 添加 `GET /api/r7/category-forecast/{id}` 品类预测
+- [ ] 459. 添加 `GET /api/r7/sku-forecast/{id}` SKU 预测
+- [ ] 460. 添加 `GET /api/r7/safety-stock` 安全库存
+- [ ] 461. 添加 `GET /api/r7/replenishment-list` 补货清单
 
 ### 11.8 预测前端
-462. 实现历史+预测折线图（含置信区间阴影）
-463. 实现 ACF/PACF 分析图
-464. 实现时间序列分解图
-465. 实现预测误差对比表
-466. 实现补货建议清单表格
-467. 实现缺货风险仪表盘（红黄绿）
-468. 提交：R7 时间序列预测完成
+- [ ] 462. 实现历史+预测折线图（含置信区间阴影）
+- [ ] 463. 实现 ACF/PACF 分析图
+- [ ] 464. 实现时间序列分解图
+- [ ] 465. 实现预测误差对比表
+- [ ] 466. 实现补货建议清单表格
+- [ ] 467. 实现缺货风险仪表盘（红黄绿）
+- [ ] 468. 提交：R7 时间序列预测完成
 
 ---
 
 ## 阶段十二：营销归因 R8 —— 对应讲义第 8 章
 
 ### 12.1 活动 KPI
-469. 在 `subprojects/marketing_attribution.py` 计算每个活动的曝光/点击/转化
-470. 计算 CTR/CVR/CPC/CPM/CPA/ROAS/ROI
-471. 按渠道汇总营销效率
+- [ ] 469. 在 `subprojects/marketing_attribution.py` 计算每个活动的曝光/点击/转化
+- [ ] 470. 计算 CTR/CVR/CPC/CPM/CPA/ROAS/ROI
+- [ ] 471. 按渠道汇总营销效率
 
 ### 12.2 优惠券分析
-472. 统计每种券的发放/核销/核销率
-473. 统计券带来 GMV 和券成本
-474. 计算券 ROAS
-475. 识别券敏感/不敏感用户
+- [ ] 472. 统计每种券的发放/核销/核销率
+- [ ] 473. 统计券带来 GMV 和券成本
+- [ ] 474. 计算券 ROAS
+- [ ] 475. 识别券敏感/不敏感用户
 
 ### 12.3 增量评估
-476. 筛选 has_control_group=1 的活动
-477. 计算活动组 vs 对照组 GMV 差异
-478. 计算增量 ROI
-479. 对无对照组活动做前后对比（注明限制）
+- [ ] 476. 筛选 has_control_group=1 的活动
+- [ ] 477. 计算活动组 vs 对照组 GMV 差异
+- [ ] 478. 计算增量 ROI
+- [ ] 479. 对无对照组活动做前后对比（注明限制）
 
 ### 12.4 预算建议
-480. 渠道 ROAS 排名
-481. 识别加投/压缩/优化渠道
-482. 模拟预算迁移 20% 的影响
+- [ ] 480. 渠道 ROAS 排名
+- [ ] 481. 识别加投/压缩/优化渠道
+- [ ] 482. 模拟预算迁移 20% 的影响
 
 ### 12.5 营销 API
-483. 添加 `GET /api/r8/campaign-kpis`
-484. 添加 `GET /api/r8/coupon-analysis`
-485. 添加 `GET /api/r8/channel-efficiency`
-486. 添加 `GET /api/r8/increment-analysis`
-487. 添加 `GET /api/r8/budget-optimization`
+- [ ] 483. 添加 `GET /api/r8/campaign-kpis`
+- [ ] 484. 添加 `GET /api/r8/coupon-analysis`
+- [ ] 485. 添加 `GET /api/r8/channel-efficiency`
+- [ ] 486. 添加 `GET /api/r8/increment-analysis`
+- [ ] 487. 添加 `GET /api/r8/budget-optimization`
 
 ### 12.6 营销前端
-488. 实现活动 KPI 表格
-489. 实现活动 ROAS 柱状图
-490. 实现渠道效率雷达图
-491. 实现优惠券核销漏斗图
-492. 实现增量分析面板
-493. 实现预算迁移模拟器（滑块调节+实时估算）
-494. 提交：R8 营销归因完成
+- [ ] 488. 实现活动 KPI 表格
+- [ ] 489. 实现活动 ROAS 柱状图
+- [ ] 490. 实现渠道效率雷达图
+- [ ] 491. 实现优惠券核销漏斗图
+- [ ] 492. 实现增量分析面板
+- [ ] 493. 实现预算迁移模拟器（滑块调节+实时估算）
+- [ ] 494. 提交：R8 营销归因完成
 
 ---
 
 ## 阶段十三：履约与售后 R9
 
 ### 13.1 履约分析
-495. 在 `subprojects/fulfillment_analysis.py` 计算各承运商延迟率
-496. 计算各省份延迟率
-497. 分析延迟对退款率的影响
-498. 输出承运商排行榜
+- [ ] 495. 在 `subprojects/fulfillment_analysis.py` 计算各承运商延迟率
+- [ ] 496. 计算各省份延迟率
+- [ ] 497. 分析延迟对退款率的影响
+- [ ] 498. 输出承运商排行榜
 
 ### 13.2 退款分析
-499. 统计月度退款率趋势
-500. 统计退款原因分布
-501. 统计高退款商品 TOP 20
-502. 统计高退款供应商 TOP 10
+- [ ] 499. 统计月度退款率趋势
+- [ ] 500. 统计退款原因分布
+- [ ] 501. 统计高退款商品 TOP 20
+- [ ] 502. 统计高退款供应商 TOP 10
 
 ### 13.3 评论分析
-503. 统计平均评分（按品类/商品）
-504. 统计差评率（rating <= 2）
-505. 统计评论情感分布
-506. 统计评论标签分布
+- [ ] 503. 统计平均评分（按品类/商品）
+- [ ] 504. 统计差评率（rating <= 2）
+- [ ] 505. 统计评论情感分布
+- [ ] 506. 统计评论标签分布
 
 ### 13.4 风险清单
-507. 生成高退款商品风险清单
-508. 生成高差评商品风险清单
-509. 生成高延迟地区风险清单
-510. 每条风险附带数据证据和建议动作
+- [ ] 507. 生成高退款商品风险清单
+- [ ] 508. 生成高差评商品风险清单
+- [ ] 509. 生成高延迟地区风险清单
+- [ ] 510. 每条风险附带数据证据和建议动作
 
 ### 13.5 R9 API 与前端
-511. 添加 `GET /api/r9/fulfillment`、`/refund-analysis`、`/review-analysis`、`/risk-list`
-512. 实现承运商对比柱状图、退款趋势折线图、退款原因饼图
-513. 实现风险清单表格
-514. 提交：R9 履约售后完成
+- [ ] 511. 添加 `GET /api/r9/fulfillment`、`/refund-analysis`、`/review-analysis`、`/risk-list`
+- [ ] 512. 实现承运商对比柱状图、退款趋势折线图、退款原因饼图
+- [ ] 513. 实现风险清单表格
+- [ ] 514. 提交：R9 履约售后完成
 
 ---
 
 ## 阶段十四：库存策略 R10
 
 ### 14.1 SKU 动销
-515. 在 `subprojects/inventory_strategy.py` 计算每个 SKU 销量/销售额/毛利
-516. 计算库存周转次数和天数
-517. 计算动销率趋势
+- [ ] 515. 在 `subprojects/inventory_strategy.py` 计算每个 SKU 销量/销售额/毛利
+- [ ] 516. 计算库存周转次数和天数
+- [ ] 517. 计算动销率趋势
 
 ### 14.2 ABC 分类
-518. 按销售额 ABC 分类
-519. 按毛利 ABC 分类
-520. 按销量 ABC 分类
-521. 生成 ABC 交叉矩阵
+- [ ] 518. 按销售额 ABC 分类
+- [ ] 519. 按毛利 ABC 分类
+- [ ] 520. 按销量 ABC 分类
+- [ ] 521. 生成 ABC 交叉矩阵
 
 ### 14.3 商品策略
-522. 识别"补货"商品（高销量+A类+低库存）
-523. 识别"清仓"商品（低动销+高库存+C类）
-524. 识别"提价/降价/下架/重点运营"商品
-525. 至少 20 个 SKU 的具体策略建议
+- [ ] 522. 识别"补货"商品（高销量+A类+低库存）
+- [ ] 523. 识别"清仓"商品（低动销+高库存+C类）
+- [ ] 524. 识别"提价/降价/下架/重点运营"商品
+- [ ] 525. 至少 20 个 SKU 的具体策略建议
 
 ### 14.4 预警与 API
-526. 实现缺货/滞销/高退款库存风险预警
-527. 添加 `GET /api/r10/sku-performance`、`/abc-classification`、`/strategies`、`/alerts`
-528. 实现 SKU 绩效表格、ABC 饼图、策略标签表格、预警面板
-529. 提交：R10 库存策略完成
+- [ ] 526. 实现缺货/滞销/高退款库存风险预警
+- [ ] 527. 添加 `GET /api/r10/sku-performance`、`/abc-classification`、`/strategies`、`/alerts`
+- [ ] 528. 实现 SKU 绩效表格、ABC 饼图、策略标签表格、预警面板
+- [ ] 529. 提交：R10 库存策略完成
 
 ---
 
 ## 阶段十五：综合决策中心 R11 —— 对应讲义第 9 章
 
 ### 15.1 决策摘要
-530. 在 `subprojects/decision_board.py` 计算经营健康度评分
-531. 识别 TOP 3 增长机会
-532. 识别 TOP 3 经营风险
-533. 生成推荐动作清单（P0/P1/P2 优先级）
+- [ ] 530. 在 `subprojects/decision_board.py` 计算经营健康度评分
+- [ ] 531. 识别 TOP 3 增长机会
+- [ ] 532. 识别 TOP 3 经营风险
+- [ ] 533. 生成推荐动作清单（P0/P1/P2 优先级）
 
 ### 15.2 证据链
-534. 每条建议标注来源模块
-535. 每条建议标注置信度和适用条件
-536. 每条建议标注已知风险
+- [ ] 534. 每条建议标注来源模块
+- [ ] 535. 每条建议标注置信度和适用条件
+- [ ] 536. 每条建议标注已知风险
 
 ### 15.3 动作管理
-537. 实现运营动作创建（CRUD）
-538. 动作绑定用户/商品/活动
-539. 动作写入 admin_action_logs
-540. 动作状态跟踪
+- [ ] 537. 实现运营动作创建（CRUD）
+- [ ] 538. 动作绑定用户/商品/活动
+- [ ] 539. 动作写入 admin_action_logs
+- [ ] 540. 动作状态跟踪
 
 ### 15.4 效果追踪
-541. 动作前后指标对比
-542. 预期收益达成判断
-543. 复盘结论记录
-544. "一键生成经营周报"功能
+- [ ] 541. 动作前后指标对比
+- [ ] 542. 预期收益达成判断
+- [ ] 543. 复盘结论记录
+- [ ] 544. "一键生成经营周报"功能
 
 ### 15.5 R11 API 与前端
-545. 添加 `GET /api/r11/summary`、`/opportunities`、`/risks`、`/actions`
-546. 添加 `POST /api/r11/actions`、`PUT /api/r11/actions/{id}`
-547. 实现经营健康度仪表盘
-548. 实现三栏布局（机会|风险|动作）
-549. 实现动作管理面板和效果追踪
-550. 实现"生成经营周报"按钮
-551. 提交：R11 综合决策中心完成
+- [ ] 545. 添加 `GET /api/r11/summary`、`/opportunities`、`/risks`、`/actions`
+- [ ] 546. 添加 `POST /api/r11/actions`、`PUT /api/r11/actions/{id}`
+- [ ] 547. 实现经营健康度仪表盘
+- [ ] 548. 实现三栏布局（机会|风险|动作）
+- [ ] 549. 实现动作管理面板和效果追踪
+- [ ] 550. 实现"生成经营周报"按钮
+- [ ] 551. 提交：R11 综合决策中心完成
 
 ---
 
 ## 阶段十六：仪表盘前端整体完善
 
 ### 16.1 页面布局
-552. 创建 `analytics_dashboard/static/index.html` 完整首页
-553. 实现左侧导航栏（可折叠，9 个一级菜单）
-554. 实现顶部状态栏（项目名+数据状态+刷新+时间）
-555. 实现面包屑导航
-556. 实现前端路由（SPA）
+- [ ] 552. 创建 `analytics_dashboard/static/index.html` 完整首页
+- [ ] 553. 实现左侧导航栏（可折叠，9 个一级菜单）
+- [ ] 554. 实现顶部状态栏（项目名+数据状态+刷新+时间）
+- [ ] 555. 实现面包屑导航
+- [ ] 556. 实现前端路由（SPA）
 
 ### 16.2 通用组件
-557. 实现可复用 KPI 卡片组件
-558. 实现可复用数据表格组件（排序/分页/行选择）
-559. 实现可复用筛选器栏组件
-560. 实现可复用图表容器组件（标题+图表+口径说明）
-561. 实现 Loading 骨架屏和空状态组件
-562. 实现 Toast 消息通知组件
-563. 实现 Modal 弹窗组件
-564. 实现 CSV 导出通用按钮
+- [ ] 557. 实现可复用 KPI 卡片组件
+- [ ] 558. 实现可复用数据表格组件（排序/分页/行选择）
+- [ ] 559. 实现可复用筛选器栏组件
+- [ ] 560. 实现可复用图表容器组件（标题+图表+口径说明）
+- [ ] 561. 实现 Loading 骨架屏和空状态组件
+- [ ] 562. 实现 Toast 消息通知组件
+- [ ] 563. 实现 Modal 弹窗组件
+- [ ] 564. 实现 CSV 导出通用按钮
 
 ### 16.3 口径说明
-565. 每个 KPI 卡片增加"口径"按钮
-566. 点击弹窗展示指标定义/公式/来源表/过滤条件
-567. 确保所有页面的指标都有口径追溯
+- [ ] 565. 每个 KPI 卡片增加"口径"按钮
+- [ ] 566. 点击弹窗展示指标定义/公式/来源表/过滤条件
+- [ ] 567. 确保所有页面的指标都有口径追溯
 
 ### 16.4 首页总览
-568. 聚合 R1-R11 所有关键发现
-569. 展示本周核心 KPI + 趋势 + TOP 3 告警 + 快捷导航
-570. 提交：仪表盘前端整体完善
+- [ ] 568. 聚合 R1-R11 所有关键发现
+- [ ] 569. 展示本周核心 KPI + 趋势 + TOP 3 告警 + 快捷导航
+- [ ] 570. 提交：仪表盘前端整体完善
 
 ---
 
 ## 阶段十七：AI 分析助手（创新加分模块）
 
 ### 17.1 AI 对话
-571. 创建 `subprojects/ai_assistant.py`
-572. 实现自然语言查询接口
-573. 用户问题分类（指标查询/趋势分析/异常解释/建议征求）
-574. 自动调用对应分析模块
-575. 格式化为自然语言回复
-576. 保持对话上下文
+- [ ] 571. 创建 `subprojects/ai_assistant.py`
+- [ ] 572. 实现自然语言查询接口
+- [ ] 573. 用户问题分类（指标查询/趋势分析/异常解释/建议征求）
+- [ ] 574. 自动调用对应分析模块
+- [ ] 575. 格式化为自然语言回复
+- [ ] 576. 保持对话上下文
 
 ### 17.2 AI 自动洞察
-577. 每日自动检测 GMV 异常（环比 > 10%）
-578. 自动检测退款率飙升
-579. 自动检测渠道转化骤降
-580. 自动检测商品库存告急
-581. 生成每日自动洞察（3-5 条）
+- [ ] 577. 每日自动检测 GMV 异常（环比 > 10%）
+- [ ] 578. 自动检测退款率飙升
+- [ ] 579. 自动检测渠道转化骤降
+- [ ] 580. 自动检测商品库存告急
+- [ ] 581. 生成每日自动洞察（3-5 条）
 
 ### 17.3 AI 自然语言查询
-582. "上周 organic 渠道的 GMV？"
-583. "哪个品类退款率最高？"
-584. "下个月应该补哪些 SKU？"
-585. "对比搜索和社交渠道转化效率"
-586. 自动生成 SQL/API 查询并返回图表
+- [ ] 582. "上周 organic 渠道的 GMV？"
+- [ ] 583. "哪个品类退款率最高？"
+- [ ] 584. "下个月应该补哪些 SKU？"
+- [ ] 585. "对比搜索和社交渠道转化效率"
+- [ ] 586. 自动生成 SQL/API 查询并返回图表
 
 ### 17.4 AI 建议生成
-587. 基于所有模块结果生成综合建议
-588. 建议含问题+数据+动作+收益+风险
-589. 支持采纳/修改/拒绝反馈
-590. 被采纳建议进入 R11 动作管理
+- [ ] 587. 基于所有模块结果生成综合建议
+- [ ] 588. 建议含问题+数据+动作+收益+风险
+- [ ] 589. 支持采纳/修改/拒绝反馈
+- [ ] 590. 被采纳建议进入 R11 动作管理
 
 ### 17.5 AI API 与前端
-591. 添加 `POST /api/ai/chat`、`GET /api/ai/auto-insights`、`POST /api/ai/query`
-592. 实现聊天界面（对话气泡+输入框）
-593. 实现自动洞察面板
-594. 实现自然语言查询输入框
-595. 实现建议卡片（含采纳/修改/拒绝按钮）
-596. 提交：AI 分析助手完成
+- [ ] 591. 添加 `POST /api/ai/chat`、`GET /api/ai/auto-insights`、`POST /api/ai/query`
+- [ ] 592. 实现聊天界面（对话气泡+输入框）
+- [ ] 593. 实现自动洞察面板
+- [ ] 594. 实现自然语言查询输入框
+- [ ] 595. 实现建议卡片（含采纳/修改/拒绝按钮）
+- [ ] 596. 提交：AI 分析助手完成
 
 ---
 
 ## 阶段十八：系统配置模块
 
-597. 实现数据源切换（ETL API / SQLite / CSV）
-598. 实现 ETL API 地址配置
-599. 实现"测试连接"按钮
-600. 实现模型阈值配置（复购预测/聚类/关联规则）
-601. 实现安全库存服务水平配置
-602. 实现预测周期配置
-603. 实现经营周报模块勾选
-604. 实现系统信息展示（版本/数据库大小/缓存状态/API 统计）
-605. 实现日志查看器
-606. 提交：系统配置模块完成
+- [ ] 597. 实现数据源切换（ETL API / SQLite / CSV）
+- [ ] 598. 实现 ETL API 地址配置
+- [ ] 599. 实现"测试连接"按钮
+- [ ] 600. 实现模型阈值配置（复购预测/聚类/关联规则）
+- [ ] 601. 实现安全库存服务水平配置
+- [ ] 602. 实现预测周期配置
+- [ ] 603. 实现经营周报模块勾选
+- [ ] 604. 实现系统信息展示（版本/数据库大小/缓存状态/API 统计）
+- [ ] 605. 实现日志查看器
+- [ ] 606. 提交：系统配置模块完成
 
 ---
 
 ## 阶段十九：高级扩展功能（额外加分）
 
-607. 实现 SHAP 特征重要性瀑布图
-608. 实现 LIME 局部解释
-609. 实现 Isolation Forest 异常检测
-610. 实现异常事件自动告警
-611. 实现 AB 测试方案创建向导
-612. 实现 AB 测试样本量计算器
-613. 实现 T 检验/卡方检验结果分析
-614. 实现"数据故事"自动生成
-615. 实现经营变化时间轴动画播放
-616. 提交：高级扩展功能完成
+- [ ] 607. 实现 SHAP 特征重要性瀑布图
+- [ ] 608. 实现 LIME 局部解释
+- [ ] 609. 实现 Isolation Forest 异常检测
+- [ ] 610. 实现异常事件自动告警
+- [ ] 611. 实现 AB 测试方案创建向导
+- [ ] 612. 实现 AB 测试样本量计算器
+- [ ] 613. 实现 T 检验/卡方检验结果分析
+- [ ] 614. 实现"数据故事"自动生成
+- [ ] 615. 实现经营变化时间轴动画播放
+- [ ] 616. 提交：高级扩展功能完成
 
 ---
 
 ## 阶段二十：Docker 部署
 
-617. 创建 `server/Dockerfile`（商城 API，node:18-alpine）
-618. 创建 `analytics_dashboard/Dockerfile`（FastAPI，python:3.11-slim）
-619. 创建根目录 `docker-compose.yml`（mall-api + dashboard）
-620. 配置只读卷挂载 `./server/data:/data:ro`
-621. 创建 `.dockerignore`
-622. 执行 `docker compose config` 验证
-623. 执行 `docker compose build`
-624. 执行 `docker compose up -d`
-625. 验证 `curl http://localhost:8000/health`
-626. 浏览器验证 `http://localhost:8000`
-627. 执行 `docker compose down` 停止
-628. 提交：Docker 部署完成
+- [ ] 617. 创建 `server/Dockerfile`（商城 API，node:18-alpine）
+- [ ] 618. 创建 `analytics_dashboard/Dockerfile`（FastAPI，python:3.11-slim）
+- [ ] 619. 创建根目录 `docker-compose.yml`（mall-api + dashboard）
+- [ ] 620. 配置只读卷挂载 `./server/data:/data:ro`
+- [ ] 621. 创建 `.dockerignore`
+- [ ] 622. 执行 `docker compose config` 验证
+- [ ] 623. 执行 `docker compose build`
+- [ ] 624. 执行 `docker compose up -d`
+- [ ] 625. 验证 `curl http://localhost:8000/health`
+- [ ] 626. 浏览器验证 `http://localhost:8000`
+- [ ] 627. 执行 `docker compose down` 停止
+- [ ] 628. 提交：Docker 部署完成
 
 ---
 
 ## 阶段二十一：测试与质量保证
 
-629. 为 utils.py 编写单元测试
-630. 为 data_access.py 编写单元测试
-631. 编写 `tests/smoke_test.py` API 冒烟测试
-632. 测试健康检查、KPI 接口、子项目列表、预测名单
-633. 验证用户宽表主键唯一性
-634. 验证预测模型无数据泄漏
-635. 验证前端所有页面可加载
-636. 验证筛选器联动
-637. 验证 CSV 导出
-638. 提交：测试套件完成
+- [ ] 629. 为 utils.py 编写单元测试
+- [ ] 630. 为 data_access.py 编写单元测试
+- [ ] 631. 编写 `tests/smoke_test.py` API 冒烟测试
+- [ ] 632. 测试健康检查、KPI 接口、子项目列表、预测名单
+- [ ] 633. 验证用户宽表主键唯一性
+- [ ] 634. 验证预测模型无数据泄漏
+- [ ] 635. 验证前端所有页面可加载
+- [ ] 636. 验证筛选器联动
+- [ ] 637. 验证 CSV 导出
+- [ ] 638. 提交：测试套件完成
 
 ---
 
 ## 阶段二十二：文档与答辩
 
 ### 22.1 代码文档
-639. 所有 Python 函数 docstring
-640. `analytics_dashboard/README.md`
-641. API 接口文档（FastAPI Swagger）
-642. 部署文档（本地+Docker）
+- [ ] 639. 所有 Python 函数 docstring
+- [ ] 640. `analytics_dashboard/README.md`
+- [ ] 641. API 接口文档（FastAPI Swagger）
+- [ ] 642. 部署文档（本地+Docker）
 
 ### 22.2 经营决策报告
-643. 撰写《Course eShop 商城经营分析决策报告》
-644. 包含：业务背景、经营诊断、用户分析、预测模型、商品策略、营销效果、综合建议
+- [ ] 643. 撰写《Course eShop 商城经营分析决策报告》
+- [ ] 644. 包含：业务背景、经营诊断、用户分析、预测模型、商品策略、营销效果、综合建议
 
 ### 22.3 答辩材料
-645. 准备 15-20 页 PPT
-646. 准备现场演示脚本
-647. 准备 Q&A 预演
+- [ ] 645. 准备 15-20 页 PPT
+- [ ] 646. 准备现场演示脚本
+- [ ] 647. 准备 Q&A 预演
 
 ---
 
 ## 阶段二十三：最终验收与提交
 
-648. 检查 `git log --oneline --decorate --graph --all` 体现功能演进
-649. 确保至少包含：环境搭建→数据层→驾驶舱→数据挖掘→Docker 等阶段提交
-650. 打标签 `v1.0.0-final`
-651. `git push origin main --tags`
-652. 最终验收：dashboard 可访问、API 正常、前端完整、Docker 可部署、能解释各模块
-653. 提交最终版本
-654. 🎉 项目完成！
+- [ ] 648. 检查 `git log --oneline --decorate --graph --all` 体现功能演进
+- [ ] 649. 确保至少包含：环境搭建→数据层→驾驶舱→数据挖掘→Docker 等阶段提交
+- [ ] 650. 打标签 `v1.0.0-final`
+- [ ] 651. `git push origin main --tags`
+- [ ] 652. 最终验收：dashboard 可访问、API 正常、前端完整、Docker 可部署、能解释各模块
+- [ ] 653. 提交最终版本
+- [ ] 654. 🎉 项目完成！
 
 ---
 
