@@ -43,6 +43,7 @@ from .data_access import (
 from .subprojects import data_quality as r0
 from .subprojects import business_health as r1
 from .subprojects import traffic_funnel as r2
+from .subprojects import customer_clustering as r5
 from .subprojects import repurchase_prediction as r4
 from .subprojects import rfm_user_ops as r3
 from .subprojects import feature_engineering as fe
@@ -574,6 +575,46 @@ async def post_r4_roi(top_pct: float = 5.0):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============================================================
+# R5 聚类分析路由
+# ============================================================
+
+@app.get("/api/r5/user-clusters")
+async def get_r5_user_clusters(k: int = 5):
+    """用户聚类。"""
+    try:
+        result = r5.cluster_users(k=k)
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r5/product-clusters")
+async def get_r5_product_clusters(k: int = 5):
+    """商品聚类。"""
+    try:
+        result = r5.cluster_products(k=k)
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r5/cluster-profile/{cluster_id}")
+async def get_r5_cluster_profile(cluster_id: int):
+    """簇画像（占位，由前端从 user-clusters 提取）。"""
+    return {"cluster_id": cluster_id, "note": "请使用 /api/r5/user-clusters 获取完整分群数据"}
+
+
+@app.get("/api/r5/algorithm-compare")
+async def get_r5_algorithm_compare():
+    """三种聚类算法对比。"""
+    try:
+        result = r5.compare_algorithms()
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/subprojects")
 async def list_subprojects():
     """子项目列表。"""
@@ -584,7 +625,7 @@ async def list_subprojects():
             {"id": "r2", "name": "流量漏斗诊断", "status": "completed"},
             {"id": "r3", "name": "RFM 用户运营", "status": "completed"},
             {"id": "r4", "name": "复购预测模型", "status": "completed"},
-            {"id": "r5", "name": "客户聚类分群", "status": "pending"},
+            {"id": "r5", "name": "客户聚类分群", "status": "completed"},
             {"id": "r6", "name": "关联规则分析", "status": "pending"},
             {"id": "r7", "name": "时间序列预测", "status": "pending"},
             {"id": "r8", "name": "营销归因分析", "status": "pending"},
