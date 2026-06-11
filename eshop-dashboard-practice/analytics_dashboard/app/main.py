@@ -43,6 +43,7 @@ from .data_access import (
 from .subprojects import data_quality as r0
 from .subprojects import business_health as r1
 from .subprojects import traffic_funnel as r2
+from .subprojects import fulfillment_analysis as r9
 from .subprojects import marketing_attribution as r8
 from .subprojects import sales_forecast as r7
 from .subprojects import association_rules as r6
@@ -782,6 +783,50 @@ async def get_r8_budget(migrate_pct: float = 20.0):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============================================================
+# R9 履约售后路由
+# ============================================================
+
+@app.get("/api/r9/fulfillment")
+async def get_r9_fulfillment():
+    """履约分析。"""
+    try:
+        result = r9.analyze_fulfillment()
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r9/refund-analysis")
+async def get_r9_refunds():
+    """退款分析。"""
+    try:
+        result = r9.analyze_refunds()
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r9/review-analysis")
+async def get_r9_reviews():
+    """评论分析。"""
+    try:
+        result = r9.analyze_reviews()
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r9/risk-list")
+async def get_r9_risks():
+    """风险清单。"""
+    try:
+        result = r9.generate_risk_list()
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/subprojects")
 async def list_subprojects():
     """子项目列表。"""
@@ -796,7 +841,7 @@ async def list_subprojects():
             {"id": "r6", "name": "关联规则分析", "status": "completed"},
             {"id": "r7", "name": "时间序列预测", "status": "completed"},
             {"id": "r8", "name": "营销归因分析", "status": "completed"},
-            {"id": "r9", "name": "履约售后分析", "status": "pending"},
+            {"id": "r9", "name": "履约售后分析", "status": "completed"},
             {"id": "r10", "name": "库存策略优化", "status": "pending"},
             {"id": "r11", "name": "综合决策中心", "status": "pending"},
         ]
