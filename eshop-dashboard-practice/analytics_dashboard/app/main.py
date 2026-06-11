@@ -15,6 +15,7 @@ from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from .config import CORS_ALLOWED_ORIGINS, SERVICE_HOST, SERVICE_PORT, LOG_LEVEL
 from .data_access import (
@@ -40,6 +41,7 @@ from .data_access import (
     ETLClient,
 )
 from .subprojects import data_quality as r0
+from .subprojects import business_health as r1
 from .subprojects import feature_engineering as fe
 from .utils import to_json, to_native, setup_logging
 
@@ -101,6 +103,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 静态文件
+import os
+static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
+if os.path.isdir(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir, html=True), name="static")
 
 
 # ---- 中间件 ----
@@ -319,13 +327,100 @@ async def get_feature_importance(target: Optional[str] = None):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============================================================
+# R1 经营驾驶舱路由
+# ============================================================
+
+@app.get("/api/r1/dashboard")
+async def get_r1_dashboard():
+    """经营驾驶舱全部数据（KPI + 趋势 + 拆解 + 异常）。"""
+    try:
+        data = r1.get_dashboard_data()
+        return to_native(data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r1/kpi")
+async def get_r1_kpi():
+    """8 个核心指标卡。"""
+    try:
+        conn = get_db_connection()
+        kpi = r1.compute_kpi(conn)
+        mom = r1.compute_mom_changes(conn)
+        conn.close()
+        return to_native({"kpi": kpi, "mom": mom})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r1/trends")
+async def get_r1_trends():
+    """月度趋势数据。"""
+    try:
+        conn = get_db_connection()
+        trends = r1.compute_monthly_trends(conn)
+        conn.close()
+        return to_native({"trends": trends})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r1/channel-breakdown")
+async def get_r1_channels():
+    """渠道拆解。"""
+    try:
+        conn = get_db_connection()
+        data = r1.compute_channel_breakdown(conn)
+        conn.close()
+        return to_native({"channels": data})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r1/category-breakdown")
+async def get_r1_categories():
+    """品类拆解。"""
+    try:
+        conn = get_db_connection()
+        data = r1.compute_category_breakdown(conn)
+        conn.close()
+        return to_native({"categories": data})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r1/top-products")
+async def get_r1_top_products():
+    """TOP/BOTTOM 商品。"""
+    try:
+        conn = get_db_connection()
+        data = r1.compute_top_bottom_products(conn)
+        conn.close()
+        return to_native(data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r1/anomaly-alerts")
+async def get_r1_anomalies():
+    """异常告警。"""
+    try:
+        conn = get_db_connection()
+        data = r1.detect_anomalies(conn)
+        conn.close()
+        return to_native({"anomalies": data})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/subprojects")
 async def list_subprojects():
     """子项目列表。"""
     return {
         "subprojects": [
             {"id": "r0", "name": "数据质量检查", "status": "completed"},
-            {"id": "r1", "name": "经营驾驶舱", "status": "pending"},
+            {"id": "r1", "name": "经营驾驶舱", "status": "completed"},
             {"id": "r2", "name": "流量漏斗诊断", "status": "pending"},
             {"id": "r3", "name": "RFM 用户运营", "status": "pending"},
             {"id": "r4", "name": "复购预测模型", "status": "pending"},

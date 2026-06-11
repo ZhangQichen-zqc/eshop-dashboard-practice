@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course eShop 经营驾驶舱</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f1f5f9;color:#1e293b}
+.header{background:#1e293b;color:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:18px;font-weight:600}
+.header .info{font-size:12px;color:#94a3b8}
+.container{max-width:1400px;margin:0 auto;padding:20px}
+/* KPI Cards */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.kpi-card{background:#fff;border-radius:10px;padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.kpi-card .label{font-size:12px;color:#64748b;margin-bottom:6px}
+.kpi-card .value{font-size:26px;font-weight:700;color:#1e293b}
+.kpi-card .mom{font-size:13px;margin-top:4px}
+.kpi-card .mom.up{color:#059669}
+.kpi-card .mom.down{color:#dc2626}
+/* Filters */
+.filters{background:#fff;border-radius:10px;padding:16px 20px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.filters label{font-size:13px;color:#64748b}
+.filters select,.filters input{border:1px solid #e2e8f0;border-radius:6px;padding:6px 12px;font-size:13px}
+.btn{background:#2563eb;color:#fff;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500}
+.btn:hover{background:#1d4ed8}
+/* Charts */
+.charts{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px}
+.chart-box{background:#fff;border-radius:10px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.chart-box h3{font-size:14px;font-weight:600;margin-bottom:12px;color:#334155}
+.chart-box canvas{max-height:320px}
+/* Tables */
+.tables{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
+.table-box{background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.table-box h3{font-size:14px;font-weight:600;margin-bottom:10px}
+.table-box table{width:100%;font-size:12px;border-collapse:collapse}
+.table-box th{text-align:left;padding:6px 8px;border-bottom:2px solid #e2e8f0;color:#64748b}
+.table-box td{padding:6px 8px;border-bottom:1px solid #f1f5f9}
+.alerts{background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.alerts h3{font-size:14px;font-weight:600;margin-bottom:8px}
+.alerts .alert-item{padding:8px 12px;margin:4px 0;border-radius:6px;font-size:13px}
+.alerts .alert-item.up{background:#fef2f2;color:#991b1b}
+.alerts .alert-item.down{background:#fefce8;color:#92400e}
+.loading{text-align:center;padding:40px;color:#64748b}
+.error{background:#fef2f2;color:#dc2626;padding:16px;border-radius:8px;margin:12px 0}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Course eShop 经营驾驶舱</h1>
+  <div class="info">
+    <span id="updateTime">加载中...</span>
+    <button class="btn" onclick="refreshAll()" style="margin-left:12px;background:#475569">刷新数据</button>
+  </div>
+</div>
+
+<div class="container">
+  <!-- KPI Cards -->
+  <div class="kpi-row" id="kpiRow">
+    <div class="kpi-card"><div class="label">GMV</div><div class="value" id="k-gmv">--</div><div class="mom" id="m-gmv"></div></div>
+    <div class="kpi-card"><div class="label">净销售额</div><div class="value" id="k-net">--</div></div>
+    <div class="kpi-card"><div class="label">毛利率</div><div class="value" id="k-margin">--</div></div>
+    <div class="kpi-card"><div class="label">订单数</div><div class="value" id="k-orders">--</div><div class="mom" id="m-orders"></div></div>
+    <div class="kpi-card"><div class="label">买家数</div><div class="value" id="k-buyers">--</div><div class="mom" id="m-buyers"></div></div>
+    <div class="kpi-card"><div class="label">客单价</div><div class="value" id="k-aov">--</div><div class="mom" id="m-aov"></div></div>
+    <div class="kpi-card"><div class="label">退款率</div><div class="value" id="k-refund">--</div></div>
+    <div class="kpi-card"><div class="label">转化率</div><div class="value" id="k-conv">--</div></div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <label>日期范围:</label><input type="month" id="fStart" value="2024-04"> ~ <input type="month" id="fEnd" value="2026-03">
+    <button class="btn" onclick="refreshAll()">应用筛选</button>
+    <span style="margin-left:auto;font-size:12px;color:#94a3b8">全部数据基于订单状态 (paid/completed)</span>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts">
+    <div class="chart-box"><h3>月度 GMV 趋势</h3><canvas id="chartTrend"></canvas></div>
+    <div class="chart-box"><h3>渠道 GMV 占比</h3><canvas id="chartChannel"></canvas></div>
+  </div>
+  <div class="charts" style="grid-template-columns:1fr 1fr">
+    <div class="chart-box"><h3>品类 GMV 贡献</h3><canvas id="chartCategory"></canvas></div>
+    <div class="chart-box"><h3>会员等级贡献</h3><canvas id="chartMember"></canvas></div>
+  </div>
+
+  <!-- Tables -->
+  <div class="tables">
+    <div class="table-box"><h3>TOP 10 商品</h3><table id="topProducts"><thead><tr><th>商品</th><th>品类</th><th>GMV</th></tr></thead><tbody></tbody></table></div>
+    <div class="table-box"><h3>BOTTOM 10 商品</h3><table id="bottomProducts"><thead><tr><th>商品</th><th>品类</th><th>GMV</th></tr></thead><tbody></tbody></table></div>
+    <div class="table-box"><h3>渠道明细</h3><table id="channelTable"><thead><tr><th>渠道</th><th>GMV</th><th>占比</th></tr></thead><tbody></tbody></table></div>
+  </div>
+
+  <!-- Anomaly Alerts -->
+  <div class="alerts" id="alertsBox"><h3>异常告警 (环比波动 > 10%)</h3><div id="alertList"><div class="loading">加载中...</div></div></div>
+</div>
+
+<script>
+const API = '';
+
+function formatMoney(v) { return '¥' + (v/10000).toFixed(0) + '万'; }
+function formatNum(v) { return v?.toLocaleString() || '0'; }
+function momHtml(v) {
+  if (v == null) return '';
+  const cls = v >= 0 ? 'up' : 'down';
+  const arrow = v >= 0 ? '↑' : '↓';
+  return `<span class="mom ${cls}">${arrow} ${Math.abs(v).toFixed(1)}%</span>`;
+}
+
+async function refreshAll() {
+  try {
+    const resp = await fetch(API + '/api/r1/dashboard');
+    const d = await resp.json();
+    if (d.error) { showError(d.error); return; }
+
+    // KPI
+    const k = d.kpi;
+    document.getElementById('k-gmv').textContent = formatMoney(k.gmv);
+    document.getElementById('k-net').textContent = formatMoney(k.net_sales);
+    document.getElementById('k-margin').textContent = k.gross_margin.toFixed(1) + '%';
+    document.getElementById('k-orders').textContent = formatNum(k.order_count);
+    document.getElementById('k-buyers').textContent = formatNum(k.buyer_count);
+    document.getElementById('k-aov').textContent = '¥' + k.aov?.toLocaleString();
+    document.getElementById('k-refund').textContent = k.refund_rate?.toFixed(1) + '%';
+    document.getElementById('k-conv').textContent = k.conversion_rate?.toFixed(1) + '%';
+
+    // MoM
+    const mom = d.mom_changes;
+    document.getElementById('m-gmv').innerHTML = momHtml(mom.gmv_mom);
+    document.getElementById('m-orders').innerHTML = momHtml(mom.orders_mom);
+    document.getElementById('m-buyers').innerHTML = momHtml(mom.buyers_mom);
+    document.getElementById('m-aov').innerHTML = momHtml(mom.aov_mom);
+
+    document.getElementById('updateTime').textContent = '更新: ' + new Date(d.generated_at).toLocaleString();
+
+    // Charts
+    drawTrend(d.monthly_trends);
+    drawChannel(d.channel_breakdown);
+    drawCategory(d.category_breakdown);
+    drawMember(d.member_contribution);
+
+    // Tables
+    renderTopProducts(d.top_bottom_products.top);
+    renderBottomProducts(d.top_bottom_products.bottom);
+    renderChannelTable(d.channel_breakdown);
+
+    // Anomalies
+    renderAnomalies(d.anomalies);
+  } catch(e) {
+    showError('数据加载失败: ' + e.message);
+  }
+}
+
+let chartInstances = {};
+function destroyChart(name) {
+  if (chartInstances[name]) { chartInstances[name].destroy(); delete chartInstances[name]; }
+}
+
+function drawTrend(data) {
+  destroyChart('trend');
+  const labels = data.map(d => d.ym);
+  const gmv = data.map(d => d.gmv / 10000);
+  const aov = data.map(d => d.aov);
+  const ctx = document.getElementById('chartTrend').getContext('2d');
+  chartInstances['trend'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {label:'GMV (万元)', data:gmv, backgroundColor:'#2563eb', borderRadius:2, yAxisID:'y'},
+        {label:'客单价 (元)', data:aov, type:'line', borderColor:'#dc2626', pointRadius:2, tension:.3, yAxisID:'y1'}
+      ]
+    },
+    options: {
+      responsive:true,
+      scales:{
+        y:{position:'left', title:{display:true,text:'万元'}},
+        y1:{position:'right', title:{display:true,text:'元'}, grid:{display:false}, min:1000}
+      }
+    }
+  });
+}
+
+function drawChannel(data) {
+  destroyChart('channel');
+  const ctx = document.getElementById('chartChannel').getContext('2d');
+  chartInstances['channel'] = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: data.map(d => d.channel),
+      datasets: [{data:data.map(d=>d.share), backgroundColor:['#2563eb','#059669','#d97706','#dc2626','#7c3aed','#0891b2']}]
+    },
+    options: {responsive:true, plugins:{legend:{position:'bottom', labels:{fontSize:11}}}}
+  });
+}
+
+function drawCategory(data) {
+  destroyChart('category');
+  const ctx = document.getElementById('chartCategory').getContext('2d');
+  chartInstances['category'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.map(d => d.category_name),
+      datasets: [{label:'GMV (万元)', data:data.map(d=>d.gmv/10000), backgroundColor:'#2563eb', borderRadius:3}]
+    },
+    options: {responsive:true, indexAxis:'y', scales:{x:{title:{display:true,text:'万元'}}}}
+  });
+}
+
+function drawMember(data) {
+  destroyChart('member');
+  const ctx = document.getElementById('chartMember').getContext('2d');
+  chartInstances['member'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.map(d => d.member_level),
+      datasets: [
+        {label:'买家数', data:data.map(d=>d.buyers), backgroundColor:'#93c5fd'},
+        {label:'GMV (万元)', data:data.map(d=>d.gmv/10000), backgroundColor:'#2563eb'}
+      ]
+    },
+    options: {responsive:true, scales:{y:{title:{display:true,text:'数量/万元'}}}}
+  });
+}
+
+function renderTopProducts(data) {
+  const tbody = document.querySelector('#topProducts tbody');
+  tbody.innerHTML = data.map(d => `<tr><td>${d.product_name}</td><td>${d.category_name}</td><td>¥${(d.gmv/10000).toFixed(1)}万</td></tr>`).join('');
+}
+
+function renderBottomProducts(data) {
+  const tbody = document.querySelector('#bottomProducts tbody');
+  tbody.innerHTML = data.map(d => `<tr><td>${d.product_name}</td><td>${d.category_name}</td><td>¥${(d.gmv/10000).toFixed(1)}万</td></tr>`).join('');
+}
+
+function renderChannelTable(data) {
+  const tbody = document.querySelector('#channelTable tbody');
+  tbody.innerHTML = data.map(d => `<tr><td>${d.channel}</td><td>¥${(d.gmv/10000).toFixed(1)}万</td><td>${d.share}%</td></tr>`).join('');
+}
+
+function renderAnomalies(data) {
+  const div = document.getElementById('alertList');
+  if (!data.length) { div.innerHTML = '<div style="padding:8px;color:#059669">✅ 无异常月份</div>'; return; }
+  div.innerHTML = data.map(a => `<div class="alert-item ${a.direction}">[${a.month}] ${a.indicator} ${a.direction==='up'?'增长':'下降'} ${Math.abs(a.change_pct).toFixed(1)}%</div>`).join('');
+}
+
+function showError(msg) {
+  document.getElementById('kpiRow').insertAdjacentHTML('beforebegin', `<div class="error">${msg}</div>`);
+}
+
+refreshAll();
+</script>
+</body>
+</html>
