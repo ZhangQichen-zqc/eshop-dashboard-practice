@@ -43,6 +43,7 @@ from .data_access import (
 from .subprojects import data_quality as r0
 from .subprojects import business_health as r1
 from .subprojects import traffic_funnel as r2
+from .subprojects import inventory_strategy as r10
 from .subprojects import fulfillment_analysis as r9
 from .subprojects import marketing_attribution as r8
 from .subprojects import sales_forecast as r7
@@ -827,6 +828,50 @@ async def get_r9_risks():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============================================================
+# R10 库存策略路由
+# ============================================================
+
+@app.get("/api/r10/sku-performance")
+async def get_r10_sku_perf():
+    """SKU 动销绩效。"""
+    try:
+        result = r10.analyze_sku_performance()
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r10/abc-classification")
+async def get_r10_abc():
+    """ABC 分类矩阵。"""
+    try:
+        result = r10.compute_abc_matrix()
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r10/strategies")
+async def get_r10_strategies():
+    """商品策略建议。"""
+    try:
+        result = r10.generate_product_strategies()
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r10/alerts")
+async def get_r10_alerts():
+    """库存预警。"""
+    try:
+        result = r10.generate_inventory_alerts()
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/subprojects")
 async def list_subprojects():
     """子项目列表。"""
@@ -842,7 +887,7 @@ async def list_subprojects():
             {"id": "r7", "name": "时间序列预测", "status": "completed"},
             {"id": "r8", "name": "营销归因分析", "status": "completed"},
             {"id": "r9", "name": "履约售后分析", "status": "completed"},
-            {"id": "r10", "name": "库存策略优化", "status": "pending"},
+            {"id": "r10", "name": "库存策略优化", "status": "completed"},
             {"id": "r11", "name": "综合决策中心", "status": "pending"},
         ]
     }
