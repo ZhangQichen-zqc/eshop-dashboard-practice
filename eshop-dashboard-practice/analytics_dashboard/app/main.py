@@ -43,6 +43,7 @@ from .data_access import (
 from .subprojects import data_quality as r0
 from .subprojects import business_health as r1
 from .subprojects import traffic_funnel as r2
+from .subprojects import rfm_user_ops as r3
 from .subprojects import feature_engineering as fe
 from .utils import to_json, to_native, setup_logging
 
@@ -464,6 +465,70 @@ async def get_r2_remarketing():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============================================================
+# R3 RFM 用户运营路由
+# ============================================================
+
+@app.get("/api/r3/rfm-layers")
+async def get_r3_rfm_layers():
+    """RFM 分群数据。"""
+    try:
+        data = r3.compute_rfm_layers()
+        return to_native(data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r3/cohort-retention")
+async def get_r3_cohort():
+    """Cohort 留存数据。"""
+    try:
+        data = r3.compute_cohort_retention()
+        return to_native(data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r3/user-profile/{user_id}")
+async def get_r3_user_profile(user_id: str):
+    """用户画像。"""
+    try:
+        data = r3.get_user_profile(user_id)
+        return to_native(data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r3/segment-comparison")
+async def get_r3_segment_comparison():
+    """分群对比数据。"""
+    try:
+        data = r3.get_segment_comparison()
+        return to_native(data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r3/search-users")
+async def get_r3_search(keyword: str = "", segment: str = "", limit: int = 50):
+    """用户搜索。"""
+    try:
+        data = r3.search_users(keyword, segment, limit)
+        return to_native({"users": data, "count": len(data)})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/r3/batch-tag")
+async def post_r3_batch_tag(user_ids: List[str], tag: str):
+    """批量打标签。"""
+    try:
+        result = r3.batch_tag_users(user_ids, tag)
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/subprojects")
 async def list_subprojects():
     """子项目列表。"""
@@ -472,7 +537,7 @@ async def list_subprojects():
             {"id": "r0", "name": "数据质量检查", "status": "completed"},
             {"id": "r1", "name": "经营驾驶舱", "status": "completed"},
             {"id": "r2", "name": "流量漏斗诊断", "status": "completed"},
-            {"id": "r3", "name": "RFM 用户运营", "status": "pending"},
+            {"id": "r3", "name": "RFM 用户运营", "status": "completed"},
             {"id": "r4", "name": "复购预测模型", "status": "pending"},
             {"id": "r5", "name": "客户聚类分群", "status": "pending"},
             {"id": "r6", "name": "关联规则分析", "status": "pending"},
