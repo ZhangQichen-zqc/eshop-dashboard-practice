@@ -252,6 +252,8 @@ def to_native(obj: Any) -> Any:
         return int(obj)
     if isinstance(obj, (np.floating,)):
         return float(obj) if not np.isnan(obj) else None
+    if isinstance(obj, (np.bool_,)):
+        return bool(obj)
     if isinstance(obj, np.ndarray):
         return to_native(obj.tolist())
     if isinstance(obj, (pd.Timestamp,)):

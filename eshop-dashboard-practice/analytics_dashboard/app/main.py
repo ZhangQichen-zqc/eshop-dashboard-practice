@@ -43,6 +43,7 @@ from .data_access import (
 from .subprojects import data_quality as r0
 from .subprojects import business_health as r1
 from .subprojects import traffic_funnel as r2
+from .subprojects import sales_forecast as r7
 from .subprojects import association_rules as r6
 from .subprojects import customer_clustering as r5
 from .subprojects import repurchase_prediction as r4
@@ -675,6 +676,53 @@ async def get_r6_product_recs(sku_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============================================================
+# R7 时间序列预测路由
+# ============================================================
+
+@app.get("/api/r7/gmv-forecast")
+async def get_r7_gmv_forecast(periods: int = 30):
+    """GMV 预测（多模型对比 + 未来 N 天预测）。"""
+    try:
+        result = r7.forecast_gmv(periods=periods)
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r7/category-forecast/{category_name}")
+async def get_r7_category_forecast(category_name: str, periods: int = 30):
+    """品类销量预测。"""
+    try:
+        result = r7.forecast_category(category_name, periods=periods)
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r7/safety-stock")
+async def get_r7_safety_stock():
+    """安全库存与补货建议。"""
+    try:
+        result = r7.compute_safety_stock()
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r7/replenishment-list")
+async def get_r7_replenishment():
+    """补货清单（紧急补货 + 库存过剩）。"""
+    try:
+        result = r7.compute_safety_stock()
+        return to_native({
+            "urgent": result["urgent_replenishment"],
+            "excess": result["excess_inventory"],
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/subprojects")
 async def list_subprojects():
     """子项目列表。"""
@@ -687,7 +735,7 @@ async def list_subprojects():
             {"id": "r4", "name": "复购预测模型", "status": "completed"},
             {"id": "r5", "name": "客户聚类分群", "status": "completed"},
             {"id": "r6", "name": "关联规则分析", "status": "completed"},
-            {"id": "r7", "name": "时间序列预测", "status": "pending"},
+            {"id": "r7", "name": "时间序列预测", "status": "completed"},
             {"id": "r8", "name": "营销归因分析", "status": "pending"},
             {"id": "r9", "name": "履约售后分析", "status": "pending"},
             {"id": "r10", "name": "库存策略优化", "status": "pending"},
