@@ -42,6 +42,7 @@ from .data_access import (
 )
 from .subprojects import data_quality as r0
 from .subprojects import business_health as r1
+from .subprojects import traffic_funnel as r2
 from .subprojects import feature_engineering as fe
 from .utils import to_json, to_native, setup_logging
 
@@ -414,6 +415,55 @@ async def get_r1_anomalies():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============================================================
+# R2 流量漏斗路由
+# ============================================================
+
+@app.get("/api/r2/funnel")
+async def get_r2_funnel(group_by: Optional[str] = None):
+    """漏斗数据（可选按 channel/device/campaign 分组）。"""
+    try:
+        conn = get_db_connection()
+        if group_by == "channel":
+            data = r2.compute_funnel_by_channel(conn)
+        elif group_by == "device":
+            data = r2.compute_funnel_by_device(conn)
+        elif group_by == "campaign":
+            data = r2.compute_funnel_by_campaign(conn)
+        else:
+            data = r2.compute_overall_funnel(conn)
+        conn.close()
+        return to_native(data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r2/dropoff-analysis")
+async def get_r2_dropoff():
+    """流失诊断 + 高曝光低加购/高加购低结算商品。"""
+    try:
+        conn = get_db_connection()
+        dropoff = r2.find_biggest_dropoff(conn)
+        high_exposure = r2.find_high_exposure_low_cart(conn)
+        high_cart = r2.find_high_cart_low_checkout(conn)
+        conn.close()
+        return to_native({"dropoff": dropoff, "high_exposure_low_cart": high_exposure, "high_cart_low_checkout": high_cart})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r2/remarketing-list")
+async def get_r2_remarketing():
+    """再营销候选名单。"""
+    try:
+        conn = get_db_connection()
+        data = r2.generate_remarketing_list(conn)
+        conn.close()
+        return to_native(data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/subprojects")
 async def list_subprojects():
     """子项目列表。"""
@@ -421,7 +471,7 @@ async def list_subprojects():
         "subprojects": [
             {"id": "r0", "name": "数据质量检查", "status": "completed"},
             {"id": "r1", "name": "经营驾驶舱", "status": "completed"},
-            {"id": "r2", "name": "流量漏斗诊断", "status": "pending"},
+            {"id": "r2", "name": "流量漏斗诊断", "status": "completed"},
             {"id": "r3", "name": "RFM 用户运营", "status": "pending"},
             {"id": "r4", "name": "复购预测模型", "status": "pending"},
             {"id": "r5", "name": "客户聚类分群", "status": "pending"},
