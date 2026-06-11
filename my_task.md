@@ -113,100 +113,100 @@
 ## 阶段二：ETL 数据接入层开发
 
 ### 2.1 创建仪表盘项目骨架
-- [ ] 83. 创建 `analytics_dashboard/` 目录
-- [ ] 84. 创建 `analytics_dashboard/app/__init__.py`
-- [ ] 85. 创建 `analytics_dashboard/app/main.py`
-- [ ] 86. 创建 `analytics_dashboard/app/data_access.py`
-- [ ] 87. 创建 `analytics_dashboard/app/utils.py`
-- [ ] 88. 创建 `analytics_dashboard/app/config.py`
-- [ ] 89. 创建 `analytics_dashboard/app/subprojects/__init__.py`
-- [ ] 90. 创建 `analytics_dashboard/static/` 目录
-- [ ] 91. 创建 `analytics_dashboard/tests/__init__.py`
+- [x] **83.** 创建 `analytics_dashboard/` 目录
+- [x] **84.** 创建 `analytics_dashboard/app/__init__.py`
+- [x] **85.** 创建 `analytics_dashboard/app/main.py`
+- [x] **86.** 创建 `analytics_dashboard/app/data_access.py`
+- [x] **87.** 创建 `analytics_dashboard/app/utils.py`
+- [x] **88.** 创建 `analytics_dashboard/app/config.py`
+- [x] **89.** 创建 `analytics_dashboard/app/subprojects/__init__.py`
+- [x] **90.** 创建 `analytics_dashboard/static/` 目录
+- [x] **91.** 创建 `analytics_dashboard/tests/__init__.py`
 
 ### 2.2 实现 config.py
-- [ ] 92. 定义项目根目录路径常量
-- [ ] 93. 定义 SQLite 数据库路径（支持 `ESHOP_DB_PATH` 环境变量）
-- [ ] 94. 定义 ETL API 基础 URL 配置
-- [ ] 95. 定义数据缓存目录路径
-- [ ] 96. 定义日志级别和服务端口配置
-- [ ] 97. 定义 CORS 允许来源
+- [x] **92.** 定义项目根目录路径常量
+- [x] **93.** 定义 SQLite 数据库路径（支持 `ESHOP_DB_PATH` 环境变量）
+- [x] **94.** 定义 ETL API 基础 URL 配置
+- [x] **95.** 定义数据缓存目录路径
+- [x] **96.** 定义日志级别和服务端口配置
+- [x] **97.** 定义 CORS 允许来源
 
 ### 2.3 实现 utils.py 工具函数
-- [ ] 98. 实现 `safe_divide(a, b, default=0)` 安全除法
-- [ ] 99. 实现 `format_money(value)` 金额格式化
-- [ ] 100. 实现 `format_percent(value)` 百分比格式化
-- [ ] 101. 实现 `parse_date(value)` 日期解析
-- [ ] 102. 实现 `compute_quantiles(series)` 分位数计算
-- [ ] 103. 实现 `standardize(series)` 标准化
-- [ ] 104. 实现 `moving_average(series, window=7)` 移动平均
-- [ ] 105. 实现 `mom_change(current, previous)` 环比
-- [ ] 106. 实现 `yoy_change(current, last_year)` 同比
-- [ ] 107. 实现 `missing_summary(df)` 缺失值统计
-- [ ] 108. 实现 `detect_outliers_iqr(series)` IQR 异常值检测
-- [ ] 109. 实现 `detect_outliers_zscore(series, threshold=3)` Z-score 异常值检测
-- [ ] 110. 实现 `@cache_result(ttl)` 缓存装饰器
-- [ ] 111. 实现 `setup_logging()` 日志配置
-- [ ] 112. 实现 JSON 序列化辅助函数（处理 numpy 类型）
+- [x] **98.** 实现 `safe_divide(a, b, default=0)` 安全除法
+- [x] **99.** 实现 `format_money(value)` 金额格式化
+- [x] **100.** 实现 `format_percent(value)` 百分比格式化
+- [x] **101.** 实现 `parse_date(value)` 日期解析
+- [x] **102.** 实现 `compute_quantiles(series)` 分位数计算
+- [x] **103.** 实现 `standardize(series)` 标准化
+- [x] **104.** 实现 `moving_average(series, window=7)` 移动平均
+- [x] **105.** 实现 `mom_change(current, previous)` 环比
+- [x] **106.** 实现 `yoy_change(current, last_year)` 同比
+- [x] **107.** 实现 `missing_summary(df)` 缺失值统计
+- [x] **108.** 实现 `detect_outliers_iqr(series)` IQR 异常值检测
+- [x] **109.** 实现 `detect_outliers_zscore(series, threshold=3)` Z-score 异常值检测
+- [x] **110.** 实现 `@cache_result(ttl)` 缓存装饰器
+- [x] **111.** 实现 `setup_logging()` 日志配置
+- [x] **112.** 实现 JSON 序列化辅助函数（处理 numpy 类型）
 
 ### 2.4 实现 data_access.py —— SQLite 模式
-- [ ] 113. 实现 `get_db_connection(readonly=True)` 只读连接
-- [ ] 114. 实现 `query_table(table_name, limit, offset, order_by, filters)` 分页查询
-- [ ] 115. 实现 `query_table_schema(table_name)` 表结构查询
-- [ ] 116. 实现 `query_metrics()` 核心指标查询
-- [ ] 117. 实现 `query_quality_report()` 质量报告查询
-- [ ] 118. 实现 `query_daily_summary(start_date, end_date, channels)` 经营日报
-- [ ] 119. 实现 `load_dim_user()` 加载用户维度
-- [ ] 120. 实现 `load_dim_product()` 加载商品维度
-- [ ] 121. 实现 `load_dim_date()` 加载日期维度
-- [ ] 122. 实现 `load_dim_campaign()` 加载活动维度
-- [ ] 123. 实现 `load_fact_order()` 加载订单事实
-- [ ] 124. 实现 `load_fact_order_item()` 加载订单行事实
-- [ ] 125. 实现 `load_fact_traffic()` 加载流量事实
-- [ ] 126. 实现 `load_fact_coupon_use()` 加载优惠券事实
-- [ ] 127. 实现 `load_fact_refund()` 加载退款事实
-- [ ] 128. 实现 `load_fact_fulfillment()` 加载履约事实
-- [ ] 129. 实现 `load_fact_inventory_movement()` 加载库存流水
-- [ ] 130. 实现 `load_fact_product_review()` 加载评论事实
-- [ ] 131. 实现 `load_fact_ads_spend()` 加载广告花费
-- [ ] 132. 为所有加载函数添加参数化过滤（日期范围、渠道、类目）
+- [x] **113.** 实现 `get_db_connection(readonly=True)` 只读连接
+- [x] **114.** 实现 `query_table(table_name, limit, offset, order_by, filters)` 分页查询
+- [x] **115.** 实现 `query_table_schema(table_name)` 表结构查询
+- [x] **116.** 实现 `query_metrics()` 核心指标查询
+- [x] **117.** 实现 `query_quality_report()` 质量报告查询
+- [x] **118.** 实现 `query_daily_summary(start_date, end_date, channels)` 经营日报
+- [x] **119.** 实现 `load_dim_user()` 加载用户维度
+- [x] **120.** 实现 `load_dim_product()` 加载商品维度
+- [x] **121.** 实现 `load_dim_date()` 加载日期维度
+- [x] **122.** 实现 `load_dim_campaign()` 加载活动维度
+- [x] **123.** 实现 `load_fact_order()` 加载订单事实
+- [x] **124.** 实现 `load_fact_order_item()` 加载订单行事实
+- [x] **125.** 实现 `load_fact_traffic()` 加载流量事实
+- [x] **126.** 实现 `load_fact_coupon_use()` 加载优惠券事实
+- [x] **127.** 实现 `load_fact_refund()` 加载退款事实
+- [x] **128.** 实现 `load_fact_fulfillment()` 加载履约事实
+- [x] **129.** 实现 `load_fact_inventory_movement()` 加载库存流水
+- [x] **130.** 实现 `load_fact_product_review()` 加载评论事实
+- [x] **131.** 实现 `load_fact_ads_spend()` 加载广告花费
+- [x] **132.** 为所有加载函数添加参数化过滤（日期范围、渠道、类目）
 
 ### 2.5 实现 data_access.py —— ETL API 模式
-- [ ] 133. 实现 `ETLClient` 类封装 HTTP 请求
-- [ ] 134. 实现 `ETLClient.get_tables()` 获取表列表
-- [ ] 135. 实现 `ETLClient.get_schema(table)` 获取表结构
-- [ ] 136. 实现 `ETLClient.query(table, **params)` 分页查询
-- [ ] 137. 实现 `ETLClient.export_csv(table, save_path)` 导出 CSV
-- [ ] 138. 实现 `ETLClient.get_metrics()` 获取核心指标
-- [ ] 139. 实现 `ETLClient.get_quality()` 获取质量报告
-- [ ] 140. 实现 API 请求重试（最多 3 次）
-- [ ] 141. 实现 API 超时处理（30 秒）
-- [ ] 142. 实现 API 不可用时自动降级到 SQLite 模式
+- [x] **133.** 实现 `ETLClient` 类封装 HTTP 请求
+- [x] **134.** 实现 `ETLClient.get_tables()` 获取表列表
+- [x] **135.** 实现 `ETLClient.get_schema(table)` 获取表结构
+- [x] **136.** 实现 `ETLClient.query(table, **params)` 分页查询
+- [x] **137.** 实现 `ETLClient.export_csv(table, save_path)` 导出 CSV
+- [x] **138.** 实现 `ETLClient.get_metrics()` 获取核心指标
+- [x] **139.** 实现 `ETLClient.get_quality()` 获取质量报告
+- [x] **140.** 实现 API 请求重试（最多 3 次）
+- [x] **141.** 实现 API 超时处理（30 秒）
+- [x] **142.** 实现 API 不可用时自动降级到 SQLite 模式
 
 ### 2.6 实现 data_access.py —— CSV 模式
-- [ ] 143. 实现 `load_csv_table(table_name)` 从 exports/ 读取
-- [ ] 144. 实现 CSV 内存缓存避免重复读取
-- [ ] 145. 实现 CSV 字段类型自动推断和转换
-- [ ] 146. 实现数据源降级链：ETL API → SQLite → CSV
+- [x] **143.** 实现 `load_csv_table(table_name)` 从 exports/ 读取
+- [x] **144.** 实现 CSV 内存缓存避免重复读取
+- [x] **145.** 实现 CSV 字段类型自动推断和转换
+- [x] **146.** 实现数据源降级链：ETL API → SQLite → CSV
 
 ### 2.7 创建 FastAPI 入口 main.py
-- [ ] 147. 实现 FastAPI 应用实例化和 CORS 配置
-- [ ] 148. 实现启动事件：预热缓存
-- [ ] 149. 实现关闭事件：清理连接
-- [ ] 150. 实现 `GET /` 根路由
-- [ ] 151. 实现 `GET /health` 健康检查
-- [ ] 152. 实现 `GET /api/summary` 经营概览
-- [ ] 153. 实现 `GET /api/tables` 数据表列表
-- [ ] 154. 实现 `GET /api/tables/{name}` 表结构
-- [ ] 155. 实现 `GET /api/query/{table_name}` 数据查询
-- [ ] 156. 实现 `GET /api/quality` 数据质量
-- [ ] 157. 实现 `GET /api/subprojects` 子项目列表
-- [ ] 158. 实现 `GET /api/subprojects/{id}` 子项目详情
-- [ ] 159. 实现 `POST /api/reload` 手动刷新缓存
-- [ ] 160. 实现 `GET /api/export/{table_name}` 数据导出
-- [ ] 161. 实现全局异常处理中间件
-- [ ] 162. 实现请求日志中间件
-- [ ] 163. 验证所有路由可用
-- [ ] 164. 提交：FastAPI 骨架和数据读取层完成
+- [x] **147.** 实现 FastAPI 应用实例化和 CORS 配置
+- [x] **148.** 实现启动事件：预热缓存
+- [x] **149.** 实现关闭事件：清理连接
+- [x] **150.** 实现 `GET /` 根路由
+- [x] **151.** 实现 `GET /health` 健康检查
+- [x] **152.** 实现 `GET /api/summary` 经营概览
+- [x] **153.** 实现 `GET /api/tables` 数据表列表
+- [x] **154.** 实现 `GET /api/tables/{name}` 表结构
+- [x] **155.** 实现 `GET /api/query/{table_name}` 数据查询
+- [x] **156.** 实现 `GET /api/quality` 数据质量
+- [x] **157.** 实现 `GET /api/subprojects` 子项目列表
+- [x] **158.** 实现 `GET /api/subprojects/{id}` 子项目详情
+- [x] **159.** 实现 `POST /api/reload` 手动刷新缓存
+- [x] **160.** 实现 `GET /api/export/{table_name}` 数据导出
+- [x] **161.** 实现全局异常处理中间件
+- [x] **162.** 实现请求日志中间件
+- [x] **163.** 验证所有路由可用
+- [x] **164.** 提交：FastAPI 骨架和数据读取层完成
 
 ---
 
