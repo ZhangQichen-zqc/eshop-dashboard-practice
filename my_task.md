@@ -66,47 +66,47 @@
 ## 阶段一：数据探索与理解 —— 对应讲义第 1 章
 
 ### 1.1 创建 Jupyter 探索环境
-- [ ] 48. 创建 `notebooks/` 目录
-- [ ] 49. 创建 `notebooks/01_data_exploration.ipynb`
-- [ ] 50. 在 notebook 中导入 pandas、numpy、sqlite3
-- [ ] 51. 编写 SQLite 直连函数 `connect_db()`
-- [ ] 52. 编写 CSV 批量读取函数 `load_all_csv()`
-- [ ] 53. 编写 ETL API 调用函数 `fetch_etl_table(table_name)`
-- [ ] 54. 验证三种读取方式结果一致
+- [x] **48.** 创建 `notebooks/` 目录
+- [x] **49.** 创建 `notebooks/01_data_exploration.ipynb`
+- [x] **50.** 在 notebook 中导入 pandas、numpy、sqlite3
+- [x] **51.** 编写 SQLite 直连函数 `connect_db()`
+- [x] **52.** 编写 CSV 批量读取函数 `load_all_csv()`
+- [x] **53.** 编写 ETL API 调用函数 `fetch_etl_table(table_name)`
+- [x] **54.** 验证三种读取方式结果一致
 
 ### 1.2 遍历全部数据资产
-- [ ] 55. 列出全部 34 张表的名称和记录数
-- [ ] 56. 为每张表标注类型：dimension / fact / source / summary
-- [ ] 57. 读取 `dim_user` 查看字段和样例数据
-- [ ] 58. 读取 `dim_product` 查看字段和样例数据
-- [ ] 59. 读取 `dim_date` 查看字段和样例数据
-- [ ] 60. 读取 `dim_campaign` 查看字段和样例数据
-- [ ] 61. 读取 `fact_order` 查看字段和样例数据
-- [ ] 62. 读取 `fact_order_item` 查看字段和样例数据
-- [ ] 63. 读取 `fact_traffic` 查看字段和样例数据
-- [ ] 64. 读取 `fact_coupon_use` 查看字段和样例数据
-- [ ] 65. 读取 `fact_refund` 查看字段和样例数据
-- [ ] 66. 读取 `fact_fulfillment` 查看字段和样例数据
-- [ ] 67. 读取 `fact_inventory_movement` 查看字段和样例数据
-- [ ] 68. 读取 `fact_product_review` 查看字段和样例数据
-- [ ] 69. 读取 `fact_ads_spend` 查看字段和样例数据
-- [ ] 70. 读取 `daily_business_summary` 查看字段和样例数据
+- [x] **55.** 列出全部 34 张表的名称和记录数
+- [x] **56.** 为每张表标注类型：dimension / fact / source / summary
+- [x] **57.** 读取 `dim_user` 查看字段和样例数据
+- [x] **58.** 读取 `dim_product` 查看字段和样例数据
+- [x] **59.** 读取 `dim_date` 查看字段和样例数据
+- [x] **60.** 读取 `dim_campaign` 查看字段和样例数据
+- [x] **61.** 读取 `fact_order` 查看字段和样例数据
+- [x] **62.** 读取 `fact_order_item` 查看字段和样例数据
+- [x] **63.** 读取 `fact_traffic` 查看字段和样例数据
+- [x] **64.** 读取 `fact_coupon_use` 查看字段和样例数据
+- [x] **65.** 读取 `fact_refund` 查看字段和样例数据
+- [x] **66.** 读取 `fact_fulfillment` 查看字段和样例数据
+- [x] **67.** 读取 `fact_inventory_movement` 查看字段和样例数据
+- [x] **68.** 读取 `fact_product_review` 查看字段和样例数据
+- [x] **69.** 读取 `fact_ads_spend` 查看字段和样例数据
+- [x] **70.** 读取 `daily_business_summary` 查看字段和样例数据
 
 ### 1.3 理解核心指标口径
-- [ ] 71. 按标准口径计算 GMV：`SUM(paid_amount) WHERE status IN ('paid','completed')`
-- [ ] 72. 计算净销售额：GMV - 退款金额
-- [ ] 73. 计算毛利：`SUM((unit_price-unit_cost)*quantity - discount_amount)`
-- [ ] 74. 计算订单数、买家数、客单价、退款率、转化率
-- [ ] 75. 将指标口径定义写入 `docs/metric_definitions.md`
+- [x] **71.** 按标准口径计算 GMV：`SUM(paid_amount) WHERE status IN ('paid','completed')`
+- [x] **72.** 计算净销售额：GMV - 退款金额
+- [x] **73.** 计算毛利：`SUM((unit_price-unit_cost)*quantity - discount_amount)`
+- [x] **74.** 计算订单数、买家数、客单价、退款率、转化率
+- [x] **75.** 将指标口径定义写入 `docs/metric_definitions.md`
 
 ### 1.4 初步业务发现
-- [ ] 76. 计算数据时间范围（MIN / MAX order_date）
-- [ ] 77. 计算总 GMV、总订单数、总买家数
-- [ ] 78. 绘制 24 个月月度 GMV 折线图
-- [ ] 79. 绘制各渠道 GMV 占比饼图
-- [ ] 80. 绘制各品类 GMV 贡献柱状图
-- [ ] 81. 写出 500 字初步业务发现
-- [ ] 82. 提交：数据探索与业务理解阶段完成
+- [x] **76.** 计算数据时间范围（MIN / MAX order_date）
+- [x] **77.** 计算总 GMV、总订单数、总买家数
+- [x] **78.** 绘制 24 个月月度 GMV 折线图
+- [x] **79.** 绘制各渠道 GMV 占比饼图
+- [x] **80.** 绘制各品类 GMV 贡献柱状图
+- [x] **81.** 写出 500 字初步业务发现
+- [x] **82.** 提交：数据探索与业务理解阶段完成
 
 ---
 
