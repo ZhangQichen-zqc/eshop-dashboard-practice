@@ -38,7 +38,7 @@
 - [x] **27.** 添加 `scipy>=1.11`
 - [x] **28.** 激活虚拟环境并安装依赖：`source venv/bin/activate && pip install -r analytics_dashboard/requirements.txt`
 - [x] **29.** 验证依赖导入：`python3 -c "import fastapi, pandas, sklearn, matplotlib"`
-- [ ] 30. 提交：安装 Python 依赖完成
+- [x] **30.** 提交：安装 Python 依赖完成
 
 ### 0.3 数据库种子数据验证
 - [x] **31.** 确认 SQLite 数据库存在：`ls -la server/data/eshop.sqlite`
@@ -59,7 +59,7 @@
 - [x] **44.** 测试 ETL metrics 接口：`curl http://127.0.0.1:38173/api/etl/metrics`
 - [x] **45.** 测试 ETL quality 接口：`curl http://127.0.0.1:38173/api/etl/quality`
 - [x] **46.** 停止商城 API（Ctrl+C）
-- [ ] 47. 提交：商城 API 和 ETL 接口验证通过
+- [x] **47.** 提交：商城 API 和 ETL 接口验证通过
 
 ---
 
