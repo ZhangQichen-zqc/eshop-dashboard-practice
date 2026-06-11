@@ -43,6 +43,7 @@ from .data_access import (
 from .subprojects import data_quality as r0
 from .subprojects import business_health as r1
 from .subprojects import traffic_funnel as r2
+from .subprojects import decision_board as r11
 from .subprojects import inventory_strategy as r10
 from .subprojects import fulfillment_analysis as r9
 from .subprojects import marketing_attribution as r8
@@ -872,6 +873,64 @@ async def get_r10_alerts():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============================================================
+# R11 综合决策中心路由
+# ============================================================
+
+@app.get("/api/r11/summary")
+async def get_r11_summary():
+    """经营健康度 + 机会 + 风险 + 动作。"""
+    try:
+        health = r11.compute_health_score()
+        opportunities = r11.identify_opportunities()
+        risks = r11.identify_risks()
+        actions = r11.get_actions()
+        return to_native({
+            "health": health,
+            "opportunities": opportunities,
+            "risks": risks,
+            "actions": actions,
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r11/opportunities")
+async def get_r11_opportunities():
+    """增长机会。"""
+    return to_native({"opportunities": r11.identify_opportunities()})
+
+
+@app.get("/api/r11/risks")
+async def get_r11_risks():
+    """经营风险。"""
+    return to_native({"risks": r11.identify_risks()})
+
+
+@app.get("/api/r11/actions")
+async def get_r11_actions(status: str = None):
+    """运营动作列表。"""
+    result = r11.get_actions(status)
+    return to_native({"actions": result, "count": len(result)})
+
+
+@app.post("/api/r11/actions")
+async def post_r11_action(action_type: str, target_id: str, detail: str, priority: str = "P1"):
+    """创建运营动作。"""
+    result = r11.create_action(action_type, target_id, detail, priority)
+    return to_native(result)
+
+
+@app.get("/api/r11/weekly-report")
+async def get_r11_report():
+    """生成经营周报。"""
+    try:
+        result = r11.generate_weekly_report()
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/subprojects")
 async def list_subprojects():
     """子项目列表。"""
@@ -888,7 +947,7 @@ async def list_subprojects():
             {"id": "r8", "name": "营销归因分析", "status": "completed"},
             {"id": "r9", "name": "履约售后分析", "status": "completed"},
             {"id": "r10", "name": "库存策略优化", "status": "completed"},
-            {"id": "r11", "name": "综合决策中心", "status": "pending"},
+            {"id": "r11", "name": "综合决策中心", "status": "completed"},
         ]
     }
 
