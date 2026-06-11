@@ -43,6 +43,7 @@ from .data_access import (
 from .subprojects import data_quality as r0
 from .subprojects import business_health as r1
 from .subprojects import traffic_funnel as r2
+from .subprojects import repurchase_prediction as r4
 from .subprojects import rfm_user_ops as r3
 from .subprojects import feature_engineering as fe
 from .utils import to_json, to_native, setup_logging
@@ -529,6 +530,50 @@ async def post_r3_batch_tag(user_ids: List[str], tag: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============================================================
+# R4 复购预测路由
+# ============================================================
+
+@app.get("/api/r4/train")
+async def get_r4_train():
+    """训练复购预测模型（样本准备 + 特征 + 多模型训练 + 评估）。"""
+    try:
+        result = r4.prepare_and_train()
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r4/prediction-list")
+async def get_r4_prediction_list():
+    """预测名单（全部用户打分）。"""
+    try:
+        result = r4.score_all_users()
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/r4/adjust-threshold")
+async def post_r4_threshold(threshold: float = 0.5):
+    """调节阈值 + ROI 模拟。"""
+    try:
+        result = r4.simulate_roi(threshold)
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/r4/roi-simulation")
+async def post_r4_roi(top_pct: float = 5.0):
+    """ROI 模拟（按百分比触达）。"""
+    try:
+        result = r4.generate_contact_list(top_pct=top_pct)
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/subprojects")
 async def list_subprojects():
     """子项目列表。"""
@@ -538,7 +583,7 @@ async def list_subprojects():
             {"id": "r1", "name": "经营驾驶舱", "status": "completed"},
             {"id": "r2", "name": "流量漏斗诊断", "status": "completed"},
             {"id": "r3", "name": "RFM 用户运营", "status": "completed"},
-            {"id": "r4", "name": "复购预测模型", "status": "pending"},
+            {"id": "r4", "name": "复购预测模型", "status": "completed"},
             {"id": "r5", "name": "客户聚类分群", "status": "pending"},
             {"id": "r6", "name": "关联规则分析", "status": "pending"},
             {"id": "r7", "name": "时间序列预测", "status": "pending"},
