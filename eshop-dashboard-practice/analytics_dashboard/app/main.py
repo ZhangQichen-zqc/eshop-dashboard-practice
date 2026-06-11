@@ -43,6 +43,7 @@ from .data_access import (
 from .subprojects import data_quality as r0
 from .subprojects import business_health as r1
 from .subprojects import traffic_funnel as r2
+from .subprojects import marketing_attribution as r8
 from .subprojects import sales_forecast as r7
 from .subprojects import association_rules as r6
 from .subprojects import customer_clustering as r5
@@ -723,6 +724,64 @@ async def get_r7_replenishment():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============================================================
+# R8 营销归因路由
+# ============================================================
+
+@app.get("/api/r8/campaign-kpis")
+async def get_r8_campaign_kpis():
+    """活动 KPI。"""
+    try:
+        result = r8.compute_campaign_kpis()
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r8/coupon-analysis")
+async def get_r8_coupon_analysis():
+    """优惠券分析。"""
+    try:
+        result = r8.analyze_coupons()
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r8/channel-efficiency")
+async def get_r8_channel_efficiency():
+    """渠道效率排名。"""
+    try:
+        result = r8.compute_budget_optimization()
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r8/increment-analysis")
+async def get_r8_increment():
+    """增量分析。"""
+    try:
+        result = r8.compute_increment_analysis()
+        return to_native(result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r8/budget-optimization")
+async def get_r8_budget(migrate_pct: float = 20.0):
+    """预算优化模拟。"""
+    try:
+        result = r8.compute_budget_optimization(migrate_pct=migrate_pct)
+        return to_native({
+            "channel_ranking": result["channel_ranking"],
+            "suggestion": result["suggestion"],
+            "simulation": result["simulation"],
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/subprojects")
 async def list_subprojects():
     """子项目列表。"""
@@ -736,7 +795,7 @@ async def list_subprojects():
             {"id": "r5", "name": "客户聚类分群", "status": "completed"},
             {"id": "r6", "name": "关联规则分析", "status": "completed"},
             {"id": "r7", "name": "时间序列预测", "status": "completed"},
-            {"id": "r8", "name": "营销归因分析", "status": "pending"},
+            {"id": "r8", "name": "营销归因分析", "status": "completed"},
             {"id": "r9", "name": "履约售后分析", "status": "pending"},
             {"id": "r10", "name": "库存策略优化", "status": "pending"},
             {"id": "r11", "name": "综合决策中心", "status": "pending"},

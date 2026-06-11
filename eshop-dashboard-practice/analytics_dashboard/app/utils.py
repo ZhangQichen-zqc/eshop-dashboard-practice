@@ -260,4 +260,6 @@ def to_native(obj: Any) -> Any:
         return obj.isoformat()
     if isinstance(obj, (date, datetime)):
         return obj.isoformat()
+    if isinstance(obj, float) and (np.isinf(obj) or np.isnan(obj)):
+        return None
     return obj
