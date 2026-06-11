@@ -38,7 +38,8 @@ from .data_access import (
     load_fact_ads_spend,
     ETLClient,
 )
-from .utils import to_json, setup_logging
+from .subprojects import data_quality as r0
+from .utils import to_json, to_native, setup_logging
 
 # ---- 日志 ----
 logger = setup_logging(LOG_LEVEL)
@@ -227,10 +228,41 @@ async def query_data(
 
 @app.get("/api/quality")
 async def get_quality():
-    """数据质量报告。"""
+    """数据质量快速报告。"""
     try:
         checks = query_quality_report()
         return {"generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"), "checks": checks}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r0/quality-report")
+async def get_r0_full_report():
+    """R0 完整数据质量报告（6 大维度）。"""
+    try:
+        cached_result = cached("r0_quality", ttl=600)
+        if cached_result:
+            return to_native(cached_result)
+        report = r0.run_full_quality_report()
+        set_cache("r0_quality", report)
+        return to_native(report)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/r0/preprocess")
+async def r0_preprocess(config: Optional[Dict] = None):
+    """数据预处理流水线（示例用 fact_order）。"""
+    try:
+        from .data_access import load_fact_order
+        df = load_fact_order()
+        result = r0.run_preprocessing_pipeline(df, config or {})
+        return to_native({
+            "ok": True,
+            "input_shape": list(df.shape),
+            "output_shape": list(result.shape),
+            "sample": result.head(3).to_dict(orient="records"),
+        })
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -240,7 +272,7 @@ async def list_subprojects():
     """子项目列表。"""
     return {
         "subprojects": [
-            {"id": "r0", "name": "数据质量检查", "status": "pending"},
+            {"id": "r0", "name": "数据质量检查", "status": "completed"},
             {"id": "r1", "name": "经营驾驶舱", "status": "pending"},
             {"id": "r2", "name": "流量漏斗诊断", "status": "pending"},
             {"id": "r3", "name": "RFM 用户运营", "status": "pending"},

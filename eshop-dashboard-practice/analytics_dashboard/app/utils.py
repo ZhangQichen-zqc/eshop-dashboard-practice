@@ -237,3 +237,25 @@ def to_json(obj: Any, **kwargs) -> str:
     kwargs.setdefault("ensure_ascii", False)
     kwargs.setdefault("cls", NumpyEncoder)
     return json.dumps(obj, **kwargs)
+
+
+def to_native(obj: Any) -> Any:
+    """递归将 numpy/pandas 类型转换为 Python 原生类型。
+
+    用于 FastAPI 返回数据前的类型清理，解决 jsonable_encoder 不兼容问题。
+    """
+    if isinstance(obj, dict):
+        return {k: to_native(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [to_native(v) for v in obj]
+    if isinstance(obj, (np.integer,)):
+        return int(obj)
+    if isinstance(obj, (np.floating,)):
+        return float(obj) if not np.isnan(obj) else None
+    if isinstance(obj, np.ndarray):
+        return to_native(obj.tolist())
+    if isinstance(obj, (pd.Timestamp,)):
+        return obj.isoformat()
+    if isinstance(obj, (date, datetime)):
+        return obj.isoformat()
+    return obj
