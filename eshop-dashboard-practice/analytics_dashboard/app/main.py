@@ -43,6 +43,7 @@ from .data_access import (
 from .subprojects import data_quality as r0
 from .subprojects import business_health as r1
 from .subprojects import traffic_funnel as r2
+from .subprojects import association_rules as r6
 from .subprojects import customer_clustering as r5
 from .subprojects import repurchase_prediction as r4
 from .subprojects import rfm_user_ops as r3
@@ -615,6 +616,65 @@ async def get_r5_algorithm_compare():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============================================================
+# R6 关联规则路由
+# ============================================================
+
+@app.get("/api/r6/association-rules")
+async def get_r6_rules():
+    """关联规则列表。"""
+    try:
+        result = r6.run_full_association_analysis()
+        # 只返回精简版避免过大
+        return to_native({
+            "category_rules": result["category_rules"]["rules"][:30],
+            "sku_rules_count": len(result["sku_rules"]["rules"]),
+            "bundles": result["bundles"],
+            "cross_sell": result["cross_sell"],
+            "business_unsuitable": result["business_unsuitable"],
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r6/frequent-itemsets")
+async def get_r6_frequent_itemsets(basket_type: str = "sku"):
+    """频繁项集。"""
+    try:
+        if basket_type == "category":
+            basket = r6.build_category_basket()
+        else:
+            basket = r6.build_sku_basket()
+        result = r6.mine_association_rules(basket)
+        return to_native({"itemsets": result["frequent_itemsets"][:50]})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r6/bundle-recommendations")
+async def get_r6_bundles():
+    """捆绑推荐。"""
+    try:
+        basket = r6.build_sku_basket()
+        result = r6.mine_association_rules(basket, min_support=0.005)
+        bundles = r6.generate_bundle_recommendations(result["rules"])
+        return to_native({"bundles": bundles})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r6/product-recommendations/{sku_id}")
+async def get_r6_product_recs(sku_id: str):
+    """单品推荐。"""
+    try:
+        basket = r6.build_sku_basket()
+        result = r6.mine_association_rules(basket, min_support=0.003)
+        recs = r6.get_product_recommendations(sku_id, result["rules"])
+        return to_native({"sku_id": sku_id, "recommendations": recs})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/subprojects")
 async def list_subprojects():
     """子项目列表。"""
@@ -626,7 +686,7 @@ async def list_subprojects():
             {"id": "r3", "name": "RFM 用户运营", "status": "completed"},
             {"id": "r4", "name": "复购预测模型", "status": "completed"},
             {"id": "r5", "name": "客户聚类分群", "status": "completed"},
-            {"id": "r6", "name": "关联规则分析", "status": "pending"},
+            {"id": "r6", "name": "关联规则分析", "status": "completed"},
             {"id": "r7", "name": "时间序列预测", "status": "pending"},
             {"id": "r8", "name": "营销归因分析", "status": "pending"},
             {"id": "r9", "name": "履约售后分析", "status": "pending"},

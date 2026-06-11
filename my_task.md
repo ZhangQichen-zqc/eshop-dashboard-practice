@@ -562,40 +562,40 @@
 ## 阶段十：关联规则 R6 —— 对应讲义第 6 章
 
 ### 10.1 购物篮构建
-- [ ] 402. 在 `subprojects/association_rules.py` 按 order_id 聚合 SKU
-- [ ] 403. 筛选 2 个以上商品的订单
-- [ ] 404. 构建按类目的购物篮
-- [ ] 405. 构建按价格带的购物篮
+- [x] **402.** 在 `subprojects/association_rules.py` 按 order_id 聚合 SKU
+- [x] **403.** 筛选 2 个以上商品的订单
+- [x] **404.** 构建按类目的购物篮
+- [x] **405.** 构建按价格带的购物篮
 
 ### 10.2 Apriori 挖掘
-- [ ] 406. 设置 min_support=0.01 执行频繁项集挖掘
-- [ ] 407. 生成关联规则（min_confidence=0.3）
-- [ ] 408. 计算 support/confidence/lift/leverage/conviction
-- [ ] 409. 按 lift 降序排列
-- [ ] 410. 筛选 lift > 1.2 的有效规则
-- [ ] 411. 剔除冗余规则
+- [x] **406.** 设置 min_support=0.01 执行频繁项集挖掘
+- [x] **407.** 生成关联规则（min_confidence=0.3）
+- [x] **408.** 计算 support/confidence/lift/leverage/conviction
+- [x] **409.** 按 lift 降序排列
+- [x] **410.** 筛选 lift > 1.2 的有效规则
+- [x] **411.** 剔除冗余规则
 
 ### 10.3 推荐生成
-- [ ] 412. 生成"买了 A 也买 B"推荐列表
-- [ ] 413. 生成捆绑销售建议（高 lift + 高 confidence）
-- [ ] 414. 生成凑单推荐（低价 + 高概率 + GMV 提升）
-- [ ] 415. 生成交叉销售建议（跨类目 + 高 lift）
-- [ ] 416. 筛选"数学好但业务不适合"的规则（至少 5 条）
+- [x] **412.** 生成"买了 A 也买 B"推荐列表
+- [x] **413.** 生成捆绑销售建议（高 lift + 高 confidence）
+- [x] **414.** 生成凑单推荐（低价 + 高概率 + GMV 提升）
+- [x] **415.** 生成交叉销售建议（跨类目 + 高 lift）
+- [x] **416.** 筛选"数学好但业务不适合"的规则（至少 5 条）
 
 ### 10.4 关联规则 API
-- [ ] 417. 添加 `GET /api/r6/association-rules` 规则列表
-- [ ] 418. 添加 `GET /api/r6/frequent-itemsets` 频繁项集
-- [ ] 419. 添加 `GET /api/r6/bundle-recommendations` 捆绑推荐
-- [ ] 420. 添加 `GET /api/r6/product-recommendations/{sku_id}` 单品推荐
+- [x] **417.** 添加 `GET /api/r6/association-rules` 规则列表
+- [x] **418.** 添加 `GET /api/r6/frequent-itemsets` 频繁项集
+- [x] **419.** 添加 `GET /api/r6/bundle-recommendations` 捆绑推荐
+- [x] **420.** 添加 `GET /api/r6/product-recommendations/{sku_id}` 单品推荐
 
 ### 10.5 关联规则前端
-- [ ] 421. 实现支持度/置信度/提升度阈值滑块
-- [ ] 422. 实现散点图（X=support, Y=confidence, 气泡=lift）
-- [ ] 423. 实现关联规则表格
-- [ ] 424. 实现商品关联网络图
-- [ ] 425. 实现"选商品，看推荐"交互
-- [ ] 426. 实现捆绑推荐卡片
-- [ ] 427. 提交：R6 关联规则完成
+- [x] **421.** 实现支持度/置信度/提升度阈值滑块
+- [x] **422.** 实现散点图（X=support, Y=confidence, 气泡=lift）
+- [x] **423.** 实现关联规则表格
+- [x] **424.** 实现商品关联网络图
+- [x] **425.** 实现"选商品，看推荐"交互
+- [x] **426.** 实现捆绑推荐卡片
+- [x] **427.** 提交：R6 关联规则完成
 
 ---
 
