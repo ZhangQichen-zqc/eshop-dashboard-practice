@@ -3,254 +3,394 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Course eShop 经营驾驶舱</title>
+<title>Course eShop 经营仪表盘</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
+:root{--bg:#f1f5f9;--card:#fff;--text:#1e293b;--muted:#64748b;--blue:#2563eb;--red:#dc2626;--green:#059669;--yellow:#d97706;--purple:#7c3aed;--border:#e2e8f0;--sidebar-bg:#1e293b;--sidebar-text:#cbd5e1;--sidebar-active:#2563eb}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f1f5f9;color:#1e293b}
-.header{background:#1e293b;color:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center}
-.header h1{font-size:18px;font-weight:600}
-.header .info{font-size:12px;color:#94a3b8}
-.container{max-width:1400px;margin:0 auto;padding:20px}
-/* KPI Cards */
-.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
-.kpi-card{background:#fff;border-radius:10px;padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.kpi-card .label{font-size:12px;color:#64748b;margin-bottom:6px}
-.kpi-card .value{font-size:26px;font-weight:700;color:#1e293b}
-.kpi-card .mom{font-size:13px;margin-top:4px}
-.kpi-card .mom.up{color:#059669}
-.kpi-card .mom.down{color:#dc2626}
-/* Filters */
-.filters{background:#fff;border-radius:10px;padding:16px 20px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;gap:16px;flex-wrap:wrap;align-items:center}
-.filters label{font-size:13px;color:#64748b}
-.filters select,.filters input{border:1px solid #e2e8f0;border-radius:6px;padding:6px 12px;font-size:13px}
-.btn{background:#2563eb;color:#fff;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500}
-.btn:hover{background:#1d4ed8}
-/* Charts */
-.charts{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px}
-.chart-box{background:#fff;border-radius:10px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.chart-box h3{font-size:14px;font-weight:600;margin-bottom:12px;color:#334155}
-.chart-box canvas{max-height:320px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+/* Sidebar */
+.sidebar{width:220px;background:var(--sidebar-bg);color:var(--sidebar-text);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform .3s}
+.sidebar.collapsed{transform:translateX(-220px)}
+.sidebar-header{padding:16px 20px;font-size:15px;font-weight:700;color:#fff;border-bottom:1px solid #334155;display:flex;align-items:center;gap:8px}
+.sidebar-header .dot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.5}}
+.sidebar-nav{flex:1;overflow-y:auto;padding:8px 0}
+.sidebar-nav a{display:flex;align-items:center;gap:10px;padding:10px 20px;color:var(--sidebar-text);text-decoration:none;font-size:13px;transition:.2s;border-left:3px solid transparent}
+.sidebar-nav a:hover,.sidebar-nav a.active{background:#334155;color:#fff;border-left-color:var(--sidebar-active)}
+.sidebar-nav a .badge{font-size:10px;padding:2px 6px;border-radius:10px;background:#334155;margin-left:auto}
+.sidebar-nav a.active .badge{background:var(--sidebar-active)}
+/* Main */
+.main{margin-left:220px;flex:1;transition:margin-left .3s}
+.sidebar.collapsed+.main{margin-left:0}
+/* Top Bar */
+.topbar{background:var(--card);padding:10px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+.topbar .toggle-btn{background:0;border:0;font-size:20px;cursor:pointer;color:var(--text);padding:4px 8px;border-radius:4px}
+.topbar .toggle-btn:hover{background:var(--bg)}
+.topbar .info{font-size:12px;color:var(--muted);display:flex;gap:16px;align-items:center}
+.breadcrumb{font-size:12px;color:var(--muted);padding:4px 0}
+.breadcrumb span{color:var(--blue)}
+/* Container */
+.container{padding:20px;max-width:1400px}
+/* Section Title */
+.section-title{font-size:20px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section-title .icon{font-size:24px}
+.section-title .sub{font-size:13px;font-weight:400;color:var(--muted)}
+/* KPI Grid */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.kpi-card{background:var(--card);border-radius:10px;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.06);border-left:3px solid var(--blue);transition:transform .2s}
+.kpi-card:hover{transform:translateY(-2px)}
+.kpi-card.warn{border-left-color:var(--yellow)}
+.kpi-card.ok{border-left-color:var(--green)}
+.kpi-card.bad{border-left-color:var(--red)}
+.kpi-card .kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;cursor:help}
+.kpi-card .kpi-value{font-size:22px;font-weight:700}
+.kpi-card .kpi-mom{font-size:11px;margin-top:2px}
+.kpi-card .kpi-mom.up{color:var(--green)}
+.kpi-card .kpi-mom.down{color:var(--red)}
+/* Charts Row */
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px}
+.charts-row.eq{grid-template-columns:1fr 1fr}
+.chart-panel{background:var(--card);border-radius:10px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.chart-panel h4{font-size:13px;font-weight:600;margin-bottom:12px;color:var(--text);display:flex;align-items:center;gap:6px}
+.chart-panel canvas{max-height:280px}
 /* Tables */
-.tables{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
-.table-box{background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.table-box h3{font-size:14px;font-weight:600;margin-bottom:10px}
-.table-box table{width:100%;font-size:12px;border-collapse:collapse}
-.table-box th{text-align:left;padding:6px 8px;border-bottom:2px solid #e2e8f0;color:#64748b}
-.table-box td{padding:6px 8px;border-bottom:1px solid #f1f5f9}
-.alerts{background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.alerts h3{font-size:14px;font-weight:600;margin-bottom:8px}
-.alerts .alert-item{padding:8px 12px;margin:4px 0;border-radius:6px;font-size:13px}
-.alerts .alert-item.up{background:#fef2f2;color:#991b1b}
-.alerts .alert-item.down{background:#fefce8;color:#92400e}
-.loading{text-align:center;padding:40px;color:#64748b}
-.error{background:#fef2f2;color:#dc2626;padding:16px;border-radius:8px;margin:12px 0}
+.data-table{width:100%;font-size:12px;border-collapse:collapse}
+.data-table th{text-align:left;padding:8px 10px;background:#f8fafc;border-bottom:2px solid var(--border);font-weight:600;color:var(--muted);font-size:11px;cursor:pointer}
+.data-table td{padding:8px 10px;border-bottom:1px solid #f1f5f9}
+.data-table tr:hover{background:#f8fafc}
+/* Alerts */
+.alert-list{display:flex;flex-direction:column;gap:6px}
+.alert-item{padding:10px 14px;border-radius:8px;font-size:13px;display:flex;gap:10px;align-items:flex-start}
+.alert-item.high{background:#fef2f2;border-left:3px solid var(--red)}
+.alert-item.medium{background:#fefce8;border-left:3px solid var(--yellow)}
+.alert-item.low{background:#f0fdf4;border-left:3px solid var(--green)}
+.alert-item .sev{font-weight:700;font-size:11px;text-transform:uppercase}
+/* Buttons & Utils */
+.btn{padding:8px 16px;border:0;border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;transition:.2s}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:#1d4ed8}
+.btn-outline{background:0;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{background:var(--bg)}
+.btn-sm{padding:4px 10px;font-size:11px}
+.btn-group{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+/* Loading & Toast */
+.loading{text-align:center;padding:32px;color:var(--muted)}
+.error-card{background:#fef2f2;color:var(--red);padding:14px 18px;border-radius:8px;margin:12px 0;font-size:13px}
+.toast{position:fixed;top:20px;right:20px;background:#1e293b;color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s}
+.toast.show{opacity:1}
+.toast.success{border-left:3px solid var(--green)}
+.toast.error{border-left:3px solid var(--red)}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:center;justify-content:center}
+.modal-box{background:#fff;border-radius:12px;padding:24px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-box h3{font-size:16px;margin-bottom:12px}
+.modal-box .close{float:right;background:0;border:0;font-size:18px;cursor:pointer}
+/* Responsive */
+@media(max-width:768px){.sidebar{transform:translateX(-220px)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.charts-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="header">
-  <h1>Course eShop 经营驾驶舱</h1>
-  <div class="info">
-    <span id="updateTime">加载中...</span>
-    <button class="btn" onclick="refreshAll()" style="margin-left:12px;background:#475569">刷新数据</button>
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header"><span class="dot"></span>eShop Dashboard</div>
+  <div class="sidebar-nav">
+    <a href="#home" class="active" onclick="navTo('home',this)"><span>🏠</span>首页总览</a>
+    <a href="#r1" onclick="navTo('r1',this)"><span>📊</span>经营驾驶舱 <span class="badge">R1</span></a>
+    <a href="#r2" onclick="navTo('r2',this)"><span>🔻</span>流量漏斗 <span class="badge">R2</span></a>
+    <a href="#r3" onclick="navTo('r3',this)"><span>👥</span>RFM 用户运营 <span class="badge">R3</span></a>
+    <a href="#r4" onclick="navTo('r4',this)"><span>🤖</span>复购预测 <span class="badge">R4</span></a>
+    <a href="#r5" onclick="navTo('r5',this)"><span>🔮</span>客户聚类 <span class="badge">R5</span></a>
+    <a href="#r6" onclick="navTo('r6',this)"><span>🔗</span>关联规则 <span class="badge">R6</span></a>
+    <a href="#r7" onclick="navTo('r7',this)"><span>📈</span>销售预测 <span class="badge">R7</span></a>
+    <a href="#r8" onclick="navTo('r8',this)"><span>📢</span>营销归因 <span class="badge">R8</span></a>
+    <a href="#r9" onclick="navTo('r9',this)"><span>🚚</span>履约售后 <span class="badge">R9</span></a>
+    <a href="#r10" onclick="navTo('r10',this)"><span>📦</span>库存策略 <span class="badge">R10</span></a>
+    <a href="#r11" onclick="navTo('r11',this)"><span>🎯</span>决策中心 <span class="badge">R11</span></a>
   </div>
+</nav>
+
+<!-- Main -->
+<div class="main" id="mainContent">
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="toggle-btn" onclick="toggleSidebar()" title="切换侧栏">☰</button>
+      <div class="breadcrumb" id="breadcrumb">首页 / <span>经营总览</span></div>
+    </div>
+    <div class="info">
+      <span style="color:var(--green);font-size:11px">● 系统运行中</span>
+      <span id="topTime">--</span>
+      <button class="btn btn-sm btn-outline" onclick="refreshAll()">🔄 刷新</button>
+      <button class="btn btn-sm btn-primary" onclick="window.open('/api/r11/weekly-report')">📄 导出周报</button>
+    </div>
+  </header>
+  <div class="container" id="pageContent"></div>
 </div>
 
-<div class="container">
-  <!-- KPI Cards -->
-  <div class="kpi-row" id="kpiRow">
-    <div class="kpi-card"><div class="label">GMV</div><div class="value" id="k-gmv">--</div><div class="mom" id="m-gmv"></div></div>
-    <div class="kpi-card"><div class="label">净销售额</div><div class="value" id="k-net">--</div></div>
-    <div class="kpi-card"><div class="label">毛利率</div><div class="value" id="k-margin">--</div></div>
-    <div class="kpi-card"><div class="label">订单数</div><div class="value" id="k-orders">--</div><div class="mom" id="m-orders"></div></div>
-    <div class="kpi-card"><div class="label">买家数</div><div class="value" id="k-buyers">--</div><div class="mom" id="m-buyers"></div></div>
-    <div class="kpi-card"><div class="label">客单价</div><div class="value" id="k-aov">--</div><div class="mom" id="m-aov"></div></div>
-    <div class="kpi-card"><div class="label">退款率</div><div class="value" id="k-refund">--</div></div>
-    <div class="kpi-card"><div class="label">转化率</div><div class="value" id="k-conv">--</div></div>
-  </div>
-
-  <!-- Filters -->
-  <div class="filters">
-    <label>日期范围:</label><input type="month" id="fStart" value="2024-04"> ~ <input type="month" id="fEnd" value="2026-03">
-    <button class="btn" onclick="refreshAll()">应用筛选</button>
-    <span style="margin-left:auto;font-size:12px;color:#94a3b8">全部数据基于订单状态 (paid/completed)</span>
-  </div>
-
-  <!-- Charts -->
-  <div class="charts">
-    <div class="chart-box"><h3>月度 GMV 趋势</h3><canvas id="chartTrend"></canvas></div>
-    <div class="chart-box"><h3>渠道 GMV 占比</h3><canvas id="chartChannel"></canvas></div>
-  </div>
-  <div class="charts" style="grid-template-columns:1fr 1fr">
-    <div class="chart-box"><h3>品类 GMV 贡献</h3><canvas id="chartCategory"></canvas></div>
-    <div class="chart-box"><h3>会员等级贡献</h3><canvas id="chartMember"></canvas></div>
-  </div>
-
-  <!-- Tables -->
-  <div class="tables">
-    <div class="table-box"><h3>TOP 10 商品</h3><table id="topProducts"><thead><tr><th>商品</th><th>品类</th><th>GMV</th></tr></thead><tbody></tbody></table></div>
-    <div class="table-box"><h3>BOTTOM 10 商品</h3><table id="bottomProducts"><thead><tr><th>商品</th><th>品类</th><th>GMV</th></tr></thead><tbody></tbody></table></div>
-    <div class="table-box"><h3>渠道明细</h3><table id="channelTable"><thead><tr><th>渠道</th><th>GMV</th><th>占比</th></tr></thead><tbody></tbody></table></div>
-  </div>
-
-  <!-- Anomaly Alerts -->
-  <div class="alerts" id="alertsBox"><h3>异常告警 (环比波动 > 10%)</h3><div id="alertList"><div class="loading">加载中...</div></div></div>
-</div>
+<!-- Toast -->
+<div class="toast" id="toast"></div>
 
 <script>
-const API = '';
+// ====== Navigation ======
+let currentPage = 'home';
+const chartCache = {};
 
-function formatMoney(v) { return '¥' + (v/10000).toFixed(0) + '万'; }
-function formatNum(v) { return v?.toLocaleString() || '0'; }
+function navTo(page, el) {
+  currentPage = page;
+  document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.getElementById('breadcrumb').innerHTML = `首页 / <span>${el?.textContent?.trim()||page}</span>`;
+  loadPage(page);
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
+
+// ====== Loading ======
+function loadPage(page) {
+  const ct = document.getElementById('pageContent');
+  ct.innerHTML = '<div class="loading">⏳ 加载中...</div>';
+  try { pageRenderers[page](ct); } catch(e) { ct.innerHTML = `<div class="error-card">页面加载失败: ${e.message}</div>`; }
+}
+
+// ====== Toast ======
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ====== API Helper ======
+async function api(path) {
+  const resp = await fetch(path);
+  if (!resp.ok) throw new Error(`${resp.status}`);
+  return resp.json();
+}
+
 function momHtml(v) {
   if (v == null) return '';
   const cls = v >= 0 ? 'up' : 'down';
-  const arrow = v >= 0 ? '↑' : '↓';
-  return `<span class="mom ${cls}">${arrow} ${Math.abs(v).toFixed(1)}%</span>`;
+  return `<span class="kpi-mom ${cls}">${v >= 0 ? '↑' : '↓'} ${Math.abs(v).toFixed(1)}%</span>`;
+}
+const F = v => v != null ? '¥' + (v/10000).toFixed(0) + '万' : '--';
+const N = v => v != null ? v.toLocaleString() : '--';
+
+// ====== Chart Helpers ======
+function makeChart(canvasId, type, data, options={}) {
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  if (chartCache[canvasId]) chartCache[canvasId].destroy();
+  chartCache[canvasId] = new Chart(ctx, {type, data, options: {...options, responsive:true}});
 }
 
-async function refreshAll() {
-  try {
-    const resp = await fetch(API + '/api/r1/dashboard');
-    const d = await resp.json();
-    if (d.error) { showError(d.error); return; }
+// ====== Page Renderers ======
+const pageRenderers = {
 
-    // KPI
-    const k = d.kpi;
-    document.getElementById('k-gmv').textContent = formatMoney(k.gmv);
-    document.getElementById('k-net').textContent = formatMoney(k.net_sales);
-    document.getElementById('k-margin').textContent = k.gross_margin.toFixed(1) + '%';
-    document.getElementById('k-orders').textContent = formatNum(k.order_count);
-    document.getElementById('k-buyers').textContent = formatNum(k.buyer_count);
-    document.getElementById('k-aov').textContent = '¥' + k.aov?.toLocaleString();
-    document.getElementById('k-refund').textContent = k.refund_rate?.toFixed(1) + '%';
-    document.getElementById('k-conv').textContent = k.conversion_rate?.toFixed(1) + '%';
+  home(ct) {
+    ct.innerHTML = `
+      <div class="section-title"><span class="icon">🏠</span>经营总览 <span class="sub">整合 R1-R11 关键发现</span></div>
+      <div class="kpi-grid" id="homeKpi"></div>
+      <div class="charts-row"><div class="chart-panel"><h4>📊 月度 GMV</h4><canvas id="hcTrend"></canvas></div>
+      <div class="chart-panel"><h4>📢 渠道 ROAS</h4><canvas id="hcRoas"></canvas></div></div>
+      <div class="charts-row eq"><div class="chart-panel"><h4>🎯 TOP 机会</h4><div id="homeOpp"></div></div>
+      <div class="chart-panel"><h4>⚠️ 主要风险</h4><div id="homeRisk"></div></div></div>`;
+    this._loadHome();
+  },
+  async _loadHome() {
+    try {
+      const [d1, d11] = await Promise.all([
+        api('/api/r1/kpi'), api('/api/r11/summary')
+      ]);
+      const k = d1.kpi;
+      document.getElementById('homeKpi').innerHTML = `
+        <div class="kpi-card ok"><div class="kpi-label" title="商品交易总额：SUM(paid_amount) WHERE status IN (paid,completed)">GMV</div><div class="kpi-value">${F(k.gmv)}</div></div>
+        <div class="kpi-card ok"><div class="kpi-label" title="毛利率：(GMV-成本-折扣)/GMV">毛利率</div><div class="kpi-value">${k.gross_margin}%</div></div>
+        <div class="kpi-card"><div class="kpi-label">订单数</div><div class="kpi-value">${N(k.order_count)}</div></div>
+        <div class="kpi-card"><div class="kpi-label">客单价</div><div class="kpi-value">¥${N(k.aov)}</div></div>
+        <div class="kpi-card warn"><div class="kpi-label">退款率</div><div class="kpi-value">${k.refund_rate}%</div></div>
+        <div class="kpi-card ok"><div class="kpi-label">转化率</div><div class="kpi-value">${k.conversion_rate}%</div></div>
+        <div class="kpi-card bad"><div class="kpi-label" title="健康度 C (61.4/100)">健康度</div><div class="kpi-value">${d11.health.grade} (${d11.health.total_score})</div></div>
+        <div class="kpi-card ok"><div class="kpi-label">MoM GMV</div><div class="kpi-value">${d1.mom.gmv_mom}%</div>${momHtml(d1.mom.gmv_mom)}</div>`;
 
-    // MoM
-    const mom = d.mom_changes;
-    document.getElementById('m-gmv').innerHTML = momHtml(mom.gmv_mom);
-    document.getElementById('m-orders').innerHTML = momHtml(mom.orders_mom);
-    document.getElementById('m-buyers').innerHTML = momHtml(mom.buyers_mom);
-    document.getElementById('m-aov').innerHTML = momHtml(mom.aov_mom);
+      // Chart: Monthly GMV
+      const t = await api('/api/r1/trends');
+      makeChart('hcTrend', 'bar', {
+        labels: t.trends.map(d=>d.ym),
+        datasets: [{label:'GMV(万元)',data:t.trends.map(d=>d.gmv/10000),backgroundColor:'#2563eb',borderRadius:2}]
+      });
 
-    document.getElementById('updateTime').textContent = '更新: ' + new Date(d.generated_at).toLocaleString();
+      // Channel ROAS
+      const r8d = await api('/api/r8/campaign-kpis');
+      makeChart('hcRoas', 'bar', {
+        labels: r8d.channel_summary?.map(d=>d.channel)||[],
+        datasets: [{label:'ROAS',data:r8d.channel_summary?.map(d=>d.roas)||[],backgroundColor:'#059669'}]
+      }, {indexAxis:'y'});
 
-    // Charts
-    drawTrend(d.monthly_trends);
-    drawChannel(d.channel_breakdown);
-    drawCategory(d.category_breakdown);
-    drawMember(d.member_contribution);
+      // Opportunities & Risks
+      document.getElementById('homeOpp').innerHTML = d11.opportunities.map((o,i)=>`<div class="alert-item ${i===0?'high':i===1?'medium':'low'}"><span class="sev">${o.priority}</span> <div><strong>${o.title}</strong><br><small>${o.description.substring(0,80)}...</small></div></div>`).join('');
+      document.getElementById('homeRisk').innerHTML = d11.risks.map(r=>`<div class="alert-item ${r.severity==='高'?'high':'medium'}"><span class="sev">${r.severity}</span><div><strong>${r.title}</strong><br><small>${r.mitigation}</small></div></div>`).join('');
+    } catch(e) { showToast('数据加载失败','error'); }
+  },
 
-    // Tables
-    renderTopProducts(d.top_bottom_products.top);
-    renderBottomProducts(d.top_bottom_products.bottom);
-    renderChannelTable(d.channel_breakdown);
+  r1(ct) {
+    ct.innerHTML = `<div class="section-title"><span class="icon">📊</span>经营驾驶舱 R1</div>
+      <div class="kpi-grid" id="r1kpi"></div>
+      <div class="charts-row"><div class="chart-panel"><h4>月度 GMV 趋势</h4><canvas id="r1Trend"></canvas></div>
+      <div class="chart-panel"><h4>渠道占比</h4><canvas id="r1Chan"></canvas></div></div>
+      <div class="charts-row eq"><div class="chart-panel"><h4>品类排名</h4><canvas id="r1Cat"></canvas></div>
+      <div class="chart-panel"><h4>异常告警</h4><div id="r1Ano"></div></div></div>`;
+    this._renderR1();
+  },
+  async _renderR1() {
+    const d = await api('/api/r1/dashboard');
+    const k = d.kpi, m = d.mom_changes;
+    document.getElementById('r1kpi').innerHTML =
+      ['gmv','net_sales','gross_margin','order_count','buyer_count','aov','refund_rate','conversion_rate']
+      .map(f=>`<div class="kpi-card"><div class="kpi-label">${f}</div><div class="kpi-value">${typeof k[f]==='number'?k[f]>=100?F(k[f]):k[f]+(f.includes('rate')||f.includes('margin')?'%':''):k[f]}</div></div>`).join('');
 
-    // Anomalies
-    renderAnomalies(d.anomalies);
-  } catch(e) {
-    showError('数据加载失败: ' + e.message);
+    makeChart('r1Trend','bar',{labels:d.monthly_trends.map(x=>x.ym),datasets:[{label:'GMV(万元)',data:d.monthly_trends.map(x=>x.gmv/10000),backgroundColor:'#2563eb',borderRadius:2},{label:'客单价',data:d.monthly_trends.map(x=>x.aov),type:'line',borderColor:'#dc2626',pointRadius:1,yAxisID:'y1'}]},{scales:{y:{position:'left'},y1:{position:'right',grid:{display:false}}}});
+    makeChart('r1Chan','doughnut',{labels:d.channel_breakdown.map(x=>x.channel),datasets:[{data:d.channel_breakdown.map(x=>x.share),backgroundColor:['#2563eb','#059669','#d97706','#dc2626','#7c3aed','#0891b2']}]});
+    makeChart('r1Cat','bar',{labels:d.category_breakdown.map(x=>x.category_name),datasets:[{label:'GMV(万元)',data:d.category_breakdown.map(x=>x.gmv/10000),backgroundColor:'#2563eb'}]},{indexAxis:'y'});
+    document.getElementById('r1Ano').innerHTML = d.anomalies?.slice(0,8).map(a=>`<div class="alert-item ${a.direction==='up'?'high':'medium'}"><span class="sev">${a.month}</span>${a.indicator} ${a.direction==='up'?'↑':'↓'} ${Math.abs(a.change_pct).toFixed(1)}%</div>`).join('')||'✅ 无异常';
+  },
+
+  async r2(ct) {
+    ct.innerHTML = `<div class="section-title"><span class="icon">🔻</span>流量漏斗 R2</div><div id="r2content"><div class="loading">加载中...</div></div>`;
+    const d = await api('/api/r2/funnel');
+    const rem = await api('/api/r2/remarketing-list');
+    document.getElementById('r2content').innerHTML = `
+      <div class="charts-row"><div class="chart-panel"><h4>5 层漏斗</h4><canvas id="r2Funnel"></canvas></div>
+      <div class="chart-panel"><h4>再营销名单</h4>
+        <div class="alert-list">
+          <div class="alert-item high"><span class="sev">浏览未购</span>${rem.browse_no_order?.length||0} 人可触达</div>
+          <div class="alert-item medium"><span class="sev">加购未付</span>${rem.cart_abandon?.length||0} 人可触达</div>
+          <div class="alert-item low"><span class="sev">结算放弃</span>${rem.checkout_abandon?.length||0} 人可触达</div>
+        </div><p style="margin-top:12px;font-size:12px;color:var(--muted)">整体转化率: ${d.rates?.overall}% | 最大流失: 首页→商品页 (19.2%)</p></div></div>`;
+    const labels = d.stages.map(s=>s.label);
+    makeChart('r2Funnel','bar',{labels,datasets:[{label:'Session数',data:d.stages.map(s=>s.sessions),backgroundColor:['#2563eb','#3b82f6','#60a5fa','#93c5fd','#bfdbfe']}]},{indexAxis:'y'});
+  },
+
+  async r3(ct) {
+    ct.innerHTML = `<div class="section-title"><span class="icon">👥</span>RFM 用户运营 R3</div><div id="r3content"><div class="loading">加载中...</div></div>`;
+    const d = await api('/api/r3/rfm-layers');
+    const cohorts = await api('/api/r3/cohort-retention');
+    const segs = d.segments||[];
+    document.getElementById('r3content').innerHTML = `
+      <div class="charts-row"><div class="chart-panel"><h4>RFM 分群分布</h4><canvas id="r3Seg"></canvas></div>
+      <div class="chart-panel"><h4>分群详情</h4><table class="data-table"><thead><tr><th>分群</th><th>人数</th><th>GMV</th><th>占比</th></tr></thead><tbody>${segs.slice(0,8).map(s=>`<tr><td><strong>${s.segment}</strong></td><td>${N(s.user_count)}</td><td>${F(s.total_gmv)}</td><td>${s.gmv_share}%</td></tr>`).join('')}</tbody></table></div></div>
+      <div class="chart-panel"><h4>Cohort 留存矩阵</h4><p style="font-size:12px;color:var(--muted)">共 ${cohorts.matrix?.length||0} 个 cohort</p><canvas id="r3Cohort" style="max-height:200px"></canvas></div>`;
+    makeChart('r3Seg','doughnut',{labels:segs.map(s=>s.segment),datasets:[{data:segs.map(s=>s.user_count),backgroundColor:['#2563eb','#059669','#d97706','#dc2626','#7c3aed','#0891b2','#ec4899','#f59e0b']}]});
+    const matrix = cohorts.matrix||[];
+    if(matrix.length) makeChart('r3Cohort','bar',{labels:matrix.map(r=>r.cohort),datasets:[{label:'M1留存%',data:matrix.map(r=>r.retention_1||0),backgroundColor:'#2563eb'},{label:'M3留存%',data:matrix.map(r=>r.retention_3||0),backgroundColor:'#059669'}]});
+  },
+
+  async r4(ct) {
+    ct.innerHTML = `<div class="section-title"><span class="icon">🤖</span>复购预测 R4 <span class="sub">梯度提升 AUC=0.998</span></div><div id="r4c"><div class="loading">训练中...</div></div>`;
+    try {
+      const d = await api('/api/r4/train');
+      const fi = d.model_results?.feature_importance||[];
+      document.getElementById('r4c').innerHTML = `
+        <div class="kpi-grid">${Object.entries(d.model_results||{}).filter(([k])=>k!=='feature_importance').map(([k,v])=>`<div class="kpi-card ${k===d.best_model?'ok':''}"><div class="kpi-label">${k}</div><div class="kpi-value">${v.auc?.toFixed(4)}</div><div style="font-size:11px">P=${v.precision?.toFixed(2)} R=${v.recall?.toFixed(2)}</div></div>`).join('')}</div>
+        <div class="charts-row eq"><div class="chart-panel"><h4>特征重要性 TOP 10</h4><canvas id="r4Fi"></canvas></div>
+        <div class="chart-panel"><h4>样本分布</h4><p style="font-size:13px">总样本: ${d.samples?.positive+d.samples?.negative} | 正例: ${d.samples?.positive} (${(d.samples?.ratio*100).toFixed(0)}%)</p><p style="font-size:13px">参考日期: ${d.samples?.reference_date}</p><p style="font-size:12px;color:var(--muted);margin-top:8px">最佳模型: ${d.best_model} | 特征数: ${d.feature_count}</p></div></div>`;
+      makeChart('r4Fi','bar',{labels:fi.slice(0,10).map(f=>f.feature),datasets:[{label:'重要性',data:fi.slice(0,10).map(f=>f.importance),backgroundColor:'#059669'}]},{indexAxis:'y'});
+    } catch(e) { document.getElementById('r4c').innerHTML = `<div class="error-card">模型训练失败（需先构建用户宽表）: ${e.message}</div>`; }
+  },
+
+  async r5(ct) {
+    ct.innerHTML = `<div class="section-title"><span class="icon">🔮</span>客户聚类 R5</div><div id="r5c"><div class="loading">聚类中...</div></div>`;
+    const d = await api('/api/r5/user-clusters?k=5');
+    const clusters = d.clusters||[];
+    document.getElementById('r5c').innerHTML = `
+      <div class="charts-row eq"><div class="chart-panel"><h4>用户分群</h4><canvas id="r5Users"></canvas></div>
+      <div class="chart-panel"><h4>各簇特征</h4><table class="data-table"><thead><tr><th>分群</th><th>人数</th><th>Recency</th><th>Frequency</th><th>Monetary</th></tr></thead><tbody>${clusters.map(c=>`<tr><td><strong>${c.name}</strong></td><td>${N(c.size)}</td><td>${c.avg_recency}d</td><td>${c.avg_frequency}</td><td>¥${N(c.avg_monetary?.toFixed(0))}</td></tr>`).join('')}</tbody></table></div></div>
+      <div class="chart-panel"><h4>肘部法</h4><canvas id="r5Elbow" style="max-height:200px"></canvas></div>`;
+    makeChart('r5Users','bar',{labels:clusters.map(c=>c.name),datasets:[{label:'人数',data:clusters.map(c=>c.size),backgroundColor:'#2563eb'}]});
+    makeChart('r5Elbow','line',{labels:(d.elbow||[]).map(e=>'K='+e.k),datasets:[{label:'Inertia',data:(d.elbow||[]).map(e=>e.inertia),borderColor:'#dc2626',fill:false}]});
+  },
+
+  async r6(ct) {
+    ct.innerHTML = `<div class="section-title"><span class="icon">🔗</span>关联规则 R6 <span class="sub">类目间无强关联</span></div><div id="r6c"><div class="loading">分析中...</div></div>`;
+    const d = await api('/api/r6/association-rules');
+    const cr = d.category_rules||[];
+    document.getElementById('r6c').innerHTML = `
+      <div class="alert-list">
+        <div class="alert-item low"><span class="sev">📊</span><div><strong>发现：类目间无强关联</strong><br>66 个类目 pair 的 lift 全部 < 1.0，品类独立购买。建议转为个性化推荐。</div></div>
+      </div>
+      ${cr.length ? `<div class="chart-panel" style="margin-top:16px"><h4>类目关联规则</h4><table class="data-table"><thead><tr><th>前项</th><th>后项</th><th>Lift</th><th>Confidence</th></tr></thead><tbody>${cr.slice(0,10).map(r=>`<tr><td>${r.antecedents?.join(',')}</td><td>${r.consequents?.join(',')}</td><td>${r.lift?.toFixed(2)}</td><td>${r.confidence?.toFixed(2)}</td></tr>`).join('')}</tbody></table></div>` : '<p style="font-size:13px;color:var(--muted);margin-top:16px">类目级 lift 均 < 1.0，无强关联规则</p>'}`;
+  },
+
+  async r7(ct) {
+    ct.innerHTML = `<div class="section-title"><span class="icon">📈</span>销售预测 R7</div><div id="r7c"><div class="loading">预测中...</div></div>`;
+    const d = await api('/api/r7/gmv-forecast');
+    const safety = await api('/api/r7/safety-stock');
+    document.getElementById('r7c').innerHTML = `
+      <div class="kpi-grid">${Object.entries(d.models||{}).map(([k,v])=>`<div class="kpi-card ${k===d.best_model?'ok':''}"><div class="kpi-label">${k}</div><div class="kpi-value">MAPE ${v.mape}%</div><div style="font-size:11px">MAE ¥${N(v.mae?.toFixed(0))}</div></div>`).join('')}</div>
+      <div class="charts-row"><div class="chart-panel"><h4>历史 + 预测 (最佳: ${d.best_model})</h4><canvas id="r7Forecast"></canvas></div>
+      <div class="chart-panel"><h4>TOP SKU 安全库存</h4><table class="data-table"><thead><tr><th>SKU</th><th>日均需求</th><th>安全库存</th><th>CV</th></tr></thead><tbody>${(safety.top_skus||[]).slice(0,8).map(s=>`<tr><td>${s.sku_id}</td><td>${s.avg_daily_demand}</td><td>${s.safety_stock}</td><td>${s.cv}</td></tr>`).join('')}</tbody></table></div></div>`;
+    makeChart('r7Forecast','line',{labels:d.history?.dates?.slice(-365)||[],datasets:[{label:'历史GMV',data:d.history?.values?.slice(-365)||[],borderColor:'#2563eb',pointRadius:0},{label:'预测',data:[...(d.history?.values?.slice(-1)||[]),...d.forecast?.values||[]],borderColor:'#dc2626',borderDash:[5,3],pointRadius:1}]});
+  },
+
+  async r8(ct) {
+    ct.innerHTML = `<div class="section-title"><span class="icon">📢</span>营销归因 R8</div><div id="r8c"><div class="loading">加载中...</div></div>`;
+    const [kpi, coup, chan] = await Promise.all([api('/api/r8/campaign-kpis'),api('/api/r8/coupon-analysis'),api('/api/r8/channel-efficiency')]);
+    document.getElementById('r8c').innerHTML = `
+      <div class="kpi-grid"><div class="kpi-card ok"><div class="kpi-label">总投放</div><div class="kpi-value">${F(kpi.total_spend)}</div></div>
+      <div class="kpi-card ok"><div class="kpi-label">活动GMV</div><div class="kpi-value">${F(kpi.total_gmv)}</div></div>
+      <div class="kpi-card ok"><div class="kpi-label">整体ROAS</div><div class="kpi-value">${kpi.overall_roas}x</div></div>
+      <div class="kpi-card"><div class="kpi-label">券核销率</div><div class="kpi-value">${coup.overall_rate}%</div></div></div>
+      <div class="charts-row eq"><div class="chart-panel"><h4>渠道 ROAS</h4><canvas id="r8Roas"></canvas></div>
+      <div class="chart-panel"><h4>预算建议</h4><div class="alert-list">${((chan.suggestion?.increase||[]).map(c=>`<div class="alert-item low"><span class="sev">⬆️ 加投</span>${c}</div>`)).concat((chan.suggestion?.decrease||[]).map(c=>`<div class="alert-item high"><span class="sev">⬇️ 缩减</span>${c}</div>`)).join('')}</div></div></div>`;
+    makeChart('r8Roas','bar',{labels:(chan.channel_ranking||[]).map(x=>x.channel),datasets:[{label:'ROAS',data:(chan.channel_ranking||[]).map(x=>x.roas),backgroundColor:'#059669'}]},{indexAxis:'y'});
+  },
+
+  async r9(ct) {
+    ct.innerHTML = `<div class="section-title"><span class="icon">🚚</span>履约售后 R9</div><div id="r9c"><div class="loading">加载中...</div></div>`;
+    const [ful, ref, rev, risk] = await Promise.all([api('/api/r9/fulfillment'),api('/api/r9/refund-analysis'),api('/api/r9/review-analysis'),api('/api/r9/risk-list')]);
+    document.getElementById('r9c').innerHTML = `
+      <div class="kpi-grid"><div class="kpi-card bad"><div class="kpi-label">总延迟率</div><div class="kpi-value">${ful.overall_late_rate}%</div></div>
+      <div class="kpi-card warn"><div class="kpi-label">延迟→退款影响</div><div class="kpi-value">+${ful.late_vs_refund?.impact}pp</div></div>
+      <div class="kpi-card"><div class="kpi-label">评论均分</div><div class="kpi-value">${rev.avg_rating}</div></div>
+      <div class="kpi-card warn"><div class="kpi-label">差评率</div><div class="kpi-value">${rev.bad_rate}%</div></div></div>
+      <div class="charts-row eq"><div class="chart-panel"><h4>承运商排名</h4><canvas id="r9Carrier"></canvas></div>
+      <div class="chart-panel"><h4>风险清单</h4>${(risk.risks||[]).slice(0,5).map(r=>`<div class="alert-item ${r.severity}"><span class="sev">${r.type}</span><div>${r.target}<br><small>${r.action}</small></div></div>`).join('')}</div></div>`;
+    makeChart('r9Carrier','bar',{labels:(ful.carriers||[]).map(c=>c.carrier),datasets:[{label:'延迟率%',data:(ful.carriers||[]).map(c=>c.late_rate),backgroundColor:'#dc2626'}]},{indexAxis:'y'});
+  },
+
+  async r10(ct) {
+    ct.innerHTML = `<div class="section-title"><span class="icon">📦</span>库存策略 R10</div><div id="r10c"><div class="loading">加载中...</div></div>`;
+    const [perf, abc, strat, alerts] = await Promise.all([api('/api/r10/sku-performance'),api('/api/r10/abc-classification'),api('/api/r10/strategies'),api('/api/r10/alerts')]);
+    document.getElementById('r10c').innerHTML = `
+      <div class="kpi-grid"><div class="kpi-card ok"><div class="kpi-label">SKU 数量</div><div class="kpi-value">${perf.total_skus}</div></div>
+      <div class="kpi-card ok"><div class="kpi-label">动销率</div><div class="kpi-value">${perf.sell_through_rate}%</div></div>
+      <div class="kpi-card"><div class="kpi-label">缺货预警</div><div class="kpi-value">${alerts.stockout_count}</div></div>
+      <div class="kpi-card warn"><div class="kpi-label">滞销预警</div><div class="kpi-value">${alerts.overstock_count}</div></div></div>
+      <div class="charts-row eq"><div class="chart-panel"><h4>ABC 分布 (销售额)</h4><canvas id="r10Abc"></canvas></div>
+      <div class="chart-panel"><h4>策略建议</h4><div class="alert-list">${Object.entries(strat.summary||{}).map(([k,v])=>`<div class="alert-item ${k.includes('清仓')||k.includes('下架')?'high':'low'}"><span class="sev">${v}</span>${k}</div>`).join('')}</div></div></div>`;
+    const s = abc.summary?.abc_sales||{};
+    makeChart('r10Abc','doughnut',{labels:['A类','B类','C类'],datasets:[{data:[s.A||0,s.B||0,s.C||0],backgroundColor:['#2563eb','#d97706','#dc2626']}]});
+  },
+
+  async r11(ct) {
+    ct.innerHTML = `<div class="section-title"><span class="icon">🎯</span>综合决策中心 R11</div><div id="r11c"><div class="loading">加载中...</div></div>`;
+    const d = await api('/api/r11/summary');
+    const h = d.health||{};
+    document.getElementById('r11c').innerHTML = `
+      <div class="kpi-grid"><div class="kpi-card ${h.grade==='C'?'warn':'ok'}"><div class="kpi-label">健康度评分</div><div class="kpi-value">${h.total_score}/100</div><div style="font-size:11px">等级: ${h.grade}</div></div>
+      ${(h.components||[]).map(c=>`<div class="kpi-card ${c.score/c.weight<0.5?'bad':c.score/c.weight>0.8?'ok':'warn'}"><div class="kpi-label">${c.dimension}</div><div class="kpi-value">${c.score}/${c.weight}</div></div>`).join('')}</div>
+      <div class="charts-row eq"><div class="chart-panel"><h4>TOP 3 增长机会</h4>${(d.opportunities||[]).map(o=>`<div class="alert-item ${o.priority==='P0'?'high':'medium'}"><span class="sev">${o.priority}</span><div><strong>${o.title}</strong><br><small>预期: ${o.expected_impact}</small></div></div>`).join('')}</div>
+      <div class="chart-panel"><h4>主要风险</h4>${(d.risks||[]).map(r=>`<div class="alert-item ${r.severity==='高'?'high':'medium'}"><span class="sev">${r.severity}</span><div><strong>${r.title}</strong><br><small>${r.mitigation}</small></div></div>`).join('')}</div></div>`;
   }
-}
+};
 
-let chartInstances = {};
-function destroyChart(name) {
-  if (chartInstances[name]) { chartInstances[name].destroy(); delete chartInstances[name]; }
+// ====== Init ======
+function refreshAll() {
+  Object.keys(chartCache).forEach(k => { chartCache[k]?.destroy(); delete chartCache[k]; });
+  loadPage(currentPage);
+  showToast('数据已刷新');
 }
-
-function drawTrend(data) {
-  destroyChart('trend');
-  const labels = data.map(d => d.ym);
-  const gmv = data.map(d => d.gmv / 10000);
-  const aov = data.map(d => d.aov);
-  const ctx = document.getElementById('chartTrend').getContext('2d');
-  chartInstances['trend'] = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        {label:'GMV (万元)', data:gmv, backgroundColor:'#2563eb', borderRadius:2, yAxisID:'y'},
-        {label:'客单价 (元)', data:aov, type:'line', borderColor:'#dc2626', pointRadius:2, tension:.3, yAxisID:'y1'}
-      ]
-    },
-    options: {
-      responsive:true,
-      scales:{
-        y:{position:'left', title:{display:true,text:'万元'}},
-        y1:{position:'right', title:{display:true,text:'元'}, grid:{display:false}, min:1000}
-      }
-    }
-  });
-}
-
-function drawChannel(data) {
-  destroyChart('channel');
-  const ctx = document.getElementById('chartChannel').getContext('2d');
-  chartInstances['channel'] = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: data.map(d => d.channel),
-      datasets: [{data:data.map(d=>d.share), backgroundColor:['#2563eb','#059669','#d97706','#dc2626','#7c3aed','#0891b2']}]
-    },
-    options: {responsive:true, plugins:{legend:{position:'bottom', labels:{fontSize:11}}}}
-  });
-}
-
-function drawCategory(data) {
-  destroyChart('category');
-  const ctx = document.getElementById('chartCategory').getContext('2d');
-  chartInstances['category'] = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: data.map(d => d.category_name),
-      datasets: [{label:'GMV (万元)', data:data.map(d=>d.gmv/10000), backgroundColor:'#2563eb', borderRadius:3}]
-    },
-    options: {responsive:true, indexAxis:'y', scales:{x:{title:{display:true,text:'万元'}}}}
-  });
-}
-
-function drawMember(data) {
-  destroyChart('member');
-  const ctx = document.getElementById('chartMember').getContext('2d');
-  chartInstances['member'] = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: data.map(d => d.member_level),
-      datasets: [
-        {label:'买家数', data:data.map(d=>d.buyers), backgroundColor:'#93c5fd'},
-        {label:'GMV (万元)', data:data.map(d=>d.gmv/10000), backgroundColor:'#2563eb'}
-      ]
-    },
-    options: {responsive:true, scales:{y:{title:{display:true,text:'数量/万元'}}}}
-  });
-}
-
-function renderTopProducts(data) {
-  const tbody = document.querySelector('#topProducts tbody');
-  tbody.innerHTML = data.map(d => `<tr><td>${d.product_name}</td><td>${d.category_name}</td><td>¥${(d.gmv/10000).toFixed(1)}万</td></tr>`).join('');
-}
-
-function renderBottomProducts(data) {
-  const tbody = document.querySelector('#bottomProducts tbody');
-  tbody.innerHTML = data.map(d => `<tr><td>${d.product_name}</td><td>${d.category_name}</td><td>¥${(d.gmv/10000).toFixed(1)}万</td></tr>`).join('');
-}
-
-function renderChannelTable(data) {
-  const tbody = document.querySelector('#channelTable tbody');
-  tbody.innerHTML = data.map(d => `<tr><td>${d.channel}</td><td>¥${(d.gmv/10000).toFixed(1)}万</td><td>${d.share}%</td></tr>`).join('');
-}
-
-function renderAnomalies(data) {
-  const div = document.getElementById('alertList');
-  if (!data.length) { div.innerHTML = '<div style="padding:8px;color:#059669">✅ 无异常月份</div>'; return; }
-  div.innerHTML = data.map(a => `<div class="alert-item ${a.direction}">[${a.month}] ${a.indicator} ${a.direction==='up'?'增长':'下降'} ${Math.abs(a.change_pct).toFixed(1)}%</div>`).join('');
-}
-
-function showError(msg) {
-  document.getElementById('kpiRow').insertAdjacentHTML('beforebegin', `<div class="error">${msg}</div>`);
-}
-
-refreshAll();
+setInterval(() => { document.getElementById('topTime').textContent = new Date().toLocaleString(); }, 1000);
+loadPage('home');
 </script>
 </body>
 </html>
