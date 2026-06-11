@@ -39,3 +39,8 @@ CORS_ALLOWED_ORIGINS = os.environ.get(
     "CORS_ALLOWED_ORIGINS",
     "http://localhost:8000,http://127.0.0.1:8000,http://localhost:5173"
 ).split(",")
+
+# ---- 数据源模式 ----
+# "etl":   通过 ETL API (http://127.0.0.1:38173/api/etl) 获取数据（教学标准模式）
+# "sqlite": 直连 SQLite（降级方案）
+DATA_SOURCE_MODE = os.environ.get("DATA_SOURCE_MODE", "etl")

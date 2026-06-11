@@ -17,7 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from .config import CORS_ALLOWED_ORIGINS, SERVICE_HOST, SERVICE_PORT, LOG_LEVEL
+from .config import CORS_ALLOWED_ORIGINS, SERVICE_HOST, SERVICE_PORT, LOG_LEVEL, DATA_SOURCE_MODE
 from .data_access import (
     get_db_connection,
     query_table,
@@ -152,6 +152,8 @@ async def root():
     return {
         "service": "Course eShop Dashboard API",
         "version": "1.0.0",
+        "data_source": DATA_SOURCE_MODE,
+        "etl_api": "http://127.0.0.1:38173/api/etl" if DATA_SOURCE_MODE == "etl" else None,
         "docs": "/docs",
         "health": "/health",
     }
@@ -173,6 +175,7 @@ async def health():
     return {
         "ok": ok,
         "database": db_ok,
+        "data_source": DATA_SOURCE_MODE,
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
     }
 
