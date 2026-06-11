@@ -10,6 +10,7 @@ import time
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional
 
+import numpy as np
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -39,6 +40,7 @@ from .data_access import (
     ETLClient,
 )
 from .subprojects import data_quality as r0
+from .subprojects import feature_engineering as fe
 from .utils import to_json, to_native, setup_logging
 
 # ---- 日志 ----
@@ -263,6 +265,56 @@ async def r0_preprocess(config: Optional[Dict] = None):
             "output_shape": list(result.shape),
             "sample": result.head(3).to_dict(orient="records"),
         })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================================
+# R3/R4 特征工程路由
+# ============================================================
+
+@app.get("/api/r3/build-user-wide")
+async def build_user_wide():
+    """构建用户宽表（RFM + 行为 + 优惠券 + 品类偏好）。"""
+    try:
+        wide = fe.build_user_wide_table(save_csv=True)
+        # 返回概要信息
+        num_cols = wide.select_dtypes(include=[np.number]).columns.tolist()
+        return to_native({
+            "ok": True,
+            "shape": list(wide.shape),
+            "columns": wide.columns.tolist(),
+            "numeric_columns": num_cols,
+            "segments": wide["rfm_segment"].value_counts().to_dict(),
+            "sample": wide.head(5).to_dict(orient="records"),
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r3/product-wide")
+async def build_product_wide():
+    """构建商品宽表。"""
+    try:
+        wide = fe.build_product_wide_table(save_csv=True)
+        return to_native({
+            "ok": True,
+            "shape": list(wide.shape),
+            "columns": wide.columns.tolist(),
+            "sample": wide.head(5).to_dict(orient="records"),
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/r3/feature-importance")
+async def get_feature_importance(target: Optional[str] = None):
+    """特征重要性预分析。"""
+    try:
+        wide = fe.build_user_wide_table(save_csv=False)
+        result = fe.analyze_feature_importance(wide, target)
+        result["shape"] = list(wide.shape)
+        return to_native(result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
