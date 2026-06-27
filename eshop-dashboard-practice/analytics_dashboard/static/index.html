@@ -171,17 +171,30 @@ a{text-decoration:none;color:inherit}
 
 /* ====== Responsive ====== */
 @media(max-width:1024px){
-  .sidebar{transform:translateX(-100%);transition:transform .3s}
+  .sidebar{transform:translateX(-100%);transition:transform .3s;box-shadow:0 0 40px rgba(0,0,0,.15)}
   .sidebar.open{transform:translateX(0)}
   .main{margin-left:0}
   .chart-row.cols-2,.chart-row.cols-eq{grid-template-columns:1fr}
   .chart-row.cols-3{grid-template-columns:1fr 1fr}
   .kpi-grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+  .topbar .breadcrumb{font-size:12px}
+  .funnel-dash{display:none}
+}
+@media(max-width:768px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .panel{padding:14px}
+  .page-title{font-size:18px}
+  .topbar-right .btn-export{display:none}
+  .ai-chat-messages{max-height:300px}
 }
 @media(max-width:640px){
   .kpi-grid{grid-template-columns:1fr 1fr}
   .chart-row.cols-3{grid-template-columns:1fr}
-  .container{padding:12px}
+  .container{padding:10px}
+  .topbar{padding:0 12px}
+  .kpi-card{padding:14px}
+  .kpi-value{font-size:20px}
+  .sidebar-logo .logo-text{font-size:12px}
 }
 
 .hidden{display:none!important}
