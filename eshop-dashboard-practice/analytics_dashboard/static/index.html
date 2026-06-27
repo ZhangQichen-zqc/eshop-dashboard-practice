@@ -266,6 +266,16 @@ a{text-decoration:none;color:inherit}
 </div>
 
 <div class="toast-wrap" id="toastWrap"></div>
+<!-- Loading overlay -->
+<div id="loadingOverlay" style="position:fixed;inset:0;background:var(--bg);z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s">
+  <div style="text-align:center">
+    <div class="spinner" style="width:48px;height:48px;border-width:4px;border-top-color:var(--primary);margin:0 auto 20px"></div>
+    <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px">Course eShop 仪表盘</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:24px">数据预加载中，请稍候...</div>
+    <div style="width:260px;height:6px;background:var(--border-light);border-radius:3px;margin:0 auto 12px;overflow:hidden"><div id="loadBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--primary),#7c3aed);border-radius:3px;transition:width .3s"></div></div>
+    <div style="font-size:12px;color:var(--muted)" id="loadStatus">正在连接 ETL API...</div>
+  </div>
+</div>
 
 <script>
 // ═══════════════════════════════════════════
@@ -279,11 +289,22 @@ async function cachedApi(url, ttl = CACHE_TTL) {
   const key = url;
   const entry = dataCache.get(key);
   if (entry && Date.now() - entry.ts < ttl) return entry.data;
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error(`${resp.status}`);
-  const data = await resp.json();
-  dataCache.set(key, { data, ts: Date.now() });
-  return data;
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`${resp.status}`);
+    const data = await resp.json();
+    dataCache.set(key, { data, ts: Date.now() });
+    return data;
+  } catch(e) {
+    console.warn('API failed:', url, e.message);
+    return null; // Return null instead of throwing
+  }
+}
+
+// Safe getter: never crashes on null data
+function safeGetCached(url) {
+  const entry = dataCache.get(url);
+  return entry?.data || null;
 }
 
 function clearCache(pattern = '') {
@@ -380,20 +401,27 @@ function showError(ct, msg) {
 // ═══════════════════════════════════════════
 // PAGE LOADER
 // ═══════════════════════════════════════════
-let loadDebounceTimer = null;
 function loadPage(page) {
   const ct = document.getElementById('pageContent');
-  // Debounce: cancel stale page loads on rapid switching
-  if (loadDebounceTimer) clearTimeout(loadDebounceTimer);
   destroyAllCharts();
-  showLoading(ct);
-  loadDebounceTimer = setTimeout(() => {
-    if (pageRenderers[page]) {
-      pageRenderers[page](ct).catch(e => showError(ct, e.message));
-    } else {
-      ct.innerHTML = '<div class="error-card">页面未找到</div>';
-    }
-  }, 50); // 50ms debounce for rapid switches
+  if (!preloadDone) {
+    ct.innerHTML = `<div style="text-align:center;padding:60px 20px">
+      <div class="spinner" style="margin:0 auto 16px;width:40px;height:40px;border-width:4px"></div>
+      <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px">数据预加载中...</div>
+      <div style="font-size:13px;color:var(--muted)">${preloadProgress}/${preloadTotal} API 已缓存</div>
+      <div style="width:200px;height:6px;background:var(--border-light);border-radius:3px;margin:12px auto;overflow:hidden"><div style="height:100%;width:${(preloadProgress/preloadTotal*100).toFixed(0)}%;background:var(--primary);border-radius:3px;transition:width .3s"></div></div>
+    </div>`;
+    return;
+  }
+  // Data ready — render immediately (data is cached, should be instant)
+  if (pageRenderers[page]) {
+    pageRenderers[page](ct).catch(e => {
+      console.error('Render error:', page, e);
+      ct.innerHTML = `<div class="error-card">渲染失败: ${e.message || e}<br><button class="btn btn-sm btn-primary" onclick="loadPage('${page}')" style="margin-top:8px">重试</button></div>`;
+    });
+  } else {
+    ct.innerHTML = `<div class="error-card">页面 "${page}" 未找到</div>`;
+  }
 }
 
 // Lazy chart rendering: defer non-critical charts
@@ -673,20 +701,26 @@ const pageRenderers = {
         </div>
       </div>`;
     try {
-      const rules = await cachedApi('/api/r6/association-rules');
+      const rules = (await cachedApi('/api/r6/association-rules')) || {};
       const cr = rules.category_rules || [], bundles = rules.bundles || [];
-      document.getElementById('pKpi').innerHTML = `
-        <div class="kpi-card" style="background:linear-gradient(135deg,#eef2ff,#e0e7ff);border:none"><div class="kpi-icon" style="background:#fff">🔗</div><div class="kpi-label">类目规则</div><div class="kpi-value">${cr.length}</div></div>
-        <div class="kpi-card" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:none"><div class="kpi-icon" style="background:#fff">🎁</div><div class="kpi-label">捆绑推荐</div><div class="kpi-value">${bundles.length}</div></div>
-        <div class="kpi-card" style="background:linear-gradient(135deg,#ecfeff,#cffafe);border:none"><div class="kpi-icon" style="background:#fff">📦</div><div class="kpi-label">SKU规则</div><div class="kpi-value">${rules.sku_rules_count||0}</div></div>
-        <div class="kpi-card" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:none"><div class="kpi-icon" style="background:#fff">⚠️</div><div class="kpi-label">强关联(Lift>1)</div><div class="kpi-value">${cr.filter(r=>(r.lift||0)>1).length}</div></div>`;
+      document.getElementById('pKpi').innerHTML = [
+        {v:cr.length,l:'类目规则',bg:'linear-gradient(135deg,#eef2ff,#e0e7ff)'},
+        {v:bundles.length,l:'捆绑推荐',bg:'linear-gradient(135deg,#f0fdf4,#dcfce7)'},
+        {v:rules.sku_rules_count||0,l:'SKU规则',bg:'linear-gradient(135deg,#ecfeff,#cffafe)'},
+        {v:cr.filter(r=>r.lift>1).length,l:'强关联(Lift>1)',bg:'linear-gradient(135deg,#fffbeb,#fef3c7)'}
+      ].map(d=>`<div class="kpi-card" style="background:${d.bg};border:none"><div class="kpi-icon" style="background:#fff">📊</div><div class="kpi-label">${d.l}</div><div class="kpi-value">${d.v}</div></div>`).join('');
       if(cr.length){
         renderChart('pRules','scatter',{datasets:[{label:'规则',data:cr.map(r=>({x:r.support||0,y:r.confidence||0})),backgroundColor:cr.map(r=>(r.lift||0)>1?'#4f46e5':'#e2e8f0'),pointRadius:5}]},{scales:{x:{title:{display:true,text:'Support'}},y:{title:{display:true,text:'Confidence'}}}});
         renderChart('pLift','bar',{labels:cr.slice(0,12).map(r=>(r.antecedents||[]).join(',')+'→'+(r.consequents||[]).join(',')),datasets:[{label:'Lift',data:cr.slice(0,12).map(r=>r.lift||0),backgroundColor:cr.slice(0,12).map(r=>(r.lift||0)>1?'#4f46e5':'#94a3b8'),borderRadius:4}]},{indexAxis:'y',plugins:{legend:{display:false}}});
+      } else {
+        document.getElementById('pRules').parentElement.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px">📊<br>类目间 Support×Confidence 散点图<br><small>暂无数据 — 类目间无强关联规则</small></div>';
+        document.getElementById('pLift').parentElement.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px">📈<br>关联规则 Lift 分布<br><small>暂无 Lift>1 的关联规则</small></div>';
       }
       document.getElementById('pBundles').innerHTML = bundles.length ? bundles.slice(0,6).map(b=>
-        `<div class="alert-item success"><span class="sev">💰</span><div><strong>${b.bundle_name||b.name||'捆绑包'}</strong><br><small>${b.expected_lift||b.description||''}</small></div></div>`).join('') : '<p style="font-size:12px;color:var(--muted);padding:12px">类目独立性高，暂无可推荐捆绑包<br>建议转为个性化推荐策略</p>';
-      document.getElementById('pFreq').innerHTML = cr.length ? `<table class="data-table"><thead><tr><th>前项</th><th>→</th><th>后项</th><th>Support</th><th>Lift</th><th>结果</th></tr></thead><tbody>${cr.slice(0,15).map(r=>`<tr><td>${(r.antecedents||[]).join(',')}</td><td>→</td><td>${(r.consequents||[]).join(',')}</td><td>${((r.support||0)*100).toFixed(1)}%</td><td>${(r.lift||0).toFixed(2)}</td><td><span class="tag ${(r.lift||0)>1.2?'tag-success':(r.lift||0)>1?'tag-warning':'tag-danger'}">${(r.lift||0)>1.2?'推荐':(r.lift||0)>1?'可关注':'弱关联'}</span></td></tr>`).join('')}</tbody></table>` : '<p style="font-size:12px;color:var(--muted);padding:12px">类目间无强关联（66对lift均<1.0），品类独立购买特征显著</p>';
+        `<div class="alert-item success"><span class="sev">💰</span><div><strong>${b.bundle_name||b.name||'捆绑包'}</strong><br><small>${b.expected_lift||b.description||''}</small></div></div>`).join('')
+        : '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">🎁 暂无捆绑推荐<br><small>类目独立购买特征显著，建议转为个性化推荐策略</small></div>';
+      document.getElementById('pFreq').innerHTML = cr.length ? `<table class="data-table"><thead><tr><th>前项</th><th>→</th><th>后项</th><th>Support</th><th>Lift</th><th>判定</th></tr></thead><tbody>${cr.slice(0,15).map(r=>`<tr><td>${(r.antecedents||[]).join(',')}</td><td>→</td><td>${(r.consequents||[]).join(',')}</td><td>${((r.support||0)*100).toFixed(1)}%</td><td>${(r.lift||0).toFixed(2)}</td><td><span class="tag ${(r.lift||0)>1.2?'tag-success':(r.lift||0)>1?'tag-warning':'tag-danger'}">${(r.lift||0)>1.2?'推荐':(r.lift||0)>1?'可关注':'弱关联'}</span></td></tr>`).join('')}</tbody></table>`
+        : `<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">📊 类目间无强关联规则<br><small>66 对类目组合的 lift 值均 < 1.0，品类独立购买特征显著</small><br><small style="color:var(--primary)">这是有价值的业务洞察：商品间不构成强制捆绑，推荐采用个性化推荐策略</small></div>`;
     } catch(e) { showError(ct,'商品分析加载失败: '+e.message); }
   },
 
@@ -1125,16 +1159,25 @@ let preloadProgress = 0, preloadTotal = ALL_APIS.length, preloadDone = false;
 async function preloadAllData() {
   const sidebar = document.getElementById('sidebar');
   const footer = sidebar.querySelector('.sidebar-footer');
-  const batchSize = 6; // parallel batch to avoid overwhelming server
+  const loadBar = document.getElementById('loadBar');
+  const loadStatus = document.getElementById('loadStatus');
+  const overlay = document.getElementById('loadingOverlay');
+  const batchSize = 8; // parallel batch size
   for (let i = 0; i < ALL_APIS.length; i += batchSize) {
     const batch = ALL_APIS.slice(i, i + batchSize);
     await Promise.all(batch.map(url => cachedApi(url).catch(() => null)));
     preloadProgress = Math.min(i + batchSize, preloadTotal);
+    const pct = (preloadProgress / preloadTotal * 100).toFixed(0);
+    if (loadBar) loadBar.style.width = pct + '%';
+    if (loadStatus) loadStatus.textContent = `已加载 ${preloadProgress}/${preloadTotal} 个接口...`;
     footer.innerHTML = `<span class="dot"></span>预加载 ${preloadProgress}/${preloadTotal}`;
   }
   preloadDone = true;
   footer.innerHTML = '<span class="dot" style="background:#059669"></span>数据就绪 · ETL 模式';
+  // Hide loading overlay with fade
+  if (overlay) { overlay.style.opacity = '0'; setTimeout(() => { overlay.style.display = 'none'; }, 500); }
   console.log('All data preloaded: ' + preloadTotal + ' APIs');
+  if (currentPage) loadPage(currentPage);
 }
 // Start preloading immediately, don't block home page
 preloadAllData();
