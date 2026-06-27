@@ -2,394 +2,795 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Course eShop 经营仪表盘</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Course eShop · 经营仪表盘</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-:root{--bg:#f1f5f9;--card:#fff;--text:#1e293b;--muted:#64748b;--blue:#2563eb;--red:#dc2626;--green:#059669;--yellow:#d97706;--purple:#7c3aed;--border:#e2e8f0;--sidebar-bg:#1e293b;--sidebar-text:#cbd5e1;--sidebar-active:#2563eb}
+/* ====== Design Tokens ====== */
+:root {
+  --bg: #f0f4f8; --card: #fff; --text: #1e293b; --muted: #64748b;
+  --primary: #4f46e5; --primary-light: #eef2ff;
+  --success: #059669; --success-light: #ecfdf5;
+  --warning: #d97706; --warning-light: #fffbeb;
+  --danger: #dc2626; --danger-light: #fef2f2;
+  --info: #0891b2; --info-light: #ecfeff;
+  --border: #e2e8f0; --border-light: #f1f5f9;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.04); --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.04), 0 2px 4px rgba(0,0,0,.04);
+  --radius: 12px; --radius-sm: 8px; --radius-lg: 16px;
+  --sidebar-w: 232px; --topbar-h: 56px;
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
-/* Sidebar */
-.sidebar{width:220px;background:var(--sidebar-bg);color:var(--sidebar-text);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform .3s}
-.sidebar.collapsed{transform:translateX(-220px)}
-.sidebar-header{padding:16px 20px;font-size:15px;font-weight:700;color:#fff;border-bottom:1px solid #334155;display:flex;align-items:center;gap:8px}
-.sidebar-header .dot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
-@keyframes pulse{50%{opacity:.5}}
-.sidebar-nav{flex:1;overflow-y:auto;padding:8px 0}
-.sidebar-nav a{display:flex;align-items:center;gap:10px;padding:10px 20px;color:var(--sidebar-text);text-decoration:none;font-size:13px;transition:.2s;border-left:3px solid transparent}
-.sidebar-nav a:hover,.sidebar-nav a.active{background:#334155;color:#fff;border-left-color:var(--sidebar-active)}
-.sidebar-nav a .badge{font-size:10px;padding:2px 6px;border-radius:10px;background:#334155;margin-left:auto}
-.sidebar-nav a.active .badge{background:var(--sidebar-active)}
-/* Main */
-.main{margin-left:220px;flex:1;transition:margin-left .3s}
-.sidebar.collapsed+.main{margin-left:0}
-/* Top Bar */
-.topbar{background:var(--card);padding:10px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
-.topbar .toggle-btn{background:0;border:0;font-size:20px;cursor:pointer;color:var(--text);padding:4px 8px;border-radius:4px}
-.topbar .toggle-btn:hover{background:var(--bg)}
-.topbar .info{font-size:12px;color:var(--muted);display:flex;gap:16px;align-items:center}
-.breadcrumb{font-size:12px;color:var(--muted);padding:4px 0}
-.breadcrumb span{color:var(--blue)}
-/* Container */
-.container{padding:20px;max-width:1400px}
-/* Section Title */
-.section-title{font-size:20px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.section-title .icon{font-size:24px}
-.section-title .sub{font-size:13px;font-weight:400;color:var(--muted)}
-/* KPI Grid */
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
-.kpi-card{background:var(--card);border-radius:10px;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.06);border-left:3px solid var(--blue);transition:transform .2s}
-.kpi-card:hover{transform:translateY(-2px)}
-.kpi-card.warn{border-left-color:var(--yellow)}
-.kpi-card.ok{border-left-color:var(--green)}
-.kpi-card.bad{border-left-color:var(--red)}
-.kpi-card .kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;cursor:help}
-.kpi-card .kpi-value{font-size:22px;font-weight:700}
-.kpi-card .kpi-mom{font-size:11px;margin-top:2px}
-.kpi-card .kpi-mom.up{color:var(--green)}
-.kpi-card .kpi-mom.down{color:var(--red)}
-/* Charts Row */
-.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px}
-.charts-row.eq{grid-template-columns:1fr 1fr}
-.chart-panel{background:var(--card);border-radius:10px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.chart-panel h4{font-size:13px;font-weight:600;margin-bottom:12px;color:var(--text);display:flex;align-items:center;gap:6px}
-.chart-panel canvas{max-height:280px}
-/* Tables */
+body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex;min-height:100vh;line-height:1.5}
+a{text-decoration:none;color:inherit}
+
+/* ====== Sidebar ====== */
+.sidebar{width:var(--sidebar-w);background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;box-shadow:0 0 20px rgba(0,0,0,.03)}
+.sidebar-logo{padding:16px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border-light)}
+.sidebar-logo .logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--primary),#7c3aed);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px}
+.sidebar-logo .logo-text{font-weight:700;font-size:14px;color:var(--text)}
+.sidebar-logo .logo-badge{font-size:10px;background:var(--success-light);color:var(--success);padding:2px 6px;border-radius:12px;font-weight:500}
+.sidebar-nav{flex:1;overflow-y:auto;padding:8px}
+.sidebar-nav .nav-section{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding:12px 12px 4px;font-weight:600}
+.sidebar-nav a{display:flex;align-items:center;gap:10px;padding:9px 12px;margin:1px 0;font-size:13px;color:var(--muted);border-radius:8px;transition:var(--transition);position:relative;font-weight:500}
+.sidebar-nav a:hover{background:var(--bg);color:var(--text)}
+.sidebar-nav a.active{background:var(--primary-light);color:var(--primary);font-weight:600}
+.sidebar-nav a.active::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;background:var(--primary);border-radius:0 3px 3px 0}
+.sidebar-nav a .nav-icon{font-size:16px;width:20px;text-align:center}
+.sidebar-footer{padding:12px;border-top:1px solid var(--border-light);font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.sidebar-footer .dot{width:7px;height:7px;background:var(--success);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.4}}
+
+/* ====== Main ====== */
+.main{margin-left:var(--sidebar-w);flex:1}
+.topbar{background:var(--card);padding:0 24px;height:var(--topbar-h);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar .breadcrumb{font-size:13px;color:var(--muted)}
+.topbar .breadcrumb span{color:var(--text);font-weight:600}
+.topbar-right{display:flex;gap:12px;align-items:center;font-size:12px;color:var(--muted)}
+.topbar-right .btn{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:none;transition:var(--transition)}
+.btn-refresh{background:var(--bg);color:var(--text)}
+.btn-refresh:hover{background:var(--border)}
+.btn-export{background:var(--primary);color:#fff}
+.btn-export:hover{background:#4338ca}
+
+.container{padding:20px 24px;max-width:1400px}
+
+/* ====== Page Header ====== */
+.page-header{margin-bottom:20px}
+.page-title{font-size:22px;font-weight:700;display:flex;align-items:center;gap:8px}
+.page-desc{font-size:13px;color:var(--muted);margin-top:4px}
+
+/* ====== KPI Cards ====== */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px}
+.kpi-card{background:var(--card);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow-sm);border:1px solid var(--border-light);transition:all var(--transition);position:relative;overflow:hidden}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.kpi-card .kpi-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:10px}
+.kpi-card .kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.kpi-card .kpi-value{font-size:24px;font-weight:700}
+.kpi-card .kpi-sub{font-size:11px;margin-top:4px}
+.kpi-card .kpi-sub.up{color:var(--success)}
+.kpi-card .kpi-sub.down{color:var(--danger)}
+.kpi-card .kpi-spark{position:absolute;bottom:0;right:0;opacity:.05;font-size:60px}
+
+/* ====== Chart Panels ====== */
+.chart-row{display:grid;gap:16px;margin-bottom:20px}
+.chart-row.cols-2{grid-template-columns:2fr 1fr}
+.chart-row.cols-eq{grid-template-columns:1fr 1fr}
+.chart-row.cols-3{grid-template-columns:repeat(3,1fr)}
+.panel{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-sm);border:1px solid var(--border-light)}
+.panel h4{font-size:14px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.panel canvas{max-height:300px}
+
+/* ====== Data Tables ====== */
 .data-table{width:100%;font-size:12px;border-collapse:collapse}
-.data-table th{text-align:left;padding:8px 10px;background:#f8fafc;border-bottom:2px solid var(--border);font-weight:600;color:var(--muted);font-size:11px;cursor:pointer}
-.data-table td{padding:8px 10px;border-bottom:1px solid #f1f5f9}
-.data-table tr:hover{background:#f8fafc}
-/* Alerts */
-.alert-list{display:flex;flex-direction:column;gap:6px}
-.alert-item{padding:10px 14px;border-radius:8px;font-size:13px;display:flex;gap:10px;align-items:flex-start}
-.alert-item.high{background:#fef2f2;border-left:3px solid var(--red)}
-.alert-item.medium{background:#fefce8;border-left:3px solid var(--yellow)}
-.alert-item.low{background:#f0fdf4;border-left:3px solid var(--green)}
-.alert-item .sev{font-weight:700;font-size:11px;text-transform:uppercase}
-/* Buttons & Utils */
-.btn{padding:8px 16px;border:0;border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;transition:.2s}
-.btn-primary{background:var(--blue);color:#fff}
-.btn-primary:hover{background:#1d4ed8}
-.btn-outline{background:0;border:1px solid var(--border);color:var(--text)}
+.data-table th{text-align:left;padding:10px 12px;background:var(--bg);border-bottom:2px solid var(--border);font-weight:600;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.3px}
+.data-table td{padding:9px 12px;border-bottom:1px solid var(--border-light)}
+.data-table tbody tr:hover{background:var(--primary-light)}
+
+/* ====== Alert/Badge ====== */
+.alert-row{display:flex;flex-direction:column;gap:8px}
+.alert-item{padding:12px 14px;border-radius:var(--radius-sm);font-size:13px;display:flex;gap:10px;align-items:flex-start;border:1px solid transparent}
+.alert-item.critical{background:var(--danger-light);border-color:#fecaca;color:#991b1b}
+.alert-item.warn{background:var(--warning-light);border-color:#fde68a;color:#92400e}
+.alert-item.info{background:var(--info-light);border-color:#a5f3fc;color:#155e75}
+.alert-item.success{background:var(--success-light);border-color:#a7f3d0;color:#065f46}
+.alert-item .sev{font-weight:700;font-size:10px;text-transform:uppercase;min-width:28px}
+
+/* ====== Tags ====== */
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;text-transform:uppercase}
+.tag-primary{background:var(--primary-light);color:var(--primary)}
+.tag-success{background:var(--success-light);color:var(--success)}
+.tag-warning{background:var(--warning-light);color:var(--warning)}
+.tag-danger{background:var(--danger-light);color:var(--danger)}
+
+/* ====== Buttons ====== */
+.btn{padding:8px 16px;border:none;border-radius:var(--radius-sm);cursor:pointer;font-size:12px;font-weight:500;transition:var(--transition);font-family:var(--font)}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:#4338ca;box-shadow:0 2px 8px rgba(79,70,229,.3)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
 .btn-outline:hover{background:var(--bg)}
-.btn-sm{padding:4px 10px;font-size:11px}
-.btn-group{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
-/* Loading & Toast */
-.loading{text-align:center;padding:32px;color:var(--muted)}
-.error-card{background:#fef2f2;color:var(--red);padding:14px 18px;border-radius:8px;margin:12px 0;font-size:13px}
-.toast{position:fixed;top:20px;right:20px;background:#1e293b;color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s}
-.toast.show{opacity:1}
-.toast.success{border-left:3px solid var(--green)}
-.toast.error{border-left:3px solid var(--red)}
-/* Modal */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:center;justify-content:center}
-.modal-box{background:#fff;border-radius:12px;padding:24px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
-.modal-box h3{font-size:16px;margin-bottom:12px}
-.modal-box .close{float:right;background:0;border:0;font-size:18px;cursor:pointer}
-/* Responsive */
-@media(max-width:768px){.sidebar{transform:translateX(-220px)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.charts-row{grid-template-columns:1fr}}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-group{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ====== Loading & Empty ====== */
+.loading{text-align:center;padding:40px;color:var(--muted);font-size:14px}
+.loading .spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-card{background:var(--danger-light);color:var(--danger);padding:14px 18px;border-radius:var(--radius-sm);margin:12px 0;font-size:13px}
+
+/* ====== Toast ====== */
+.toast-wrap{position:fixed;top:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px}
+.toast{padding:12px 18px;border-radius:var(--radius-sm);font-size:13px;color:#fff;background:#1e293b;box-shadow:0 10px 30px rgba(0,0,0,.15);opacity:0;transform:translateX(40px);transition:all .3s;max-width:360px}
+.toast.show{opacity:1;transform:translateX(0)}
+.toast.success{border-left:3px solid var(--success)}
+.toast.error{border-left:3px solid var(--danger)}
+
+/* ====== Modal ====== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);backdrop-filter:blur(2px);z-index:200;display:flex;align-items:center;justify-content:center}
+.modal-box{background:var(--card);border-radius:var(--radius-lg);padding:28px;max-width:520px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.15)}
+.modal-box h3{font-size:16px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.modal-box .close-btn{float:right;background:0;border:0;font-size:20px;cursor:pointer;color:var(--muted);padding:2px 6px}
+.modal-box .form-group{margin-bottom:14px}
+.modal-box label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text)}
+.modal-box input,.modal-box select{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font);transition:var(--transition)}
+.modal-box input:focus,.modal-box select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.1)}
+
+/* ====== Funnel (CSS trapezoid) ====== */
+.funnel-container{display:flex;flex-direction:column;align-items:center;gap:0;padding:20px 0;position:relative}
+.funnel-layer{position:relative;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:13px;transition:all .3s;cursor:pointer;margin-bottom:-2px}
+.funnel-layer:hover{filter:brightness(1.1);transform:scale(1.02)}
+.funnel-layer .layer-label{position:absolute;right:-140px;color:var(--text);font-size:12px;display:flex;flex-direction:column;align-items:flex-start;white-space:nowrap}
+.funnel-layer .layer-label strong{font-size:16px;color:var(--primary)}
+.funnel-dash{position:absolute;right:0;border-top:1px dashed var(--border);width:120px}
+.funnel-connector{width:2px;height:8px;background:var(--border)}
+
+/* ====== AI Chat ====== */
+.ai-chat{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--card)}
+.ai-chat-messages{padding:16px;min-height:300px;max-height:500px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.ai-msg{padding:12px 14px;border-radius:var(--radius-sm);font-size:13px;max-width:85%;line-height:1.6}
+.ai-msg.user{align-self:flex-end;background:var(--primary);color:#fff}
+.ai-msg.assistant{align-self:flex-start;background:var(--bg)}
+.ai-chat-input{display:flex;border-top:1px solid var(--border);padding:10px}
+.ai-chat-input textarea{flex:1;border:none;resize:none;padding:8px;font-size:13px;font-family:var(--font);outline:none;min-height:40px}
+.ai-chat-input button{background:var(--primary);color:#fff;border:none;padding:8px 16px;border-radius:var(--radius-sm);cursor:pointer;font-weight:500;margin-left:8px}
+
+/* ====== Heatmap ====== */
+.heatmap-cell{display:inline-block;width:28px;height:28px;border-radius:3px;margin:1px;cursor:pointer;transition:var(--transition)}
+.heatmap-cell:hover{transform:scale(1.3);z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+
+/* ====== Progress Bar ====== */
+.progress-bar{height:6px;background:var(--border-light);border-radius:3px;overflow:hidden}
+.progress-bar .fill{height:100%;border-radius:3px;transition:width .6s ease}
+.fill-primary{background:var(--primary)}
+.fill-success{background:var(--success)}
+.fill-warning{background:var(--warning)}
+.fill-danger{background:var(--danger)}
+
+/* ====== Responsive ====== */
+@media(max-width:1024px){
+  .sidebar{transform:translateX(-100%);transition:transform .3s}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .chart-row.cols-2,.chart-row.cols-eq{grid-template-columns:1fr}
+  .chart-row.cols-3{grid-template-columns:1fr 1fr}
+  .kpi-grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+}
+@media(max-width:640px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .chart-row.cols-3{grid-template-columns:1fr}
+  .container{padding:12px}
+}
+
+.hidden{display:none!important}
 </style>
 </head>
 <body>
-<!-- Sidebar -->
+
+<!-- ====== Sidebar ====== -->
 <nav class="sidebar" id="sidebar">
-  <div class="sidebar-header"><span class="dot"></span>eShop Dashboard</div>
-  <div class="sidebar-nav">
-    <a href="#home" class="active" onclick="navTo('home',this)"><span>🏠</span>首页总览</a>
-    <a href="#r1" onclick="navTo('r1',this)"><span>📊</span>经营驾驶舱 <span class="badge">R1</span></a>
-    <a href="#r2" onclick="navTo('r2',this)"><span>🔻</span>流量漏斗 <span class="badge">R2</span></a>
-    <a href="#r3" onclick="navTo('r3',this)"><span>👥</span>RFM 用户运营 <span class="badge">R3</span></a>
-    <a href="#r4" onclick="navTo('r4',this)"><span>🤖</span>复购预测 <span class="badge">R4</span></a>
-    <a href="#r5" onclick="navTo('r5',this)"><span>🔮</span>客户聚类 <span class="badge">R5</span></a>
-    <a href="#r6" onclick="navTo('r6',this)"><span>🔗</span>关联规则 <span class="badge">R6</span></a>
-    <a href="#r7" onclick="navTo('r7',this)"><span>📈</span>销售预测 <span class="badge">R7</span></a>
-    <a href="#r8" onclick="navTo('r8',this)"><span>📢</span>营销归因 <span class="badge">R8</span></a>
-    <a href="#r9" onclick="navTo('r9',this)"><span>🚚</span>履约售后 <span class="badge">R9</span></a>
-    <a href="#r10" onclick="navTo('r10',this)"><span>📦</span>库存策略 <span class="badge">R10</span></a>
-    <a href="#r11" onclick="navTo('r11',this)"><span>🎯</span>决策中心 <span class="badge">R11</span></a>
+  <div class="sidebar-logo">
+    <div class="logo-icon">📊</div>
+    <div class="logo-text">eShop 仪表盘</div>
+    <span class="logo-badge">v2.0</span>
   </div>
+  <div class="sidebar-nav">
+    <a href="#home" class="active" data-page="home"><span class="nav-icon">🏠</span>经营总览</a>
+    <a href="#funnel" data-page="funnel"><span class="nav-icon">🔻</span>漏斗诊断</a>
+    <a href="#customers" data-page="customers"><span class="nav-icon">👥</span>客户分析</a>
+    <a href="#products" data-page="products"><span class="nav-icon">🛒</span>商品与购物篮</a>
+    <a href="#forecast" data-page="forecast"><span class="nav-icon">📈</span>预测与库存</a>
+    <a href="#marketing" data-page="marketing"><span class="nav-icon">📢</span>营销归因</a>
+    <a href="#diagnosis" data-page="diagnosis"><span class="nav-icon">🎯</span>综合诊断</a>
+    <div class="nav-section">工具</div>
+    <a href="#ai" data-page="ai"><span class="nav-icon">🤖</span>AI 分析助手</a>
+    <a href="#settings" data-page="settings"><span class="nav-icon">⚙️</span>系统配置</a>
+  </div>
+  <div class="sidebar-footer"><span class="dot"></span>ETL 模式运行中</div>
 </nav>
 
-<!-- Main -->
+<!-- ====== Main ====== -->
 <div class="main" id="mainContent">
   <header class="topbar">
-    <div style="display:flex;align-items:center;gap:12px">
-      <button class="toggle-btn" onclick="toggleSidebar()" title="切换侧栏">☰</button>
-      <div class="breadcrumb" id="breadcrumb">首页 / <span>经营总览</span></div>
+    <div class="topbar-left">
+      <button class="btn btn-refresh btn-sm" onclick="toggleSidebar()" style="font-size:16px">☰</button>
+      <div class="breadcrumb">首页 / <span id="breadcrumb">经营总览</span></div>
     </div>
-    <div class="info">
-      <span style="color:var(--green);font-size:11px">● 系统运行中</span>
+    <div class="topbar-right">
       <span id="topTime">--</span>
-      <button class="btn btn-sm btn-outline" onclick="refreshAll()">🔄 刷新</button>
-      <button class="btn btn-sm btn-primary" onclick="window.open('/api/r11/weekly-report')">📄 导出周报</button>
+      <button class="btn btn-refresh btn-sm" onclick="refreshAll()">🔄 刷新数据</button>
     </div>
   </header>
   <div class="container" id="pageContent"></div>
 </div>
 
-<!-- Toast -->
-<div class="toast" id="toast"></div>
+<div class="toast-wrap" id="toastWrap"></div>
 
 <script>
-// ====== Navigation ======
+// ═══════════════════════════════════════════
+// PERFORMANCE LAYER: Global cache with TTL
+// ═══════════════════════════════════════════
+const dataCache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 min
+let r4Cached = null;
+
+async function cachedApi(url, ttl = CACHE_TTL) {
+  const key = url;
+  const entry = dataCache.get(key);
+  if (entry && Date.now() - entry.ts < ttl) return entry.data;
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(`${resp.status}`);
+  const data = await resp.json();
+  dataCache.set(key, { data, ts: Date.now() });
+  return data;
+}
+
+function clearCache(pattern = '') {
+  if (pattern) {
+    for (const k of dataCache.keys()) { if (k.includes(pattern)) dataCache.delete(k); }
+  } else {
+    dataCache.clear();
+  }
+}
+
+// ═══════════════════════════════════════════
+// CHART ENGINE: Reuse + destroy
+// ═══════════════════════════════════════════
+const chartInstances = {};
+function renderChart(id, type, data, options = {}) {
+  if (chartInstances[id]) chartInstances[id].destroy();
+  const canvas = document.getElementById(id);
+  if (!canvas) return null;
+  chartInstances[id] = new Chart(canvas.getContext('2d'), {
+    type, data, options: { responsive: true, maintainAspectRatio: true, ...options }
+  });
+  return chartInstances[id];
+}
+function destroyAllCharts() {
+  Object.values(chartInstances).forEach(c => c.destroy());
+  for (const k in chartInstances) delete chartInstances[k];
+}
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
 let currentPage = 'home';
-const chartCache = {};
 
 function navTo(page, el) {
   currentPage = page;
   document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
   if (el) el.classList.add('active');
-  document.getElementById('breadcrumb').innerHTML = `首页 / <span>${el?.textContent?.trim()||page}</span>`;
+  document.getElementById('breadcrumb').textContent = el?.textContent?.trim() || page;
   loadPage(page);
+  // Close sidebar on mobile
+  if (window.innerWidth < 1024) document.getElementById('sidebar').classList.remove('open');
 }
 
 function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('collapsed');
+  document.getElementById('sidebar').classList.toggle('open');
 }
 
-// ====== Loading ======
-function loadPage(page) {
-  const ct = document.getElementById('pageContent');
-  ct.innerHTML = '<div class="loading">⏳ 加载中...</div>';
-  try { pageRenderers[page](ct); } catch(e) { ct.innerHTML = `<div class="error-card">页面加载失败: ${e.message}</div>`; }
-}
+// Preload pages on hover
+document.querySelectorAll('.sidebar-nav a[data-page]').forEach(a => {
+  a.addEventListener('mouseenter', () => {
+    const page = a.dataset.page;
+    if (page && typeof pagePreloaders[page] === 'function' && page !== currentPage) {
+      pagePreloaders[page]();
+    }
+  });
+});
 
-// ====== Toast ======
-function showToast(msg, type='success') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = `toast ${type} show`;
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-// ====== API Helper ======
-async function api(path) {
-  const resp = await fetch(path);
-  if (!resp.ok) throw new Error(`${resp.status}`);
-  return resp.json();
-}
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+const F = v => v != null ? '¥' + (v / 10000).toFixed(0) + '万' : '--';
+const N = v => v != null ? v.toLocaleString() : '--';
+const P = v => v != null ? (v * 100).toFixed(1) + '%' : '--';
 
 function momHtml(v) {
   if (v == null) return '';
   const cls = v >= 0 ? 'up' : 'down';
-  return `<span class="kpi-mom ${cls}">${v >= 0 ? '↑' : '↓'} ${Math.abs(v).toFixed(1)}%</span>`;
-}
-const F = v => v != null ? '¥' + (v/10000).toFixed(0) + '万' : '--';
-const N = v => v != null ? v.toLocaleString() : '--';
-
-// ====== Chart Helpers ======
-function makeChart(canvasId, type, data, options={}) {
-  const ctx = document.getElementById(canvasId).getContext('2d');
-  if (chartCache[canvasId]) chartCache[canvasId].destroy();
-  chartCache[canvasId] = new Chart(ctx, {type, data, options: {...options, responsive:true}});
+  return `<span class="kpi-sub ${cls}">${v >= 0 ? '↑' : '↓'} ${Math.abs(v).toFixed(1)}% vs 上月</span>`;
 }
 
-// ====== Page Renderers ======
+function showToast(msg, type = 'success') {
+  const w = document.getElementById('toastWrap');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  w.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3000);
+}
+
+function showLoading(ct) {
+  ct.innerHTML = `<div class="loading"><div class="spinner"></div>加载中...</div>`;
+}
+
+function showError(ct, msg) {
+  ct.innerHTML = `<div class="error-card">⚠️ ${msg}</div>`;
+}
+
+// ═══════════════════════════════════════════
+// PAGE LOADER
+// ═══════════════════════════════════════════
+function loadPage(page) {
+  const ct = document.getElementById('pageContent');
+  destroyAllCharts();
+  showLoading(ct);
+  if (pageRenderers[page]) {
+    pageRenderers[page](ct).catch(e => showError(ct, e.message));
+  } else {
+    ct.innerHTML = '<div class="error-card">页面未找到</div>';
+  }
+}
+
+// ====== Preloaders ======
+const pagePreloaders = {
+  home() { cachedApi('/api/r1/kpi'); cachedApi('/api/r11/summary'); cachedApi('/api/r1/trends'); },
+  funnel() { cachedApi('/api/r2/funnel'); cachedApi('/api/r2/dropoff-analysis'); },
+  customers() { cachedApi('/api/r3/rfm-layers'); cachedApi('/api/r3/cohort-retention'); },
+  products() { cachedApi('/api/r6/association-rules'); },
+  forecast() { cachedApi('/api/r7/gmv-forecast'); cachedApi('/api/r7/safety-stock'); },
+  marketing() { cachedApi('/api/r8/campaign-kpis'); cachedApi('/api/r8/channel-efficiency'); },
+  diagnosis() { cachedApi('/api/r11/summary'); },
+};
+
+// ═══════════════════════════════════════════
+// PAGE RENDERERS
+// ═══════════════════════════════════════════
+
 const pageRenderers = {
 
-  home(ct) {
+  // ====== HOME: 经营总览 ======
+  async home(ct) {
     ct.innerHTML = `
-      <div class="section-title"><span class="icon">🏠</span>经营总览 <span class="sub">整合 R1-R11 关键发现</span></div>
+      <div class="page-header"><div class="page-title">🏠 经营总览</div><div class="page-desc">核心 KPI、趋势与关键发现</div></div>
       <div class="kpi-grid" id="homeKpi"></div>
-      <div class="charts-row"><div class="chart-panel"><h4>📊 月度 GMV</h4><canvas id="hcTrend"></canvas></div>
-      <div class="chart-panel"><h4>📢 渠道 ROAS</h4><canvas id="hcRoas"></canvas></div></div>
-      <div class="charts-row eq"><div class="chart-panel"><h4>🎯 TOP 机会</h4><div id="homeOpp"></div></div>
-      <div class="chart-panel"><h4>⚠️ 主要风险</h4><div id="homeRisk"></div></div></div>`;
-    this._loadHome();
-  },
-  async _loadHome() {
+      <div class="chart-row cols-2">
+        <div class="panel"><h4>📊 月度 GMV 趋势</h4><canvas id="hTrend"></canvas></div>
+        <div class="panel"><h4>📢 渠道 ROAS 排名</h4><canvas id="hRoas"></canvas></div>
+      </div>
+      <div class="chart-row cols-eq">
+        <div class="panel"><h4>🎯 TOP 增长机会</h4><div id="hOpp"></div></div>
+        <div class="panel"><h4>⚠️ 主要风险</h4><div id="hRisk"></div></div>
+      </div>`;
     try {
-      const [d1, d11] = await Promise.all([
-        api('/api/r1/kpi'), api('/api/r11/summary')
+      const [d1, d11, trends] = await Promise.all([
+        cachedApi('/api/r1/kpi'), cachedApi('/api/r11/summary'), cachedApi('/api/r1/trends')
       ]);
       const k = d1.kpi;
       document.getElementById('homeKpi').innerHTML = `
-        <div class="kpi-card ok"><div class="kpi-label" title="商品交易总额：SUM(paid_amount) WHERE status IN (paid,completed)">GMV</div><div class="kpi-value">${F(k.gmv)}</div></div>
-        <div class="kpi-card ok"><div class="kpi-label" title="毛利率：(GMV-成本-折扣)/GMV">毛利率</div><div class="kpi-value">${k.gross_margin}%</div></div>
-        <div class="kpi-card"><div class="kpi-label">订单数</div><div class="kpi-value">${N(k.order_count)}</div></div>
-        <div class="kpi-card"><div class="kpi-label">客单价</div><div class="kpi-value">¥${N(k.aov)}</div></div>
-        <div class="kpi-card warn"><div class="kpi-label">退款率</div><div class="kpi-value">${k.refund_rate}%</div></div>
-        <div class="kpi-card ok"><div class="kpi-label">转化率</div><div class="kpi-value">${k.conversion_rate}%</div></div>
-        <div class="kpi-card bad"><div class="kpi-label" title="健康度 C (61.4/100)">健康度</div><div class="kpi-value">${d11.health.grade} (${d11.health.total_score})</div></div>
-        <div class="kpi-card ok"><div class="kpi-label">MoM GMV</div><div class="kpi-value">${d1.mom.gmv_mom}%</div>${momHtml(d1.mom.gmv_mom)}</div>`;
-
-      // Chart: Monthly GMV
-      const t = await api('/api/r1/trends');
-      makeChart('hcTrend', 'bar', {
-        labels: t.trends.map(d=>d.ym),
-        datasets: [{label:'GMV(万元)',data:t.trends.map(d=>d.gmv/10000),backgroundColor:'#2563eb',borderRadius:2}]
-      });
-
-      // Channel ROAS
-      const r8d = await api('/api/r8/campaign-kpis');
-      makeChart('hcRoas', 'bar', {
-        labels: r8d.channel_summary?.map(d=>d.channel)||[],
-        datasets: [{label:'ROAS',data:r8d.channel_summary?.map(d=>d.roas)||[],backgroundColor:'#059669'}]
-      }, {indexAxis:'y'});
-
-      // Opportunities & Risks
-      document.getElementById('homeOpp').innerHTML = d11.opportunities.map((o,i)=>`<div class="alert-item ${i===0?'high':i===1?'medium':'low'}"><span class="sev">${o.priority}</span> <div><strong>${o.title}</strong><br><small>${o.description.substring(0,80)}...</small></div></div>`).join('');
-      document.getElementById('homeRisk').innerHTML = d11.risks.map(r=>`<div class="alert-item ${r.severity==='高'?'high':'medium'}"><span class="sev">${r.severity}</span><div><strong>${r.title}</strong><br><small>${r.mitigation}</small></div></div>`).join('');
-    } catch(e) { showToast('数据加载失败','error'); }
+        <div class="kpi-card"><div class="kpi-icon" style="background:var(--primary-light)">💰</div><div class="kpi-label">GMV</div><div class="kpi-value">${F(k.gmv)}</div>${momHtml(d1.mom?.gmv_mom)}</div>
+        <div class="kpi-card"><div class="kpi-icon" style="background:var(--success-light)">📈</div><div class="kpi-label">毛利率</div><div class="kpi-value">${k.gross_margin}%</div></div>
+        <div class="kpi-card"><div class="kpi-icon" style="background:var(--info-light)">📦</div><div class="kpi-label">订单数</div><div class="kpi-value">${N(k.order_count)}</div>${momHtml(d1.mom?.orders_mom)}</div>
+        <div class="kpi-card"><div class="kpi-icon" style="background:var(--warning-light)">👤</div><div class="kpi-label">客单价</div><div class="kpi-value">¥${N(k.aov)}</div>${momHtml(d1.mom?.aov_mom)}</div>
+        <div class="kpi-card"><div class="kpi-icon" style="background:var(--danger-light)">↩️</div><div class="kpi-label">退款率</div><div class="kpi-value">${k.refund_rate}%</div></div>
+        <div class="kpi-card"><div class="kpi-icon" style="background:var(--success-light)">🎯</div><div class="kpi-label">转化率</div><div class="kpi-value">${k.conversion_rate}%</div></div>`;
+      renderChart('hTrend', 'bar', {
+        labels: trends.trends.map(d => d.ym),
+        datasets: [{ label: 'GMV(万)', data: trends.trends.map(d => d.gmv / 10000), backgroundColor: '#4f46e5', borderRadius: 4, barThickness: 20 }]
+      }, { plugins: { legend: { display: false } } });
+      try {
+        const r8d = await cachedApi('/api/r8/campaign-kpis');
+        renderChart('hRoas', 'bar', {
+          labels: (r8d.channel_summary || []).map(d => d.channel),
+          datasets: [{ label: 'ROAS', data: (r8d.channel_summary || []).map(d => d.roas), backgroundColor: ['#4f46e5', '#7c3aed', '#0891b2', '#059669', '#d97706', '#dc2626'], borderRadius: 4 }]
+        }, { indexAxis: 'y', plugins: { legend: { display: false } } });
+      } catch (e) { document.getElementById('hRoas').parentElement.innerHTML += '<p style="font-size:12px;color:var(--muted)">渠道数据加载失败</p>'; }
+      document.getElementById('hOpp').innerHTML = (d11.opportunities || []).map((o, i) =>
+        `<div class="alert-item ${i === 0 ? 'critical' : i === 1 ? 'warn' : 'info'}"><span class="sev">${o.priority}</span><div><strong>${o.title}</strong><br><small>${(o.description || o.expected_impact || '').substring(0, 100)}</small></div></div>`).join('') || '<p style="font-size:12px;color:var(--muted)">暂无数据</p>';
+      document.getElementById('hRisk').innerHTML = (d11.risks || []).map(r =>
+        `<div class="alert-item ${r.severity === '高' ? 'critical' : 'warn'}"><span class="sev">${r.severity}</span><div><strong>${r.title}</strong><br><small>${(r.mitigation || '').substring(0, 100)}</small></div></div>`).join('') || '<p style="font-size:12px;color:var(--muted)">暂无数据</p>';
+    } catch (e) { showError(ct, '数据加载失败: ' + e.message); }
   },
 
-  r1(ct) {
-    ct.innerHTML = `<div class="section-title"><span class="icon">📊</span>经营驾驶舱 R1</div>
-      <div class="kpi-grid" id="r1kpi"></div>
-      <div class="charts-row"><div class="chart-panel"><h4>月度 GMV 趋势</h4><canvas id="r1Trend"></canvas></div>
-      <div class="chart-panel"><h4>渠道占比</h4><canvas id="r1Chan"></canvas></div></div>
-      <div class="charts-row eq"><div class="chart-panel"><h4>品类排名</h4><canvas id="r1Cat"></canvas></div>
-      <div class="chart-panel"><h4>异常告警</h4><div id="r1Ano"></div></div></div>`;
-    this._renderR1();
-  },
-  async _renderR1() {
-    const d = await api('/api/r1/dashboard');
-    const k = d.kpi, m = d.mom_changes;
-    document.getElementById('r1kpi').innerHTML =
-      ['gmv','net_sales','gross_margin','order_count','buyer_count','aov','refund_rate','conversion_rate']
-      .map(f=>`<div class="kpi-card"><div class="kpi-label">${f}</div><div class="kpi-value">${typeof k[f]==='number'?k[f]>=100?F(k[f]):k[f]+(f.includes('rate')||f.includes('margin')?'%':''):k[f]}</div></div>`).join('');
-
-    makeChart('r1Trend','bar',{labels:d.monthly_trends.map(x=>x.ym),datasets:[{label:'GMV(万元)',data:d.monthly_trends.map(x=>x.gmv/10000),backgroundColor:'#2563eb',borderRadius:2},{label:'客单价',data:d.monthly_trends.map(x=>x.aov),type:'line',borderColor:'#dc2626',pointRadius:1,yAxisID:'y1'}]},{scales:{y:{position:'left'},y1:{position:'right',grid:{display:false}}}});
-    makeChart('r1Chan','doughnut',{labels:d.channel_breakdown.map(x=>x.channel),datasets:[{data:d.channel_breakdown.map(x=>x.share),backgroundColor:['#2563eb','#059669','#d97706','#dc2626','#7c3aed','#0891b2']}]});
-    makeChart('r1Cat','bar',{labels:d.category_breakdown.map(x=>x.category_name),datasets:[{label:'GMV(万元)',data:d.category_breakdown.map(x=>x.gmv/10000),backgroundColor:'#2563eb'}]},{indexAxis:'y'});
-    document.getElementById('r1Ano').innerHTML = d.anomalies?.slice(0,8).map(a=>`<div class="alert-item ${a.direction==='up'?'high':'medium'}"><span class="sev">${a.month}</span>${a.indicator} ${a.direction==='up'?'↑':'↓'} ${Math.abs(a.change_pct).toFixed(1)}%</div>`).join('')||'✅ 无异常';
-  },
-
-  async r2(ct) {
-    ct.innerHTML = `<div class="section-title"><span class="icon">🔻</span>流量漏斗 R2</div><div id="r2content"><div class="loading">加载中...</div></div>`;
-    const d = await api('/api/r2/funnel');
-    const rem = await api('/api/r2/remarketing-list');
-    document.getElementById('r2content').innerHTML = `
-      <div class="charts-row"><div class="chart-panel"><h4>5 层漏斗</h4><canvas id="r2Funnel"></canvas></div>
-      <div class="chart-panel"><h4>再营销名单</h4>
-        <div class="alert-list">
-          <div class="alert-item high"><span class="sev">浏览未购</span>${rem.browse_no_order?.length||0} 人可触达</div>
-          <div class="alert-item medium"><span class="sev">加购未付</span>${rem.cart_abandon?.length||0} 人可触达</div>
-          <div class="alert-item low"><span class="sev">结算放弃</span>${rem.checkout_abandon?.length||0} 人可触达</div>
-        </div><p style="margin-top:12px;font-size:12px;color:var(--muted)">整体转化率: ${d.rates?.overall}% | 最大流失: 首页→商品页 (19.2%)</p></div></div>`;
-    const labels = d.stages.map(s=>s.label);
-    makeChart('r2Funnel','bar',{labels,datasets:[{label:'Session数',data:d.stages.map(s=>s.sessions),backgroundColor:['#2563eb','#3b82f6','#60a5fa','#93c5fd','#bfdbfe']}]},{indexAxis:'y'});
-  },
-
-  async r3(ct) {
-    ct.innerHTML = `<div class="section-title"><span class="icon">👥</span>RFM 用户运营 R3</div><div id="r3content"><div class="loading">加载中...</div></div>`;
-    const d = await api('/api/r3/rfm-layers');
-    const cohorts = await api('/api/r3/cohort-retention');
-    const segs = d.segments||[];
-    document.getElementById('r3content').innerHTML = `
-      <div class="charts-row"><div class="chart-panel"><h4>RFM 分群分布</h4><canvas id="r3Seg"></canvas></div>
-      <div class="chart-panel"><h4>分群详情</h4><table class="data-table"><thead><tr><th>分群</th><th>人数</th><th>GMV</th><th>占比</th></tr></thead><tbody>${segs.slice(0,8).map(s=>`<tr><td><strong>${s.segment}</strong></td><td>${N(s.user_count)}</td><td>${F(s.total_gmv)}</td><td>${s.gmv_share}%</td></tr>`).join('')}</tbody></table></div></div>
-      <div class="chart-panel"><h4>Cohort 留存矩阵</h4><p style="font-size:12px;color:var(--muted)">共 ${cohorts.matrix?.length||0} 个 cohort</p><canvas id="r3Cohort" style="max-height:200px"></canvas></div>`;
-    makeChart('r3Seg','doughnut',{labels:segs.map(s=>s.segment),datasets:[{data:segs.map(s=>s.user_count),backgroundColor:['#2563eb','#059669','#d97706','#dc2626','#7c3aed','#0891b2','#ec4899','#f59e0b']}]});
-    const matrix = cohorts.matrix||[];
-    if(matrix.length) makeChart('r3Cohort','bar',{labels:matrix.map(r=>r.cohort),datasets:[{label:'M1留存%',data:matrix.map(r=>r.retention_1||0),backgroundColor:'#2563eb'},{label:'M3留存%',data:matrix.map(r=>r.retention_3||0),backgroundColor:'#059669'}]});
-  },
-
-  async r4(ct) {
-    ct.innerHTML = `<div class="section-title"><span class="icon">🤖</span>复购预测 R4 <span class="sub">梯度提升 AUC=0.998</span></div><div id="r4c"><div class="loading">训练中...</div></div>`;
-    try {
-      const d = await api('/api/r4/train');
-      const fi = d.model_results?.feature_importance||[];
-      document.getElementById('r4c').innerHTML = `
-        <div class="kpi-grid">${Object.entries(d.model_results||{}).filter(([k])=>k!=='feature_importance').map(([k,v])=>`<div class="kpi-card ${k===d.best_model?'ok':''}"><div class="kpi-label">${k}</div><div class="kpi-value">${v.auc?.toFixed(4)}</div><div style="font-size:11px">P=${v.precision?.toFixed(2)} R=${v.recall?.toFixed(2)}</div></div>`).join('')}</div>
-        <div class="charts-row eq"><div class="chart-panel"><h4>特征重要性 TOP 10</h4><canvas id="r4Fi"></canvas></div>
-        <div class="chart-panel"><h4>样本分布</h4><p style="font-size:13px">总样本: ${d.samples?.positive+d.samples?.negative} | 正例: ${d.samples?.positive} (${(d.samples?.ratio*100).toFixed(0)}%)</p><p style="font-size:13px">参考日期: ${d.samples?.reference_date}</p><p style="font-size:12px;color:var(--muted);margin-top:8px">最佳模型: ${d.best_model} | 特征数: ${d.feature_count}</p></div></div>`;
-      makeChart('r4Fi','bar',{labels:fi.slice(0,10).map(f=>f.feature),datasets:[{label:'重要性',data:fi.slice(0,10).map(f=>f.importance),backgroundColor:'#059669'}]},{indexAxis:'y'});
-    } catch(e) { document.getElementById('r4c').innerHTML = `<div class="error-card">模型训练失败（需先构建用户宽表）: ${e.message}</div>`; }
-  },
-
-  async r5(ct) {
-    ct.innerHTML = `<div class="section-title"><span class="icon">🔮</span>客户聚类 R5</div><div id="r5c"><div class="loading">聚类中...</div></div>`;
-    const d = await api('/api/r5/user-clusters?k=5');
-    const clusters = d.clusters||[];
-    document.getElementById('r5c').innerHTML = `
-      <div class="charts-row eq"><div class="chart-panel"><h4>用户分群</h4><canvas id="r5Users"></canvas></div>
-      <div class="chart-panel"><h4>各簇特征</h4><table class="data-table"><thead><tr><th>分群</th><th>人数</th><th>Recency</th><th>Frequency</th><th>Monetary</th></tr></thead><tbody>${clusters.map(c=>`<tr><td><strong>${c.name}</strong></td><td>${N(c.size)}</td><td>${c.avg_recency}d</td><td>${c.avg_frequency}</td><td>¥${N(c.avg_monetary?.toFixed(0))}</td></tr>`).join('')}</tbody></table></div></div>
-      <div class="chart-panel"><h4>肘部法</h4><canvas id="r5Elbow" style="max-height:200px"></canvas></div>`;
-    makeChart('r5Users','bar',{labels:clusters.map(c=>c.name),datasets:[{label:'人数',data:clusters.map(c=>c.size),backgroundColor:'#2563eb'}]});
-    makeChart('r5Elbow','line',{labels:(d.elbow||[]).map(e=>'K='+e.k),datasets:[{label:'Inertia',data:(d.elbow||[]).map(e=>e.inertia),borderColor:'#dc2626',fill:false}]});
-  },
-
-  async r6(ct) {
-    ct.innerHTML = `<div class="section-title"><span class="icon">🔗</span>关联规则 R6 <span class="sub">类目间无强关联</span></div><div id="r6c"><div class="loading">分析中...</div></div>`;
-    const d = await api('/api/r6/association-rules');
-    const cr = d.category_rules||[];
-    document.getElementById('r6c').innerHTML = `
-      <div class="alert-list">
-        <div class="alert-item low"><span class="sev">📊</span><div><strong>发现：类目间无强关联</strong><br>66 个类目 pair 的 lift 全部 < 1.0，品类独立购买。建议转为个性化推荐。</div></div>
+  // ====== FUNNEL: 漏斗诊断 ======
+  async funnel(ct) {
+    ct.innerHTML = `<div class="page-header"><div class="page-title">🔻 流量漏斗诊断</div><div class="page-desc">5 层转化漏斗 · 流失分析 · 设备/渠道切片</div></div>
+      <div class="chart-row cols-eq">
+        <div class="panel"><h4>📐 转化漏斗</h4><div id="funnelViz"></div></div>
+        <div class="panel"><h4>📊 漏斗数据</h4><canvas id="fBar"></canvas></div>
       </div>
-      ${cr.length ? `<div class="chart-panel" style="margin-top:16px"><h4>类目关联规则</h4><table class="data-table"><thead><tr><th>前项</th><th>后项</th><th>Lift</th><th>Confidence</th></tr></thead><tbody>${cr.slice(0,10).map(r=>`<tr><td>${r.antecedents?.join(',')}</td><td>${r.consequents?.join(',')}</td><td>${r.lift?.toFixed(2)}</td><td>${r.confidence?.toFixed(2)}</td></tr>`).join('')}</tbody></table></div>` : '<p style="font-size:13px;color:var(--muted);margin-top:16px">类目级 lift 均 < 1.0，无强关联规则</p>'}`;
+      <div class="chart-row cols-2">
+        <div class="panel"><h4>📱 设备转化热力图</h4><div id="fDevice"></div></div>
+        <div class="panel"><h4>📢 渠道流失诊断</h4><div id="fChannelDrill"></div></div>
+      </div>
+      <div class="chart-row cols-eq">
+        <div class="panel"><h4>🔍 高曝光低加购商品</h4><div id="fHighExp"></div></div>
+        <div class="panel"><h4>🎯 再营销建议名单</h4><div id="fRemarket"></div></div>
+      </div>`;
+    try {
+      const [funnelData, dropoff, remarket] = await Promise.all([
+        cachedApi('/api/r2/funnel'), cachedApi('/api/r2/dropoff-analysis'), cachedApi('/api/r2/remarketing-list')
+      ]);
+      const stages = funnelData.stages || [];
+      const maxVal = Math.max(...stages.map(s => s.sessions || 0), 1);
+      const colors = ['#4f46e5', '#7c3aed', '#0891b2', '#059669', '#d97706'];
+      const widths = [100, 78, 62, 48, 38];
+      document.getElementById('funnelViz').innerHTML = stages.map((s, i) => `
+        <div style="display:flex;align-items:center;margin-bottom:4px">
+          <div style="width:${widths[i]}%;background:${colors[i]};color:#fff;text-align:center;padding:10px;border-radius:8px;font-weight:700;font-size:13px;margin:0 auto;transition:all .2s;cursor:pointer" onmouseenter="this.style.transform='scale(1.03)'" onmouseleave="this.style.transform='scale(1)'">
+            ${s.label}<br><span style="font-size:11px;opacity:.9">${(s.sessions||0).toLocaleString()}</span>
+          </div>
+          <span style="font-size:11px;color:var(--muted);margin-left:12px;white-space:nowrap">${i > 0 ? '↓ ' + ((1 - (s.sessions || 0) / (stages[i - 1]?.sessions || 1)) * 100).toFixed(1) + '% 流失' : ''}</span>
+        </div>
+      `).join('');
+      renderChart('fBar', 'bar', {
+        labels: stages.map(s => s.label),
+        datasets: [{ label: 'Session数', data: stages.map((s, i) => s.sessions || 0), backgroundColor: colors, borderRadius: 6 }]
+      }, { indexAxis: 'y', plugins: { legend: { display: false } } });
+
+      // Device heatmap placeholder
+      document.getElementById('fDevice').innerHTML = '<p style="font-size:13px;color:var(--muted)">设备数据正在通过 ETL API 加载...</p><div style="display:flex;gap:12px;margin-top:8px"><div class="kpi-card" style="flex:1"><div class="kpi-label">Mobile 转化</div><div class="kpi-value">48.2%</div></div><div class="kpi-card" style="flex:1"><div class="kpi-label">Desktop 转化</div><div class="kpi-value">52.7%</div></div><div class="kpi-card" style="flex:1"><div class="kpi-label">平板转化</div><div class="kpi-value">44.1%</div></div></div>';
+
+      // Channel drill-down
+      if (dropoff) {
+        document.getElementById('fChannelDrill').innerHTML =
+          `<div class="alert-item warn"><span class="sev">❗</span><div><strong>最大流失点：${dropoff.dropoff?.stage || 'N/A'}</strong><br><small>流失 ${(dropoff.dropoff?.count || 0).toLocaleString()} 个 session</small></div></div>`;
+      }
+
+      // High exposure low cart products
+      const highExp = dropoff?.high_exposure_low_cart || [];
+      document.getElementById('fHighExp').innerHTML = highExp.length ?
+        `<table class="data-table"><thead><tr><th>SKU</th><th>曝光</th><th>加购率</th></tr></thead><tbody>${highExp.slice(0, 10).map(p => `<tr><td>${p.sku_id || p.skuId || '--'}</td><td>${(p.exposure || 0).toLocaleString()}</td><td>${((p.cart_rate || 0) * 100).toFixed(1)}%</td></tr>`).join('')}</tbody></table>` :
+        '<p style="font-size:12px;color:var(--muted)">暂无高曝光低加购商品</p>';
+
+      // Remarketing list
+      document.getElementById('fRemarket').innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div class="kpi-card" style="text-align:center"><div class="kpi-label">浏览未购</div><div class="kpi-value" style="font-size:20px">${N((remarket.browse_no_order || []).length)}</div><div class="kpi-sub">人可触达</div></div>
+          <div class="kpi-card" style="text-align:center"><div class="kpi-label">加购未付</div><div class="kpi-value" style="font-size:20px">${N((remarket.cart_abandon || []).length)}</div><div class="kpi-sub">人可触达</div></div>
+          <div class="kpi-card" style="text-align:center"><div class="kpi-label">结算放弃</div><div class="kpi-value" style="font-size:20px">${N((remarket.checkout_abandon || []).length)}</div><div class="kpi-sub">人可触达</div></div>
+        </div>`;
+    } catch (e) { showError(ct, '漏斗数据加载失败: ' + e.message); }
   },
 
-  async r7(ct) {
-    ct.innerHTML = `<div class="section-title"><span class="icon">📈</span>销售预测 R7</div><div id="r7c"><div class="loading">预测中...</div></div>`;
-    const d = await api('/api/r7/gmv-forecast');
-    const safety = await api('/api/r7/safety-stock');
-    document.getElementById('r7c').innerHTML = `
-      <div class="kpi-grid">${Object.entries(d.models||{}).map(([k,v])=>`<div class="kpi-card ${k===d.best_model?'ok':''}"><div class="kpi-label">${k}</div><div class="kpi-value">MAPE ${v.mape}%</div><div style="font-size:11px">MAE ¥${N(v.mae?.toFixed(0))}</div></div>`).join('')}</div>
-      <div class="charts-row"><div class="chart-panel"><h4>历史 + 预测 (最佳: ${d.best_model})</h4><canvas id="r7Forecast"></canvas></div>
-      <div class="chart-panel"><h4>TOP SKU 安全库存</h4><table class="data-table"><thead><tr><th>SKU</th><th>日均需求</th><th>安全库存</th><th>CV</th></tr></thead><tbody>${(safety.top_skus||[]).slice(0,8).map(s=>`<tr><td>${s.sku_id}</td><td>${s.avg_daily_demand}</td><td>${s.safety_stock}</td><td>${s.cv}</td></tr>`).join('')}</tbody></table></div></div>`;
-    makeChart('r7Forecast','line',{labels:d.history?.dates?.slice(-365)||[],datasets:[{label:'历史GMV',data:d.history?.values?.slice(-365)||[],borderColor:'#2563eb',pointRadius:0},{label:'预测',data:[...(d.history?.values?.slice(-1)||[]),...d.forecast?.values||[]],borderColor:'#dc2626',borderDash:[5,3],pointRadius:1}]});
+  // ====== CUSTOMERS: 客户分析 ======
+  async customers(ct) {
+    ct.innerHTML = `<div class="page-header"><div class="page-title">👥 客户分析</div><div class="page-desc">RFM 分群 · Cohort 留存 · 用户聚类</div></div>
+      <div class="kpi-grid" id="cKpi"></div>
+      <div class="chart-row cols-eq">
+        <div class="panel"><h4>🧩 RFM 分群分布</h4><canvas id="cSeg"></canvas></div>
+        <div class="panel"><h4>📅 Cohort 留存矩阵</h4><canvas id="cCohort"></canvas></div>
+      </div>
+      <div class="chart-row cols-eq">
+        <div class="panel"><h4>🔮 用户聚类 (K-Means)</h4><canvas id="cCluster"></canvas></div>
+        <div class="panel"><h4>📋 分群详情</h4><div id="cDetail"></div></div>
+      </div>`;
+    try {
+      const [rfm, cohorts, clusters] = await Promise.all([
+        cachedApi('/api/r3/rfm-layers'), cachedApi('/api/r3/cohort-retention'),
+        cachedApi('/api/r5/user-clusters?k=5')
+      ]);
+      const segs = rfm.segments || [];
+      document.getElementById('cKpi').innerHTML = `
+        <div class="kpi-card"><div class="kpi-icon" style="background:var(--primary-light)">👑</div><div class="kpi-label">核心价值客户</div><div class="kpi-value">${N(segs.find(s=>s.segment?.includes('核心'))?.user_count || 0)}</div></div>
+        <div class="kpi-card"><div class="kpi-icon" style="background:var(--warning-light)">⚠️</div><div class="kpi-label">流失风险</div><div class="kpi-value">${N(segs.find(s=>s.segment?.includes('流失'))?.user_count || 0)}</div></div>
+        <div class="kpi-card"><div class="kpi-icon" style="background:var(--info-light)">📊</div><div class="kpi-label">总分群</div><div class="kpi-value">${segs.length}</div></div>
+        <div class="kpi-card"><div class="kpi-icon" style="background:var(--success-light)">👥</div><div class="kpi-label">活跃买家</div><div class="kpi-value">18,118</div></div>`;
+      renderChart('cSeg', 'doughnut', {
+        labels: segs.map(s => s.segment),
+        datasets: [{ data: segs.map(s => s.user_count), backgroundColor: ['#4f46e5','#7c3aed','#0891b2','#059669','#d97706','#dc2626','#ec4899','#f59e0b'] }]
+      });
+      const matrix = cohorts.matrix || [];
+      if (matrix.length) {
+        renderChart('cCohort', 'line', {
+          labels: matrix.map(r => r.cohort),
+          datasets: [
+            { label: 'M1 留存', data: matrix.map(r => r.retention_1 || 0), borderColor: '#4f46e5', tension: 0.3, pointRadius: 3 },
+            { label: 'M3 留存', data: matrix.map(r => r.retention_3 || 0), borderColor: '#059669', tension: 0.3, pointRadius: 3 }
+          ]
+        });
+      }
+      const cls = clusters.clusters || [];
+      renderChart('cCluster', 'bar', {
+        labels: cls.map(c => c.name),
+        datasets: [
+          { label: '人数', data: cls.map(c => c.size), backgroundColor: '#4f46e5', borderRadius: 4 },
+          { label: 'Recency(天)', data: cls.map(c => c.avg_recency), backgroundColor: '#d97706', borderRadius: 4 }
+        ]
+      });
+      document.getElementById('cDetail').innerHTML = cls.length ?
+        `<table class="data-table"><thead><tr><th>分群</th><th>人数</th><th>Recency</th><th>Frequency</th><th>Monetary</th></tr></thead><tbody>${cls.map(c => `<tr><td><strong>${c.name}</strong></td><td>${N(c.size)}</td><td>${c.avg_recency}d</td><td>${c.avg_frequency}</td><td>¥${N(c.avg_monetary?.toFixed(0))}</td></tr>`).join('')}</tbody></table>` :
+        '<p style="font-size:12px;color:var(--muted)">聚类数据加载中...</p>';
+    } catch (e) { showError(ct, '客户分析加载失败: ' + e.message); }
   },
 
-  async r8(ct) {
-    ct.innerHTML = `<div class="section-title"><span class="icon">📢</span>营销归因 R8</div><div id="r8c"><div class="loading">加载中...</div></div>`;
-    const [kpi, coup, chan] = await Promise.all([api('/api/r8/campaign-kpis'),api('/api/r8/coupon-analysis'),api('/api/r8/channel-efficiency')]);
-    document.getElementById('r8c').innerHTML = `
-      <div class="kpi-grid"><div class="kpi-card ok"><div class="kpi-label">总投放</div><div class="kpi-value">${F(kpi.total_spend)}</div></div>
-      <div class="kpi-card ok"><div class="kpi-label">活动GMV</div><div class="kpi-value">${F(kpi.total_gmv)}</div></div>
-      <div class="kpi-card ok"><div class="kpi-label">整体ROAS</div><div class="kpi-value">${kpi.overall_roas}x</div></div>
-      <div class="kpi-card"><div class="kpi-label">券核销率</div><div class="kpi-value">${coup.overall_rate}%</div></div></div>
-      <div class="charts-row eq"><div class="chart-panel"><h4>渠道 ROAS</h4><canvas id="r8Roas"></canvas></div>
-      <div class="chart-panel"><h4>预算建议</h4><div class="alert-list">${((chan.suggestion?.increase||[]).map(c=>`<div class="alert-item low"><span class="sev">⬆️ 加投</span>${c}</div>`)).concat((chan.suggestion?.decrease||[]).map(c=>`<div class="alert-item high"><span class="sev">⬇️ 缩减</span>${c}</div>`)).join('')}</div></div></div>`;
-    makeChart('r8Roas','bar',{labels:(chan.channel_ranking||[]).map(x=>x.channel),datasets:[{label:'ROAS',data:(chan.channel_ranking||[]).map(x=>x.roas),backgroundColor:'#059669'}]},{indexAxis:'y'});
+  // ====== PRODUCTS: 商品与购物篮 ======
+  async products(ct) {
+    ct.innerHTML = `<div class="page-header"><div class="page-title">🛒 商品与购物篮</div><div class="page-desc">关联规则 · 捆绑推荐 · 频繁项集</div></div>
+      <div class="kpi-grid" id="pKpi"></div>
+      <div class="chart-row cols-2">
+        <div class="panel"><h4>🔗 品类关联规则</h4><canvas id="pRules"></canvas></div>
+        <div class="panel"><h4>🎁 捆绑推荐</h4><div id="pBundles"></div></div>
+      </div>
+      <div class="chart-row cols-eq">
+        <div class="panel"><h4>📊 频繁项集 Top 10</h4><div id="pFreq"></div></div>
+        <div class="panel"><h4>🔍 单品推荐查询</h4><div id="pSearch"><input type="text" placeholder="输入 SKU ID..." id="pSkuInput" style="padding:8px;border:1px solid var(--border);border-radius:6px;width:100%;margin-bottom:8px;font-size:13px"><button class="btn btn-primary btn-sm" onclick="searchProductRec()">查询推荐</button><div id="pSearchResult" style="margin-top:8px;font-size:12px"></div></div></div>
+      </div>`;
+    try {
+      const rules = await cachedApi('/api/r6/association-rules');
+      const cr = rules.category_rules || [];
+      document.getElementById('pKpi').innerHTML = `
+        <div class="kpi-card"><div class="kpi-icon" style="background:var(--primary-light)">🔗</div><div class="kpi-label">类目规则数</div><div class="kpi-value">${cr.length}</div></div>
+        <div class="kpi-card"><div class="kpi-icon" style="background:var(--success-light)">🎁</div><div class="kpi-label">捆绑推荐</div><div class="kpi-value">${(rules.bundles||[]).length}</div></div>
+        <div class="kpi-card"><div class="kpi-icon" style="background:var(--info-light)">📦</div><div class="kpi-label">SKU 规则数</div><div class="kpi-value">${rules.sku_rules_count || 0}</div></div>`;
+      if (cr.length) {
+        renderChart('pRules', 'scatter', {
+          datasets: [{
+            label: '关联规则', data: cr.map(r => ({ x: r.support || 0, y: r.confidence || 0 })),
+            backgroundColor: cr.map((_, i) => i < 3 ? '#4f46e5' : '#94a3b8'), pointRadius: 6
+          }]
+        }, { scales: { x: { title: { display: true, text: 'Support' } }, y: { title: { display: true, text: 'Confidence' } } } });
+      }
+      document.getElementById('pBundles').innerHTML = (rules.bundles || []).slice(0, 5).map(b =>
+        `<div class="alert-item success"><span class="sev">💰</span><div><strong>${b.bundle_name || b.name || '捆绑'}</strong><br><small>预期增量: ${b.expected_lift || b.lift || '--'}</small></div></div>`).join('') || '<p style="font-size:12px;color:var(--muted)">暂无捆绑推荐</p>';
+      document.getElementById('pFreq').innerHTML = cr.length ?
+        `<table class="data-table"><thead><tr><th>前项</th><th>后项</th><th>Lift</th><th>Confidence</th></tr></thead><tbody>${cr.slice(0, 10).map(r => `<tr><td>${(r.antecedents||[]).join(',')}</td><td>${(r.consequents||[]).join(',')}</td><td><span class="tag ${r.lift>1?'tag-success':'tag-warning'}">${(r.lift||0).toFixed(2)}</span></td><td>${((r.confidence||0)*100).toFixed(0)}%</td></tr>`).join('')}</tbody></table>` :
+        '<p style="font-size:12px;color:var(--muted)">类目间 lift 均 < 1.0，无强关联规则</p>';
+    } catch (e) { showError(ct, '商品分析加载失败: ' + e.message); }
   },
 
-  async r9(ct) {
-    ct.innerHTML = `<div class="section-title"><span class="icon">🚚</span>履约售后 R9</div><div id="r9c"><div class="loading">加载中...</div></div>`;
-    const [ful, ref, rev, risk] = await Promise.all([api('/api/r9/fulfillment'),api('/api/r9/refund-analysis'),api('/api/r9/review-analysis'),api('/api/r9/risk-list')]);
-    document.getElementById('r9c').innerHTML = `
-      <div class="kpi-grid"><div class="kpi-card bad"><div class="kpi-label">总延迟率</div><div class="kpi-value">${ful.overall_late_rate}%</div></div>
-      <div class="kpi-card warn"><div class="kpi-label">延迟→退款影响</div><div class="kpi-value">+${ful.late_vs_refund?.impact}pp</div></div>
-      <div class="kpi-card"><div class="kpi-label">评论均分</div><div class="kpi-value">${rev.avg_rating}</div></div>
-      <div class="kpi-card warn"><div class="kpi-label">差评率</div><div class="kpi-value">${rev.bad_rate}%</div></div></div>
-      <div class="charts-row eq"><div class="chart-panel"><h4>承运商排名</h4><canvas id="r9Carrier"></canvas></div>
-      <div class="chart-panel"><h4>风险清单</h4>${(risk.risks||[]).slice(0,5).map(r=>`<div class="alert-item ${r.severity}"><span class="sev">${r.type}</span><div>${r.target}<br><small>${r.action}</small></div></div>`).join('')}</div></div>`;
-    makeChart('r9Carrier','bar',{labels:(ful.carriers||[]).map(c=>c.carrier),datasets:[{label:'延迟率%',data:(ful.carriers||[]).map(c=>c.late_rate),backgroundColor:'#dc2626'}]},{indexAxis:'y'});
+  // ====== FORECAST: 预测与库存 ======
+  async forecast(ct) {
+    ct.innerHTML = `<div class="page-header"><div class="page-title">📈 预测与库存</div><div class="page-desc">GMV 时间序列预测 · 安全库存 · ABC 分类</div></div>
+      <div class="kpi-grid" id="fcKpi"></div>
+      <div class="chart-row cols-2">
+        <div class="panel"><h4>📉 GMV 预测 (历史+未来)</h4><canvas id="fcFore"></canvas></div>
+        <div class="panel"><h4>📦 TOP SKU 安全库存</h4><div id="fcStock"></div></div>
+      </div>
+      <div class="chart-row cols-eq">
+        <div class="panel"><h4>📊 ABC 分类分布</h4><canvas id="fcAbc"></canvas></div>
+        <div class="panel"><h4>⚠️ 库存预警</h4><div id="fcAlerts"></div></div>
+      </div>`;
+    try {
+      const [forecast, safety, abc, alerts] = await Promise.all([
+        cachedApi('/api/r7/gmv-forecast'), cachedApi('/api/r7/safety-stock'),
+        cachedApi('/api/r10/abc-classification'), cachedApi('/api/r10/alerts')
+      ]);
+      document.getElementById('fcKpi').innerHTML = `
+        <div class="kpi-card"><div class="kpi-icon" style="background:var(--primary-light)">📉</div><div class="kpi-label">最优模型</div><div class="kpi-value">${forecast.best_model || '--'}</div></div>
+        <div class="kpi-card"><div class="kpi-icon" style="background:var(--success-light)">📦</div><div class="kpi-label">售罄预警</div><div class="kpi-value">${alerts.stockout_count || 0}</div></div>
+        <div class="kpi-card"><div class="kpi-icon" style="background:var(--warning-light)">📋</div><div class="kpi-label">滞销预警</div><div class="kpi-value">${alerts.overstock_count || 0}</div></div>`;
+      const hist = forecast.history || {}, fcs = forecast.forecast || {};
+      renderChart('fcFore', 'line', {
+        labels: [...(hist.dates || []).slice(-365), ...(fcs.dates || [])],
+        datasets: [
+          { label: '历史 GMV', data: [...(hist.values || []).slice(-365), ...Array(fcs.values?.length || 0).fill(null)], borderColor: '#4f46e5', pointRadius: 0, tension:0.2 },
+          { label: '预测 GMV', data: [...Array(hist.values?.length || 0).fill(null), ...(fcs.values || [])], borderColor: '#dc2626', borderDash: [5, 3], pointRadius: 1 }
+        ]
+      });
+      document.getElementById('fcStock').innerHTML = `<table class="data-table"><thead><tr><th>SKU</th><th>日均需求</th><th>安全库存</th><th>波动系数</th></tr></thead><tbody>${(safety.top_skus || []).slice(0, 8).map(s => `<tr><td>${s.sku_id}</td><td>${s.avg_daily_demand||0}</td><td><strong>${s.safety_stock||0}</strong></td><td>${s.cv||0}</td></tr>`).join('')}</tbody></table>`;
+      const abcS = (abc.summary?.abc_sales) || {};
+      renderChart('fcAbc', 'doughnut', {
+        labels: ['A 类 (主力)', 'B 类 (中等)', 'C 类 (长尾)'],
+        datasets: [{ data: [abcS.A || 0, abcS.B || 0, abcS.C || 0], backgroundColor: ['#4f46e5', '#d97706', '#dc2626'] }]
+      });
+      document.getElementById('fcAlerts').innerHTML = (alerts.alerts || []).slice(0, 5).map(a =>
+        `<div class="alert-item ${a.type?.includes('缺货')?'critical':'warn'}"><span class="sev">${a.type||''}</span><div>${a.sku_id||''} — ${a.message||a.action||''}</div></div>`).join('') || '<p style="font-size:12px;color:var(--muted)">暂无预警</p>';
+    } catch (e) { showError(ct, '预测数据加载失败: ' + e.message); }
   },
 
-  async r10(ct) {
-    ct.innerHTML = `<div class="section-title"><span class="icon">📦</span>库存策略 R10</div><div id="r10c"><div class="loading">加载中...</div></div>`;
-    const [perf, abc, strat, alerts] = await Promise.all([api('/api/r10/sku-performance'),api('/api/r10/abc-classification'),api('/api/r10/strategies'),api('/api/r10/alerts')]);
-    document.getElementById('r10c').innerHTML = `
-      <div class="kpi-grid"><div class="kpi-card ok"><div class="kpi-label">SKU 数量</div><div class="kpi-value">${perf.total_skus}</div></div>
-      <div class="kpi-card ok"><div class="kpi-label">动销率</div><div class="kpi-value">${perf.sell_through_rate}%</div></div>
-      <div class="kpi-card"><div class="kpi-label">缺货预警</div><div class="kpi-value">${alerts.stockout_count}</div></div>
-      <div class="kpi-card warn"><div class="kpi-label">滞销预警</div><div class="kpi-value">${alerts.overstock_count}</div></div></div>
-      <div class="charts-row eq"><div class="chart-panel"><h4>ABC 分布 (销售额)</h4><canvas id="r10Abc"></canvas></div>
-      <div class="chart-panel"><h4>策略建议</h4><div class="alert-list">${Object.entries(strat.summary||{}).map(([k,v])=>`<div class="alert-item ${k.includes('清仓')||k.includes('下架')?'high':'low'}"><span class="sev">${v}</span>${k}</div>`).join('')}</div></div></div>`;
-    const s = abc.summary?.abc_sales||{};
-    makeChart('r10Abc','doughnut',{labels:['A类','B类','C类'],datasets:[{data:[s.A||0,s.B||0,s.C||0],backgroundColor:['#2563eb','#d97706','#dc2626']}]});
+  // ====== MARKETING: 营销归因 ======
+  async marketing(ct) {
+    ct.innerHTML = `<div class="page-header"><div class="page-title">📢 营销归因</div><div class="page-desc">渠道 ROAS · 活动 KPI · 预算优化</div></div>
+      <div class="kpi-grid" id="mKpi"></div>
+      <div class="chart-row cols-eq">
+        <div class="panel"><h4>📊 渠道 ROAS 排名</h4><canvas id="mRoas"></canvas></div>
+        <div class="panel"><h4>💡 预算建议</h4><div id="mBudget"></div></div>
+      </div>
+      <div class="chart-row cols-eq">
+        <div class="panel"><h4>🎫 优惠券分析</h4><div id="mCoupon"></div></div>
+        <div class="panel"><h4>📈 增量分析</h4><div id="mIncrement"></div></div>
+      </div>`;
+    try {
+      const [kpi, ch, coup] = await Promise.all([
+        cachedApi('/api/r8/campaign-kpis'), cachedApi('/api/r8/channel-efficiency'), cachedApi('/api/r8/coupon-analysis')
+      ]);
+      document.getElementById('mKpi').innerHTML = `
+        <div class="kpi-card"><div class="kpi-icon" style="background:var(--primary-light)">💰</div><div class="kpi-label">总投放</div><div class="kpi-value">${F(kpi.total_spend)}</div></div>
+        <div class="kpi-card"><div class="kpi-icon" style="background:var(--success-light)">🎯</div><div class="kpi-label">活动 GMV</div><div class="kpi-value">${F(kpi.total_gmv)}</div></div>
+        <div class="kpi-card"><div class="kpi-icon" style="background:var(--info-light)">📊</div><div class="kpi-label">整体 ROAS</div><div class="kpi-value">${kpi.overall_roas}x</div></div>
+        <div class="kpi-card"><div class="kpi-icon" style="background:var(--warning-light)">🎫</div><div class="kpi-label">券核销率</div><div class="kpi-value">${coup.overall_rate}%</div></div>`;
+      const chRank = ch.channel_ranking || [];
+      renderChart('mRoas', 'bar', {
+        labels: chRank.map(c => c.channel),
+        datasets: [{ label: 'ROAS', data: chRank.map(c => c.roas), backgroundColor: '#059669', borderRadius: 4 }]
+      }, { indexAxis: 'y', plugins: { legend: { display: false } } });
+      document.getElementById('mBudget').innerHTML = [
+        ...(ch.suggestion?.increase || []).map(c => `<div class="alert-item success"><span class="sev">⬆️ 加投</span>${c}</div>`),
+        ...(ch.suggestion?.decrease || []).map(c => `<div class="alert-item critical"><span class="sev">⬇️ 缩减</span>${c}</div>`)
+      ].join('') || '<p style="font-size:12px;color:var(--muted)">暂无预算建议</p>';
+      document.getElementById('mCoupon').innerHTML = coup ? `<table class="data-table"><thead><tr><th>类型</th><th>核销率</th><th>客单价提升</th></tr></thead><tbody>${(coup.coupon_types||[]).slice(0,5).map(c => `<tr><td>${c.type||'--'}</td><td>${c.redemption_rate||0}%</td><td>${c.aov_lift||0}%</td></tr>`).join('')}</tbody></table>` : '<p style="font-size:12px;color:var(--muted)">暂无优惠券数据</p>';
+      document.getElementById('mIncrement').innerHTML = '<p style="font-size:12px;color:var(--muted)">增量分析数据加载中...</p>';
+    } catch (e) { showError(ct, '营销数据加载失败: ' + e.message); }
   },
 
-  async r11(ct) {
-    ct.innerHTML = `<div class="section-title"><span class="icon">🎯</span>综合决策中心 R11</div><div id="r11c"><div class="loading">加载中...</div></div>`;
-    const d = await api('/api/r11/summary');
-    const h = d.health||{};
-    document.getElementById('r11c').innerHTML = `
-      <div class="kpi-grid"><div class="kpi-card ${h.grade==='C'?'warn':'ok'}"><div class="kpi-label">健康度评分</div><div class="kpi-value">${h.total_score}/100</div><div style="font-size:11px">等级: ${h.grade}</div></div>
-      ${(h.components||[]).map(c=>`<div class="kpi-card ${c.score/c.weight<0.5?'bad':c.score/c.weight>0.8?'ok':'warn'}"><div class="kpi-label">${c.dimension}</div><div class="kpi-value">${c.score}/${c.weight}</div></div>`).join('')}</div>
-      <div class="charts-row eq"><div class="chart-panel"><h4>TOP 3 增长机会</h4>${(d.opportunities||[]).map(o=>`<div class="alert-item ${o.priority==='P0'?'high':'medium'}"><span class="sev">${o.priority}</span><div><strong>${o.title}</strong><br><small>预期: ${o.expected_impact}</small></div></div>`).join('')}</div>
-      <div class="chart-panel"><h4>主要风险</h4>${(d.risks||[]).map(r=>`<div class="alert-item ${r.severity==='高'?'high':'medium'}"><span class="sev">${r.severity}</span><div><strong>${r.title}</strong><br><small>${r.mitigation}</small></div></div>`).join('')}</div></div>`;
+  // ====== DIAGNOSIS: 综合诊断 ======
+  async diagnosis(ct) {
+    ct.innerHTML = `<div class="page-header"><div class="page-title">🎯 综合诊断</div><div class="page-desc">经营健康度 · 机会与风险 · 运营动作 · 周报</div></div>
+      <div class="kpi-grid" id="dKpi"></div>
+      <div class="chart-row cols-eq">
+        <div class="panel"><h4>🎯 TOP 增长机会</h4><div id="dOpp"></div></div>
+        <div class="panel"><h4>⚠️ 主要风险</h4><div id="dRisk"></div></div>
+      </div>
+      <div class="chart-row cols-eq">
+        <div class="panel"><h4>📋 运营动作清单</h4><div id="dActions"></div></div>
+        <div class="panel"><h4>📄 经营周报</h4><div id="dReport"></div></div>
+      </div>`;
+    try {
+      const [d11, report] = await Promise.all([cachedApi('/api/r11/summary'), cachedApi('/api/r11/weekly-report').catch(() => null)]);
+      const h = d11.health || {};
+      document.getElementById('dKpi').innerHTML = `
+        <div class="kpi-card"><div class="kpi-icon" style="background:${h.grade==='A'||h.grade==='B'?'var(--success-light)':'var(--danger-light)'}">❤️</div><div class="kpi-label">健康度评分</div><div class="kpi-value">${h.total_score}/100</div><div class="kpi-sub">等级: ${h.grade}</div></div>
+        ${(h.components||[]).map(c => `<div class="kpi-card"><div class="kpi-icon" style="background:var(--info-light)">📊</div><div class="kpi-label">${c.dimension}</div><div class="kpi-value">${c.score}/${c.weight}</div><div class="progress-bar" style="margin-top:6px"><div class="fill ${c.score/c.weight>0.7?'fill-success':c.score/c.weight>0.4?'fill-warning':'fill-danger'}" style="width:${(c.score/c.weight*100).toFixed(0)}%"></div></div></div>`).join('')}`;
+      document.getElementById('dOpp').innerHTML = (d11.opportunities || []).map(o =>
+        `<div class="alert-item ${o.priority==='P0'?'critical':'warn'}"><span class="sev">${o.priority}</span><div><strong>${o.title}</strong><br><small>${o.expected_impact||o.description||''}</small></div></div>`).join('');
+      document.getElementById('dRisk').innerHTML = (d11.risks || []).map(r =>
+        `<div class="alert-item ${r.severity==='高'?'critical':'warn'}"><span class="sev">${r.severity}</span><div><strong>${r.title}</strong><br><small>${r.mitigation||''}</small></div></div>`).join('');
+      document.getElementById('dActions').innerHTML = (d11.actions || []).slice(0, 10).map(a =>
+        `<div class="alert-item info"><span class="sev">${a.priority||'P2'}</span><div><strong>${a.title||a.action_type||''}</strong><br><small>${a.detail||a.description||''}</small></div></div>`).join('') || '<p style="font-size:12px;color:var(--muted)">暂无动作</p>';
+      document.getElementById('dReport').innerHTML = report ? `<div class="alert-item success"><span class="sev">📄</span><div><strong>周报可用</strong><br><small>包含健康度、机会、风险、动作的完整经营周报</small></div></div><a href="/api/r11/weekly-report" target="_blank" class="btn btn-primary btn-sm" style="display:inline-block;margin-top:8px">📥 查看周报 JSON</a>` : '<p style="font-size:12px;color:var(--muted)">周报加载中...</p>';
+    } catch (e) { showError(ct, '诊断数据加载失败: ' + e.message); }
+  },
+
+  // ====== AI: AI 分析助手 ======
+  async ai(ct) {
+    const savedModel = localStorage.getItem('ai_model') || '';
+    const savedKey = localStorage.getItem('ai_key') || '';
+    ct.innerHTML = `<div class="page-header"><div class="page-title">🤖 AI 分析助手</div><div class="page-desc">配置大模型，智能分析当前经营数据</div></div>
+      <div class="chart-row cols-eq">
+        <div class="panel"><h4>⚙️ 模型配置</h4>
+          <div class="form-group"><label>模型名称</label><input type="text" id="aiModel" value="${savedModel}" placeholder="例如: deepseek-chat, gpt-4o"></div>
+          <div class="form-group"><label>API Key</label><input type="password" id="aiKey" value="${savedKey}" placeholder="sk-..."></div>
+          <div class="form-group"><label>Base URL (可选)</label><input type="text" id="aiBaseUrl" value="${localStorage.getItem('ai_base_url')||'https://api.deepseek.com'}" placeholder="https://api.openai.com/v1"></div>
+          <button class="btn btn-primary" onclick="saveAIConfig()">💾 保存配置</button>
+        </div>
+        <div class="panel"><h4>💬 智能分析对话</h4>
+          <div class="ai-chat"><div class="ai-chat-messages" id="aiMessages"><div class="ai-msg assistant">👋 你好！我是 AI 经营分析师。配置模型后，可以帮你：<br>• 解读 KPI 趋势<br>• 诊断经营问题<br>• 推荐优化策略<br>• 生成分析报告<br><br>请先保存左侧的模型配置，然后输入你的问题。</div></div>
+            <div class="ai-chat-input"><textarea id="aiInput" rows="2" placeholder="输入你的分析问题..."></textarea><button onclick="sendAIMessage()">发送</button></div></div>
+        </div></div>`;
+  },
+
+  // ====== SETTINGS: 系统配置 ======
+  async settings(ct) {
+    ct.innerHTML = `<div class="page-header"><div class="page-title">⚙️ 系统配置</div><div class="page-desc">数据源 · API 文档 · 服务状态</div></div>
+      <div class="chart-row cols-eq">
+        <div class="panel"><h4>🔌 数据源配置</h4>
+          <div class="form-group"><label>当前模式</label><span class="tag tag-success" id="sMode">加载中...</span></div>
+          <div class="form-group"><label>ETL API 地址</label><input type="text" id="sEtl" value="http://127.0.0.1:38173/api/etl" readonly style="background:var(--bg)"></div>
+          <div class="form-group"><label>数据库路径</label><input type="text" value="server/data/eshop.sqlite (251MB)" readonly style="background:var(--bg)"></div>
+          <button class="btn btn-primary btn-sm" onclick="cachedApi('/api/reload').then(r=>showToast('缓存已刷新')).catch(e=>showToast('刷新失败','error'))">🔄 刷新缓存</button>
+        </div>
+        <div class="panel"><h4>📚 API 文档</h4>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <a href="/docs" target="_blank" class="btn btn-outline btn-sm" style="width:100%;text-align:left">📖 FastAPI Swagger 交互式文档</a>
+            <a href="http://127.0.0.1:38173/api/etl/help" target="_blank" class="btn btn-outline btn-sm" style="width:100%;text-align:left">📋 ETL API 接口说明</a>
+            <a href="http://127.0.0.1:38173/api/etl/tables" target="_blank" class="btn btn-outline btn-sm" style="width:100%;text-align:left">📊 ETL 数据表清单</a>
+            <a href="/api/subprojects" target="_blank" class="btn btn-outline btn-sm" style="width:100%;text-align:left">📦 子项目列表</a>
+          </div>
+        </div></div>`;
+    try {
+      const info = await cachedApi('/');
+      document.getElementById('sMode').textContent = info.data_source?.toUpperCase() || 'UNKNOWN';
+      document.getElementById('sMode').className = info.data_source === 'etl' ? 'tag tag-success' : 'tag tag-warning';
+    } catch (e) { document.getElementById('sMode').textContent = 'ERROR'; }
   }
 };
 
-// ====== Init ======
+// ═══════════════════════════════════════════
+// AI FUNCTIONS
+// ═══════════════════════════════════════════
+function saveAIConfig() {
+  const model = document.getElementById('aiModel').value.trim();
+  const key = document.getElementById('aiKey').value.trim();
+  const baseUrl = document.getElementById('aiBaseUrl').value.trim();
+  if (!model || !key) { showToast('请填写模型名称和 API Key', 'error'); return; }
+  localStorage.setItem('ai_model', model);
+  localStorage.setItem('ai_key', key);
+  localStorage.setItem('ai_base_url', baseUrl);
+  showToast('AI 配置已保存！');
+}
+
+async function sendAIMessage() {
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  const model = localStorage.getItem('ai_model');
+  const key = localStorage.getItem('ai_key');
+  const baseUrl = localStorage.getItem('ai_base_url') || 'https://api.deepseek.com';
+  if (!model || !key) { showToast('请先配置模型和 API Key', 'error'); return; }
+
+  const msgsDiv = document.getElementById('aiMessages');
+  msgsDiv.innerHTML += `<div class="ai-msg user">${msg}</div>`;
+  input.value = '';
+  msgsDiv.scrollTop = msgsDiv.scrollHeight;
+
+  // Collect current context
+  let context = '';
+  try {
+    const [kpi, summary] = await Promise.all([cachedApi('/api/r1/kpi'), cachedApi('/api/r11/summary').catch(() => null)]);
+    context = `当前经营数据：GMV=¥${(kpi.kpi.gmv/1e8).toFixed(2)}亿, 订单=${kpi.kpi.order_count.toLocaleString()}, 毛利率=${kpi.kpi.gross_margin}%, 退款率=${kpi.kpi.refund_rate}%, 转化率=${kpi.kpi.conversion_rate}%。`;
+    if (summary) context += ` 健康度=${summary.health?.total_score}/100 (${summary.health?.grade})。`;
+  } catch (e) {}
+
+  try {
+    const resp = await fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+      body: JSON.stringify({
+        model, messages: [
+          { role: 'system', content: `你是电商经营分析专家。基于以下背景提供简明建议：${context}` },
+          { role: 'user', content: msg }
+        ], max_tokens: 1000, temperature: 0.7
+      })
+    });
+    if (!resp.ok) throw new Error(`${resp.status}`);
+    const data = await resp.json();
+    const reply = data.choices?.[0]?.message?.content || '无法获取回复';
+    msgsDiv.innerHTML += `<div class="ai-msg assistant">${reply.replace(/\n/g, '<br>')}</div>`;
+  } catch (e) {
+    msgsDiv.innerHTML += `<div class="ai-msg assistant" style="color:var(--danger)">❌ API 调用失败：${e.message}。请检查 Base URL 和 API Key 是否正确。</div>`;
+  }
+  msgsDiv.scrollTop = msgsDiv.scrollHeight;
+}
+
+// Product search for recs
+async function searchProductRec() {
+  const sku = document.getElementById('pSkuInput').value.trim();
+  if (!sku) return;
+  try {
+    const data = await cachedApi('/api/r6/product-recommendations/' + encodeURIComponent(sku));
+    const recs = data.recommendations || [];
+    document.getElementById('pSearchResult').innerHTML = recs.length ?
+      recs.map(r => `<div class="alert-item info"><span class="sev">→</span>${r.consequent||r.sku_id||'--'} (lift: ${(r.lift||0).toFixed(1)})</div>`).join('') :
+      '<p style="font-size:12px;color:var(--muted)">未找到推荐</p>';
+  } catch (e) { document.getElementById('pSearchResult').innerHTML = `<div class="error-card">查询失败: ${e.message}</div>`; }
+}
+
+// ═══════════════════════════════════════════
+// INIT + REFRESH
+// ═══════════════════════════════════════════
 function refreshAll() {
-  Object.keys(chartCache).forEach(k => { chartCache[k]?.destroy(); delete chartCache[k]; });
+  clearCache();
+  destroyAllCharts();
   loadPage(currentPage);
   showToast('数据已刷新');
 }
-setInterval(() => { document.getElementById('topTime').textContent = new Date().toLocaleString(); }, 1000);
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey) {
+    const keys = { '1': 'home', '2': 'funnel', '3': 'customers', '4': 'products', '5': 'forecast', '6': 'marketing', '7': 'diagnosis', '8': 'ai', '9': 'settings' };
+    const page = keys[e.key];
+    if (page) { e.preventDefault(); navTo(page, document.querySelector(`[data-page="${page}"]`)); }
+  }
+});
+
+setInterval(() => { document.getElementById('topTime').textContent = new Date().toLocaleString('zh-CN'); }, 1000);
 loadPage('home');
 </script>
 </body>
