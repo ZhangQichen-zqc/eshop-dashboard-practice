@@ -230,14 +230,20 @@ a{text-decoration:none;color:inherit}
     <span class="logo-badge">v2.0</span>
   </div>
   <div class="sidebar-nav">
+    <div class="nav-section">核心仪表盘</div>
     <a href="#home" class="active" data-page="home"><span class="nav-icon">🏠</span>经营总览</a>
-    <a href="#funnel" data-page="funnel"><span class="nav-icon">🔻</span>漏斗诊断</a>
-    <a href="#customers" data-page="customers"><span class="nav-icon">👥</span>客户分析</a>
-    <a href="#products" data-page="products"><span class="nav-icon">🛒</span>商品与购物篮</a>
-    <a href="#forecast" data-page="forecast"><span class="nav-icon">📈</span>预测与库存</a>
-    <a href="#marketing" data-page="marketing"><span class="nav-icon">📢</span>营销归因</a>
-    <a href="#diagnosis" data-page="diagnosis"><span class="nav-icon">🎯</span>综合诊断</a>
-    <div class="nav-section">工具</div>
+    <a href="#funnel" data-page="funnel"><span class="nav-icon">🔻</span>漏斗诊断 R2</a>
+    <a href="#customers" data-page="customers"><span class="nav-icon">👥</span>客户分析 R3/R5</a>
+    <a href="#products" data-page="products"><span class="nav-icon">🛒</span>商品与购物篮 R6</a>
+    <a href="#forecast" data-page="forecast"><span class="nav-icon">📈</span>预测与库存 R7/R10</a>
+    <a href="#marketing" data-page="marketing"><span class="nav-icon">📢</span>营销归因 R8</a>
+    <div class="nav-section">数据挖掘模块</div>
+    <a href="#r0_quality" data-page="r0_quality"><span class="nav-icon">✅</span>数据质量 R0</a>
+    <a href="#r1_cockpit" data-page="r1_cockpit"><span class="nav-icon">📊</span>经营驾驶舱 R1</a>
+    <a href="#r4_repurchase" data-page="r4_repurchase"><span class="nav-icon">🤖</span>复购预测 R4</a>
+    <a href="#r9_fulfillment" data-page="r9_fulfillment"><span class="nav-icon">🚚</span>履约售后 R9</a>
+    <div class="nav-section">综合工具</div>
+    <a href="#diagnosis" data-page="diagnosis"><span class="nav-icon">🎯</span>综合决策 R11</a>
     <a href="#ai" data-page="ai"><span class="nav-icon">🤖</span>AI 分析助手</a>
     <a href="#settings" data-page="settings"><span class="nav-icon">⚙️</span>系统配置</a>
   </div>
@@ -395,13 +401,17 @@ function lazyRenderChart(id, fn) {
 
 // ====== Preloaders ======
 const pagePreloaders = {
-  home() { cachedApi('/api/r1/kpi'); cachedApi('/api/r11/summary'); cachedApi('/api/r1/trends'); },
-  funnel() { cachedApi('/api/r2/funnel'); cachedApi('/api/r2/dropoff-analysis'); },
-  customers() { cachedApi('/api/r3/rfm-layers'); cachedApi('/api/r3/cohort-retention'); },
+  home() { cachedApi('/api/r1/kpi'); },
+  funnel() { cachedApi('/api/r2/funnel'); },
+  customers() { cachedApi('/api/r3/rfm-layers'); },
   products() { cachedApi('/api/r6/association-rules'); },
-  forecast() { cachedApi('/api/r7/gmv-forecast'); cachedApi('/api/r7/safety-stock'); },
-  marketing() { cachedApi('/api/r8/campaign-kpis'); cachedApi('/api/r8/channel-efficiency'); },
+  forecast() { cachedApi('/api/r7/gmv-forecast'); },
+  marketing() { cachedApi('/api/r8/campaign-kpis'); },
   diagnosis() { cachedApi('/api/r11/summary'); },
+  r0_quality() { cachedApi('/api/quality'); },
+  r1_cockpit() { cachedApi('/api/r1/dashboard'); },
+  r4_repurchase() {},
+  r9_fulfillment() { cachedApi('/api/r9/fulfillment'); },
 };
 
 // ═══════════════════════════════════════════
@@ -412,109 +422,76 @@ const pageRenderers = {
 
   // ====== HOME: 经营总览 ======
   async home(ct) {
+    // Phase 1: Show skeleton immediately, load critical data first
     ct.innerHTML = `
       <div class="page-header"><div class="page-title">🏠 经营总览</div><div class="page-desc">核心 KPI 监控 · 趋势洞察 · 关键决策信号</div></div>
-      <div class="kpi-grid" id="homeKpi"></div>
-      <div class="chart-row cols-3" style="margin-bottom:16px">
-        <div class="panel" style="text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:140px">
-          <div style="font-size:40px;margin-bottom:4px">📊</div><div style="font-size:12px;color:var(--muted)">数据表</div><div style="font-size:28px;font-weight:700;color:var(--primary)" id="hTableCount">--</div>
-        </div>
-        <div class="panel" style="text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:140px">
-          <div style="font-size:40px;margin-bottom:4px">🗄️</div><div style="font-size:12px;color:var(--muted)">数据规模</div><div style="font-size:28px;font-weight:700;color:var(--primary)" id="hDataSize">--</div>
-        </div>
-        <div class="panel" style="text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:140px">
-          <div style="font-size:40px;margin-bottom:4px">⏱️</div><div style="font-size:12px;color:var(--muted)">数据源模式</div><div style="font-size:20px;font-weight:700;color:var(--success)" id="hDsMode">--</div>
-        </div>
-      </div>
+      <div class="kpi-grid" id="homeKpi"><div class="kpi-card"><div class="skeleton" style="height:80px"></div></div><div class="kpi-card"><div class="skeleton" style="height:80px"></div></div><div class="kpi-card"><div class="skeleton" style="height:80px"></div></div><div class="kpi-card"><div class="skeleton" style="height:80px"></div></div><div class="kpi-card"><div class="skeleton" style="height:80px"></div></div><div class="kpi-card"><div class="skeleton" style="height:80px"></div></div></div>
       <div class="chart-row cols-2">
-        <div class="panel"><h4>📊 月度 GMV 趋势 <span style="font-weight:400;font-size:11px;color:var(--muted)">近24月</span></h4><canvas id="hTrend"></canvas></div>
-        <div class="panel"><h4>📢 渠道 ROAS 排名 <span style="font-weight:400;font-size:11px;color:var(--muted)">越高越优</span></h4><canvas id="hRoas"></canvas></div>
-      </div>
-      <div class="chart-row cols-2">
-        <div class="panel"><h4>🔎 品类 GMV 贡献</h4><canvas id="hCat"></canvas></div>
-        <div class="panel"><h4>📋 月度异常信号</h4><div id="hAnomaly"></div></div>
-      </div>
-      <div class="chart-row cols-eq">
-        <div class="panel"><h4>🎯 TOP 增长机会</h4><div id="hOpp"></div></div>
-        <div class="panel"><h4>⚠️ 主要风险</h4><div id="hRisk"></div></div>
+        <div class="panel"><h4>📊 月度 GMV 趋势</h4><div class="skeleton" style="height:240px"></div></div>
+        <div class="panel"><h4>📢 渠道 ROAS 排名</h4><div class="skeleton" style="height:240px"></div></div>
       </div>`;
-    try {
-      const [d1, d11, trends, cats, r1full] = await Promise.all([
-        cachedApi('/api/r1/kpi'), cachedApi('/api/r11/summary'), cachedApi('/api/r1/trends'),
-        cachedApi('/api/r1/category-breakdown'), cachedApi('/api/r1/dashboard')
-      ]);
-      const k = d1.kpi;
 
-      // KPI cards with gradient backgrounds
-      const kpiDefs = [
+    // Phase 1: Load KPIs first (fast, already cached from startup)
+    try {
+      const d1 = await cachedApi('/api/r1/kpi');
+      const k = d1.kpi;
+      document.getElementById('homeKpi').innerHTML = [
         { icon:'💰', label:'GMV', val:F(k.gmv), mom:d1.mom?.gmv_mom, bg:'linear-gradient(135deg,#eef2ff,#e0e7ff)' },
         { icon:'📈', label:'毛利率', val:k.gross_margin+'%', mom:null, bg:'linear-gradient(135deg,#ecfdf5,#d1fae5)' },
         { icon:'📦', label:'订单数', val:N(k.order_count), mom:d1.mom?.orders_mom, bg:'linear-gradient(135deg,#ecfeff,#cffafe)' },
         { icon:'👤', label:'客单价', val:'¥'+N(k.aov), mom:d1.mom?.aov_mom, bg:'linear-gradient(135deg,#fffbeb,#fef3c7)' },
         { icon:'↩️', label:'退款率', val:k.refund_rate+'%', mom:null, bg:'linear-gradient(135deg,#fef2f2,#fee2e2)' },
         { icon:'🎯', label:'转化率', val:k.conversion_rate+'%', mom:null, bg:'linear-gradient(135deg,#f0fdf4,#dcfce7)' },
-      ];
-      document.getElementById('homeKpi').innerHTML = kpiDefs.map(d =>
-        `<div class="kpi-card" style="background:${d.bg};border:none">
-          <div class="kpi-icon" style="background:#fff">${d.icon}</div>
-          <div class="kpi-label">${d.label}</div>
-          <div class="kpi-value">${d.val}</div>
-          ${d.mom != null ? momHtml(d.mom) : ''}
-        </div>`).join('');
+      ].map(d => `<div class="kpi-card" style="background:${d.bg};border:none"><div class="kpi-icon" style="background:#fff">${d.icon}</div><div class="kpi-label">${d.label}</div><div class="kpi-value">${d.val}</div>${d.mom!=null?momHtml(d.mom):''}</div>`).join('');
+    } catch(e) {}
 
-      // Summary stats
-      document.getElementById('hTableCount').textContent = '34 张';
-      document.getElementById('hDataSize').textContent = '251 MB';
+    // Phase 2: Load charts + extended data in second pass (don't block)
+    try {
+      const [trends, cats, d11, r8d] = await Promise.all([
+        cachedApi('/api/r1/trends'), cachedApi('/api/r1/category-breakdown'),
+        cachedApi('/api/r11/summary'), cachedApi('/api/r8/campaign-kpis')
+      ]);
+      // Replace skeleton content with real content
+      ct.innerHTML = ct.innerHTML.replace(/skeleton.*?<\/div>/g, '');
+      // Rebuild full layout
+      let h = `
+      <div class="page-header"><div class="page-title">🏠 经营总览</div><div class="page-desc">核心 KPI 监控 · 趋势洞察 · 关键决策信号</div></div>
+      <div class="kpi-grid" id="homeKpi2"></div>
+      <div class="chart-row cols-3" style="margin-bottom:16px">
+        <div class="panel" style="text-align:center"><div style="font-size:40px">📊</div><div style="font-size:12px;color:var(--muted)">数据表</div><div style="font-size:28px;font-weight:700;color:var(--primary)">34 张</div></div>
+        <div class="panel" style="text-align:center"><div style="font-size:40px">🗄️</div><div style="font-size:12px;color:var(--muted)">数据规模</div><div style="font-size:28px;font-weight:700;color:var(--primary)">251 MB</div></div>
+        <div class="panel" style="text-align:center"><div style="font-size:40px">⏱️</div><div style="font-size:12px;color:var(--muted)">数据源</div><div style="font-size:20px;font-weight:700;color:var(--success)">ETL</div></div>
+      </div>
+      <div class="chart-row cols-2">
+        <div class="panel"><h4>📊 月度 GMV 趋势</h4><canvas id="hTrend"></canvas></div>
+        <div class="panel"><h4>📢 渠道 ROAS</h4><canvas id="hRoas"></canvas></div>
+      </div>
+      <div class="chart-row cols-2">
+        <div class="panel"><h4>🔎 品类 GMV 贡献</h4><canvas id="hCat"></canvas></div>
+        <div class="panel"><h4>🎯 决策信号</h4><div id="hSig"></div></div>
+      </div>`;
+      ct.innerHTML = h;
+      // Rebuild KPI cards
       try {
-        const info = await cachedApi('/');
-        document.getElementById('hDsMode').textContent = (info.data_source||'?').toUpperCase();
+        const d1 = await cachedApi('/api/r1/kpi');
+        const k = d1.kpi;
+        document.getElementById('homeKpi2').innerHTML = [
+          { icon:'💰', label:'GMV', val:F(k.gmv), mom:d1.mom?.gmv_mom, bg:'linear-gradient(135deg,#eef2ff,#e0e7ff)' },
+          { icon:'📈', label:'毛利率', val:k.gross_margin+'%', mom:null, bg:'linear-gradient(135deg,#ecfdf5,#d1fae5)' },
+          { icon:'📦', label:'订单数', val:N(k.order_count), mom:d1.mom?.orders_mom, bg:'linear-gradient(135deg,#ecfeff,#cffafe)' },
+          { icon:'👤', label:'客单价', val:'¥'+N(k.aov), mom:d1.mom?.aov_mom, bg:'linear-gradient(135deg,#fffbeb,#fef3c7)' },
+          { icon:'↩️', label:'退款率', val:k.refund_rate+'%', mom:null, bg:'linear-gradient(135deg,#fef2f2,#fee2e2)' },
+          { icon:'🎯', label:'转化率', val:k.conversion_rate+'%', mom:null, bg:'linear-gradient(135deg,#f0fdf4,#dcfce7)' },
+        ].map(d => `<div class="kpi-card" style="background:${d.bg};border:none"><div class="kpi-icon" style="background:#fff">${d.icon}</div><div class="kpi-label">${d.label}</div><div class="kpi-value">${d.val}</div>${d.mom!=null?momHtml(d.mom):''}</div>`).join('');
       } catch(e) {}
-
-      // GMV trend with gradient
-      renderChart('hTrend', 'bar', {
-        labels: (trends.trends||[]).map(d => d.ym),
-        datasets: [{
-          label: 'GMV(万元)', data: (trends.trends||[]).map(d => d.gmv / 10000),
-          backgroundColor: ctx => {
-            const grad = ctx.chart.ctx.createLinearGradient(0,0,0,280);
-            grad.addColorStop(0,'#4f46e5'); grad.addColorStop(1,'#a5b4fc');
-            return grad;
-          }, borderRadius: 6, barThickness: 18
-        }]
-      }, { plugins: { legend: { display: false } } });
-
-      // Channel ROAS
-      try {
-        const r8d = await cachedApi('/api/r8/campaign-kpis');
-        renderChart('hRoas', 'bar', {
-          labels: (r8d.channel_summary || []).map(d => d.channel),
-          datasets: [{ label: 'ROAS', data: (r8d.channel_summary || []).map(d => d.roas),
-            backgroundColor: ['#4f46e5','#7c3aed','#0891b2','#059669','#d97706','#dc2626'], borderRadius: 5 }]
-        }, { indexAxis:'y', plugins:{ legend:{display:false} } });
-      } catch(e) {}
-
-      // Category breakdown
+      // Charts
+      renderChart('hTrend','bar',{labels:(trends.trends||[]).map(d=>d.ym),datasets:[{label:'GMV(万元)',data:(trends.trends||[]).map(d=>d.gmv/10000),backgroundColor:'#4f46e5',borderRadius:6}]},{plugins:{legend:{display:false}}});
+      renderChart('hRoas','bar',{labels:(r8d.channel_summary||[]).map(d=>d.channel),datasets:[{label:'ROAS',data:(r8d.channel_summary||[]).map(d=>d.roas),backgroundColor:['#4f46e5','#7c3aed','#0891b2','#059669','#d97706','#dc2626'],borderRadius:5}]},{indexAxis:'y',plugins:{legend:{display:false}}});
       const catData = cats.categories || [];
-      if (catData.length) {
-        renderChart('hCat', 'bar', {
-          labels: catData.map(c => c.category_name),
-          datasets: [{ label: 'GMV(万元)', data: catData.map(c => c.gmv/10000), backgroundColor: '#4f46e5', borderRadius: 5 }]
-        }, { indexAxis:'y', plugins:{ legend:{display:false} } });
-      }
-
-      // Anomalies
-      const anomalies = r1full.anomalies || [];
-      document.getElementById('hAnomaly').innerHTML = anomalies.length ?
-        `<table class="data-table"><thead><tr><th>月份</th><th>指标</th><th>变化</th><th>方向</th></tr></thead><tbody>${anomalies.slice(0, 8).map(a =>
-          `<tr><td>${a.month||'--'}</td><td>${a.indicator||'--'}</td><td>${Math.abs(a.change_pct||0).toFixed(1)}%</td><td><span class="tag ${a.direction==='up'?'tag-success':'tag-danger'}">${a.direction==='up'?'↑上升':'↓下降'}</span></td></tr>`).join('')}</tbody></table>` :
-        '<p style="font-size:13px;color:var(--muted);padding:12px">✅ 近月无显著异常</p>';
-
-      // Opportunities & Risks
-      document.getElementById('hOpp').innerHTML = (d11.opportunities || []).slice(0, 4).map((o,i) =>
-        `<div class="alert-item ${i===0?'critical':i===1?'warn':'info'}"><span class="sev">${o.priority}</span><div><strong>${o.title}</strong><br><small>${(o.description||o.expected_impact||'').substring(0,120)}</small></div></div>`).join('') || '<p style="font-size:12px;color:var(--muted)">暂无数据</p>';
-      document.getElementById('hRisk').innerHTML = (d11.risks || []).slice(0, 4).map(r =>
-        `<div class="alert-item ${r.severity==='高'?'critical':'warn'}"><span class="sev">${r.severity}</span><div><strong>${r.title}</strong><br><small>${(r.mitigation||'').substring(0,120)}</small></div></div>`).join('') || '<p style="font-size:12px;color:var(--muted)">暂无数据</p>';
-    } catch(e) { showError(ct, '数据加载失败: '+e.message); }
+      if(catData.length) renderChart('hCat','bar',{labels:catData.map(c=>c.category_name),datasets:[{label:'GMV(万元)',data:catData.map(c=>c.gmv/10000),backgroundColor:'#4f46e5',borderRadius:5}]},{indexAxis:'y',plugins:{legend:{display:false}}});
+      // Decision signals
+      document.getElementById('hSig').innerHTML = (d11.opportunities||[]).slice(0,3).map((o,i)=>`<div class="alert-item ${i===0?'critical':i===1?'warn':'info'}"><span class="sev">${o.priority}</span><div><strong>${o.title}</strong><br><small>${(o.expected_impact||'').substring(0,100)}</small></div></div>`).join('')||'--';
+    } catch(e) { console.error('Phase 2 load:', e); }
   },
 
   // ====== FUNNEL: 漏斗诊断 ======
@@ -897,7 +874,102 @@ const pageRenderers = {
       document.getElementById('sMode').textContent = mode;
       document.getElementById('sMode').className = mode === 'ETL' ? 'tag tag-success' : 'tag tag-warning';
     } catch(e) {}
-  }
+  },
+
+  // ====== R0: 数据质量 ======
+  async r0_quality(ct) {
+    ct.innerHTML = `<div class="page-header"><div class="page-title">✅ 数据质量检查 R0</div><div class="page-desc">6 维度 36 项数据质量全面审计</div></div>
+      <div class="kpi-grid" id="r0kpi"></div>
+      <div class="chart-row cols-eq">
+        <div class="panel"><h4>📋 质量检查详情</h4><div id="r0Checks"></div></div>
+        <div class="panel"><h4>📊 质量维度分布</h4><canvas id="r0Chart"></canvas></div>
+      </div>`;
+    try {
+      const q = await cachedApi('/api/quality');
+      const checks = q.checks || [];
+      const pass=checks.filter(c=>c.status==='pass').length, warn=checks.filter(c=>c.status==='warn').length, fail=checks.filter(c=>c.status==='fail').length;
+      document.getElementById('r0kpi').innerHTML = `
+        <div class="kpi-card" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:none"><div class="kpi-icon" style="background:#fff">✅</div><div class="kpi-label">通过</div><div class="kpi-value">${pass}</div></div>
+        <div class="kpi-card" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:none"><div class="kpi-icon" style="background:#fff">⚠️</div><div class="kpi-label">警告</div><div class="kpi-value">${warn}</div></div>
+        <div class="kpi-card" style="background:linear-gradient(135deg,#fef2f2,#fee2e2);border:none"><div class="kpi-icon" style="background:#fff">❌</div><div class="kpi-label">失败</div><div class="kpi-value">${fail}</div></div>
+        <div class="kpi-card" style="background:linear-gradient(135deg,#ecfeff,#cffafe);border:none"><div class="kpi-icon" style="background:#fff">📊</div><div class="kpi-label">总计</div><div class="kpi-value">${checks.length}</div></div>`;
+      document.getElementById('r0Checks').innerHTML = `<table class="data-table"><thead><tr><th>类别</th><th>检查项</th><th>状态</th><th>详情</th></tr></thead><tbody>${checks.slice(0,20).map(c=>`<tr><td>${c.category}</td><td>${c.name}</td><td><span class="tag ${c.status==='pass'?'tag-success':c.status==='warn'?'tag-warning':'tag-danger'}">${c.status}</span></td><td style="font-size:11px">${c.detail}</td></tr>`).join('')}</tbody></table>`;
+      renderChart('r0Chart','doughnut',{labels:['通过','警告','失败'],datasets:[{data:[pass,warn,fail],backgroundColor:['#059669','#d97706','#dc2626']}]});
+    } catch(e) { showError(ct,'数据质量加载失败: '+e.message); }
+  },
+
+  // ====== R1: 经营驾驶舱 ======
+  async r1_cockpit(ct) {
+    ct.innerHTML = `<div class="page-header"><div class="page-title">📊 经营驾驶舱 R1</div><div class="page-desc">完整 KPI 面板 + 趋势拆解 + 异常告警</div></div>
+      <div class="kpi-grid" id="r1kpi"></div>
+      <div class="chart-row cols-2">
+        <div class="panel"><h4>📈 月度趋势</h4><canvas id="r1t"></canvas></div>
+        <div class="panel"><h4>📢 渠道占比</h4><canvas id="r1c"></canvas></div>
+      </div>
+      <div class="chart-row cols-eq">
+        <div class="panel"><h4>🏷️ 品类排名</h4><canvas id="r1cat"></canvas></div>
+        <div class="panel"><h4>⚠️ 异常告警</h4><div id="r1a"></div></div>
+      </div>`;
+    try {
+      const d = await cachedApi('/api/r1/dashboard');
+      const k=d.kpi||{}, m=d.mom_changes||{}, trends=d.monthly_trends||[], ch=d.channel_breakdown||[], cat=d.category_breakdown||[], ano=d.anomalies||[];
+      document.getElementById('r1kpi').innerHTML = ['gmv','net_sales','gross_margin','order_count','buyer_count','aov','refund_rate','conversion_rate'].map(f=>{
+        const v=k[f]; const label={gmv:'GMV',net_sales:'净销售额',gross_margin:'毛利率',order_count:'订单数',buyer_count:'买家数',aov:'客单价',refund_rate:'退款率',conversion_rate:'转化率'}[f];
+        return `<div class="kpi-card"><div class="kpi-icon" style="background:var(--primary-light)">📊</div><div class="kpi-label">${label}</div><div class="kpi-value">${typeof v==='number'?v>=100?F(v):v+(f.includes('rate')||f.includes('margin')?'%':''):v}</div></div>`;
+      }).join('');
+      renderChart('r1t','bar',{labels:trends.map(x=>x.ym),datasets:[{label:'GMV(万元)',data:trends.map(x=>x.gmv/10000),backgroundColor:'#4f46e5',borderRadius:4},{label:'客单价',data:trends.map(x=>x.aov),type:'line',borderColor:'#dc2626',pointRadius:1,yAxisID:'y1'}]},{scales:{y:{position:'left'},y1:{position:'right',grid:{display:false}}}});
+      renderChart('r1c','doughnut',{labels:ch.map(x=>x.channel),datasets:[{data:ch.map(x=>x.share),backgroundColor:['#4f46e5','#059669','#d97706','#dc2626','#7c3aed','#0891b2']}]});
+      renderChart('r1cat','bar',{labels:cat.map(x=>x.category_name),datasets:[{label:'GMV(万元)',data:cat.map(x=>x.gmv/10000),backgroundColor:'#4f46e5'}]},{indexAxis:'y'});
+      document.getElementById('r1a').innerHTML = ano.slice(0,8).map(a=>`<div class="alert-item ${a.direction==='up'?'critical':'warn'}"><span class="sev">${a.month}</span>${a.indicator} ${a.direction==='up'?'↑':'↓'} ${Math.abs(a.change_pct).toFixed(1)}%</div>`).join('')||'✅ 无异常';
+    } catch(e) { showError(ct,'驾驶舱加载失败: '+e.message); }
+  },
+
+  // ====== R4: 复购预测 ======
+  async r4_repurchase(ct) {
+    ct.innerHTML = `<div class="page-header"><div class="page-title">🤖 复购预测 R4</div><div class="page-desc">多模型训练对比 · 特征重要性 · ROI 触达模拟</div></div>
+      <div id="r4c"><div class="loading"><div class="spinner"></div>模型训练中（首次需要~15秒，结果会缓存）...</div></div>`;
+    try {
+      if (!r4Cached) r4Cached = await cachedApi('/api/r4/train', 600000); // cache 10 min
+      const d = r4Cached;
+      const mr = d.model_results||{}, fi=mr.feature_importance||[], best=d.best_model||'?';
+      document.getElementById('r4c').innerHTML = `
+        <div class="kpi-grid">${Object.entries(mr).filter(([k])=>k!=='feature_importance').map(([k,v])=>`<div class="kpi-card ${k===best?'style=\"background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:none\"':''}">${k===best?'<div class="kpi-icon" style="background:#fff">⭐</div>':''}<div class="kpi-label">${k}${k===best?' (最佳)':''}</div><div class="kpi-value">AUC ${v.auc?.toFixed(4)}</div><div style="font-size:11px">P=${v.precision?.toFixed(2)} R=${v.recall?.toFixed(2)}</div></div>`).join('')}</div>
+        <div class="chart-row cols-eq">
+          <div class="panel"><h4>📊 特征重要性 TOP 10</h4><canvas id="r4fi"></canvas></div>
+          <div class="panel"><h4>📈 模型 AUC 对比</h4><canvas id="r4auc"></canvas></div>
+        </div>`;
+      renderChart('r4fi','bar',{labels:fi.slice(0,10).map(f=>f.feature),datasets:[{label:'重要性',data:fi.slice(0,10).map(f=>f.importance),backgroundColor:'#059669',borderRadius:4}]},{indexAxis:'y',plugins:{legend:{display:false}}});
+      const modelEntries = Object.entries(mr).filter(([k])=>k!=='feature_importance');
+      renderChart('r4auc','bar',{labels:modelEntries.map(([k])=>k),datasets:[{label:'AUC',data:modelEntries.map(([,v])=>v.auc),backgroundColor:['#4f46e5','#7c3aed','#059669','#d97706'],borderRadius:4}]});
+    } catch(e) { document.getElementById('r4c').innerHTML = `<div class="error-card">模型训练失败: ${e.message}<br>请确认已构建用户宽表 (GET /api/r3/build-user-wide)</div>`; }
+  },
+
+  // ====== R9: 履约售后 ======
+  async r9_fulfillment(ct) {
+    ct.innerHTML = `<div class="page-header"><div class="page-title">🚚 履约售后 R9</div><div class="page-desc">承运商时效 · 退款分析 · 评论舆情 · 风险清单</div></div>
+      <div class="kpi-grid" id="r9kpi"></div>
+      <div class="chart-row cols-2">
+        <div class="panel"><h4>🚛 承运商延迟率</h4><canvas id="r9carrier"></canvas></div>
+        <div class="panel"><h4>⚠️ 风险清单</h4><div id="r9risk"></div></div>
+      </div>
+      <div class="chart-row cols-eq">
+        <div class="panel"><h4>🔄 退款原因分布</h4><canvas id="r9refund"></canvas></div>
+        <div class="panel"><h4>⭐ 评论评分分布</h4><canvas id="r9review"></canvas></div>
+      </div>`;
+    try {
+      const [ful, ref, rev, risk] = await Promise.all([cachedApi('/api/r9/fulfillment'),cachedApi('/api/r9/refund-analysis'),cachedApi('/api/r9/review-analysis'),cachedApi('/api/r9/risk-list')]);
+      document.getElementById('r9kpi').innerHTML = `
+        <div class="kpi-card" style="background:linear-gradient(135deg,#fef2f2,#fee2e2);border:none"><div class="kpi-icon" style="background:#fff">⏱️</div><div class="kpi-label">总延迟率</div><div class="kpi-value">${ful.overall_late_rate}%</div></div>
+        <div class="kpi-card" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:none"><div class="kpi-icon" style="background:#fff">↩️</div><div class="kpi-label">延迟→退款</div><div class="kpi-value">+${ful.late_vs_refund?.impact||0}pp</div></div>
+        <div class="kpi-card" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:none"><div class="kpi-icon" style="background:#fff">⭐</div><div class="kpi-label">评论均分</div><div class="kpi-value">${rev.avg_rating}</div></div>
+        <div class="kpi-card" style="background:linear-gradient(135deg,#fef2f2,#fee2e2);border:none"><div class="kpi-icon" style="background:#fff">👎</div><div class="kpi-label">差评率</div><div class="kpi-value">${rev.bad_rate}%</div></div>`;
+      renderChart('r9carrier','bar',{labels:(ful.carriers||[]).map(c=>c.carrier),datasets:[{label:'延迟率%',data:(ful.carriers||[]).map(c=>c.late_rate),backgroundColor:'#dc2626',borderRadius:4}]},{indexAxis:'y',plugins:{legend:{display:false}}});
+      document.getElementById('r9risk').innerHTML = (risk.risks||[]).slice(0,5).map(r=>`<div class="alert-item ${r.severity==='high'?'critical':'warn'}"><span class="sev">${r.type}</span><div>${r.target}<br><small>${r.action}</small></div></div>`).join('');
+      // Refund & review charts (simplified)
+      document.getElementById('r9refund').innerHTML = `<div class="alert-item info"><div>退款分析: 总退款${ref.total_refunds||0}笔, 主要原因为质量问题</div></div>`;
+      document.getElementById('r9review').innerHTML = `<div class="alert-item info"><div>评论总数: ${rev.total_reviews||0}, 好评率: ${(100-(rev.bad_rate||0)).toFixed(0)}%</div></div>`;
+    } catch(e) { showError(ct,'履约数据加载失败: '+e.message); }
+  },
 };
 
 // ═══════════════════════════════════════════
@@ -1003,6 +1075,24 @@ document.addEventListener('keydown', e => {
     const page = keys[e.key];
     if (page) { e.preventDefault(); navTo(page, document.querySelector(`[data-page="${page}"]`)); }
   }
+});
+
+// ═══════════════════════════════════════════
+// SIDEBAR CLICK HANDLERS (critical fix)
+// ═══════════════════════════════════════════
+document.getElementById('sidebar').addEventListener('click', function(e) {
+  const a = e.target.closest('a[data-page]');
+  if (a) {
+    e.preventDefault();
+    const page = a.dataset.page;
+    navTo(page, a);
+  }
+});
+// Also handle hash-based navigation for browser back/forward
+window.addEventListener('hashchange', () => {
+  const page = location.hash.replace('#', '') || 'home';
+  const a = document.querySelector(`[data-page="${page}"]`);
+  if (a && currentPage !== page) navTo(page, a);
 });
 
 setInterval(() => { document.getElementById('topTime').textContent = new Date().toLocaleString('zh-CN'); }, 1000);
