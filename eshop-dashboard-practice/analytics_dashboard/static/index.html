@@ -367,44 +367,108 @@ const pageRenderers = {
   // ====== HOME: 经营总览 ======
   async home(ct) {
     ct.innerHTML = `
-      <div class="page-header"><div class="page-title">🏠 经营总览</div><div class="page-desc">核心 KPI、趋势与关键发现</div></div>
+      <div class="page-header"><div class="page-title">🏠 经营总览</div><div class="page-desc">核心 KPI 监控 · 趋势洞察 · 关键决策信号</div></div>
       <div class="kpi-grid" id="homeKpi"></div>
+      <div class="chart-row cols-3" style="margin-bottom:16px">
+        <div class="panel" style="text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:140px">
+          <div style="font-size:40px;margin-bottom:4px">📊</div><div style="font-size:12px;color:var(--muted)">数据表</div><div style="font-size:28px;font-weight:700;color:var(--primary)" id="hTableCount">--</div>
+        </div>
+        <div class="panel" style="text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:140px">
+          <div style="font-size:40px;margin-bottom:4px">🗄️</div><div style="font-size:12px;color:var(--muted)">数据规模</div><div style="font-size:28px;font-weight:700;color:var(--primary)" id="hDataSize">--</div>
+        </div>
+        <div class="panel" style="text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:140px">
+          <div style="font-size:40px;margin-bottom:4px">⏱️</div><div style="font-size:12px;color:var(--muted)">数据源模式</div><div style="font-size:20px;font-weight:700;color:var(--success)" id="hDsMode">--</div>
+        </div>
+      </div>
       <div class="chart-row cols-2">
-        <div class="panel"><h4>📊 月度 GMV 趋势</h4><canvas id="hTrend"></canvas></div>
-        <div class="panel"><h4>📢 渠道 ROAS 排名</h4><canvas id="hRoas"></canvas></div>
+        <div class="panel"><h4>📊 月度 GMV 趋势 <span style="font-weight:400;font-size:11px;color:var(--muted)">近24月</span></h4><canvas id="hTrend"></canvas></div>
+        <div class="panel"><h4>📢 渠道 ROAS 排名 <span style="font-weight:400;font-size:11px;color:var(--muted)">越高越优</span></h4><canvas id="hRoas"></canvas></div>
+      </div>
+      <div class="chart-row cols-2">
+        <div class="panel"><h4>🔎 品类 GMV 贡献</h4><canvas id="hCat"></canvas></div>
+        <div class="panel"><h4>📋 月度异常信号</h4><div id="hAnomaly"></div></div>
       </div>
       <div class="chart-row cols-eq">
         <div class="panel"><h4>🎯 TOP 增长机会</h4><div id="hOpp"></div></div>
         <div class="panel"><h4>⚠️ 主要风险</h4><div id="hRisk"></div></div>
       </div>`;
     try {
-      const [d1, d11, trends] = await Promise.all([
-        cachedApi('/api/r1/kpi'), cachedApi('/api/r11/summary'), cachedApi('/api/r1/trends')
+      const [d1, d11, trends, cats, r1full] = await Promise.all([
+        cachedApi('/api/r1/kpi'), cachedApi('/api/r11/summary'), cachedApi('/api/r1/trends'),
+        cachedApi('/api/r1/category-breakdown'), cachedApi('/api/r1/dashboard')
       ]);
       const k = d1.kpi;
-      document.getElementById('homeKpi').innerHTML = `
-        <div class="kpi-card"><div class="kpi-icon" style="background:var(--primary-light)">💰</div><div class="kpi-label">GMV</div><div class="kpi-value">${F(k.gmv)}</div>${momHtml(d1.mom?.gmv_mom)}</div>
-        <div class="kpi-card"><div class="kpi-icon" style="background:var(--success-light)">📈</div><div class="kpi-label">毛利率</div><div class="kpi-value">${k.gross_margin}%</div></div>
-        <div class="kpi-card"><div class="kpi-icon" style="background:var(--info-light)">📦</div><div class="kpi-label">订单数</div><div class="kpi-value">${N(k.order_count)}</div>${momHtml(d1.mom?.orders_mom)}</div>
-        <div class="kpi-card"><div class="kpi-icon" style="background:var(--warning-light)">👤</div><div class="kpi-label">客单价</div><div class="kpi-value">¥${N(k.aov)}</div>${momHtml(d1.mom?.aov_mom)}</div>
-        <div class="kpi-card"><div class="kpi-icon" style="background:var(--danger-light)">↩️</div><div class="kpi-label">退款率</div><div class="kpi-value">${k.refund_rate}%</div></div>
-        <div class="kpi-card"><div class="kpi-icon" style="background:var(--success-light)">🎯</div><div class="kpi-label">转化率</div><div class="kpi-value">${k.conversion_rate}%</div></div>`;
+
+      // KPI cards with gradient backgrounds
+      const kpiDefs = [
+        { icon:'💰', label:'GMV', val:F(k.gmv), mom:d1.mom?.gmv_mom, bg:'linear-gradient(135deg,#eef2ff,#e0e7ff)' },
+        { icon:'📈', label:'毛利率', val:k.gross_margin+'%', mom:null, bg:'linear-gradient(135deg,#ecfdf5,#d1fae5)' },
+        { icon:'📦', label:'订单数', val:N(k.order_count), mom:d1.mom?.orders_mom, bg:'linear-gradient(135deg,#ecfeff,#cffafe)' },
+        { icon:'👤', label:'客单价', val:'¥'+N(k.aov), mom:d1.mom?.aov_mom, bg:'linear-gradient(135deg,#fffbeb,#fef3c7)' },
+        { icon:'↩️', label:'退款率', val:k.refund_rate+'%', mom:null, bg:'linear-gradient(135deg,#fef2f2,#fee2e2)' },
+        { icon:'🎯', label:'转化率', val:k.conversion_rate+'%', mom:null, bg:'linear-gradient(135deg,#f0fdf4,#dcfce7)' },
+      ];
+      document.getElementById('homeKpi').innerHTML = kpiDefs.map(d =>
+        `<div class="kpi-card" style="background:${d.bg};border:none">
+          <div class="kpi-icon" style="background:#fff">${d.icon}</div>
+          <div class="kpi-label">${d.label}</div>
+          <div class="kpi-value">${d.val}</div>
+          ${d.mom != null ? momHtml(d.mom) : ''}
+        </div>`).join('');
+
+      // Summary stats
+      document.getElementById('hTableCount').textContent = '34 张';
+      document.getElementById('hDataSize').textContent = '251 MB';
+      try {
+        const info = await cachedApi('/');
+        document.getElementById('hDsMode').textContent = (info.data_source||'?').toUpperCase();
+      } catch(e) {}
+
+      // GMV trend with gradient
       renderChart('hTrend', 'bar', {
-        labels: trends.trends.map(d => d.ym),
-        datasets: [{ label: 'GMV(万)', data: trends.trends.map(d => d.gmv / 10000), backgroundColor: '#4f46e5', borderRadius: 4, barThickness: 20 }]
+        labels: (trends.trends||[]).map(d => d.ym),
+        datasets: [{
+          label: 'GMV(万元)', data: (trends.trends||[]).map(d => d.gmv / 10000),
+          backgroundColor: ctx => {
+            const grad = ctx.chart.ctx.createLinearGradient(0,0,0,280);
+            grad.addColorStop(0,'#4f46e5'); grad.addColorStop(1,'#a5b4fc');
+            return grad;
+          }, borderRadius: 6, barThickness: 18
+        }]
       }, { plugins: { legend: { display: false } } });
+
+      // Channel ROAS
       try {
         const r8d = await cachedApi('/api/r8/campaign-kpis');
         renderChart('hRoas', 'bar', {
           labels: (r8d.channel_summary || []).map(d => d.channel),
-          datasets: [{ label: 'ROAS', data: (r8d.channel_summary || []).map(d => d.roas), backgroundColor: ['#4f46e5', '#7c3aed', '#0891b2', '#059669', '#d97706', '#dc2626'], borderRadius: 4 }]
-        }, { indexAxis: 'y', plugins: { legend: { display: false } } });
-      } catch (e) { document.getElementById('hRoas').parentElement.innerHTML += '<p style="font-size:12px;color:var(--muted)">渠道数据加载失败</p>'; }
-      document.getElementById('hOpp').innerHTML = (d11.opportunities || []).map((o, i) =>
-        `<div class="alert-item ${i === 0 ? 'critical' : i === 1 ? 'warn' : 'info'}"><span class="sev">${o.priority}</span><div><strong>${o.title}</strong><br><small>${(o.description || o.expected_impact || '').substring(0, 100)}</small></div></div>`).join('') || '<p style="font-size:12px;color:var(--muted)">暂无数据</p>';
-      document.getElementById('hRisk').innerHTML = (d11.risks || []).map(r =>
-        `<div class="alert-item ${r.severity === '高' ? 'critical' : 'warn'}"><span class="sev">${r.severity}</span><div><strong>${r.title}</strong><br><small>${(r.mitigation || '').substring(0, 100)}</small></div></div>`).join('') || '<p style="font-size:12px;color:var(--muted)">暂无数据</p>';
-    } catch (e) { showError(ct, '数据加载失败: ' + e.message); }
+          datasets: [{ label: 'ROAS', data: (r8d.channel_summary || []).map(d => d.roas),
+            backgroundColor: ['#4f46e5','#7c3aed','#0891b2','#059669','#d97706','#dc2626'], borderRadius: 5 }]
+        }, { indexAxis:'y', plugins:{ legend:{display:false} } });
+      } catch(e) {}
+
+      // Category breakdown
+      const catData = cats.categories || [];
+      if (catData.length) {
+        renderChart('hCat', 'bar', {
+          labels: catData.map(c => c.category_name),
+          datasets: [{ label: 'GMV(万元)', data: catData.map(c => c.gmv/10000), backgroundColor: '#4f46e5', borderRadius: 5 }]
+        }, { indexAxis:'y', plugins:{ legend:{display:false} } });
+      }
+
+      // Anomalies
+      const anomalies = r1full.anomalies || [];
+      document.getElementById('hAnomaly').innerHTML = anomalies.length ?
+        `<table class="data-table"><thead><tr><th>月份</th><th>指标</th><th>变化</th><th>方向</th></tr></thead><tbody>${anomalies.slice(0, 8).map(a =>
+          `<tr><td>${a.month||'--'}</td><td>${a.indicator||'--'}</td><td>${Math.abs(a.change_pct||0).toFixed(1)}%</td><td><span class="tag ${a.direction==='up'?'tag-success':'tag-danger'}">${a.direction==='up'?'↑上升':'↓下降'}</span></td></tr>`).join('')}</tbody></table>` :
+        '<p style="font-size:13px;color:var(--muted);padding:12px">✅ 近月无显著异常</p>';
+
+      // Opportunities & Risks
+      document.getElementById('hOpp').innerHTML = (d11.opportunities || []).slice(0, 4).map((o,i) =>
+        `<div class="alert-item ${i===0?'critical':i===1?'warn':'info'}"><span class="sev">${o.priority}</span><div><strong>${o.title}</strong><br><small>${(o.description||o.expected_impact||'').substring(0,120)}</small></div></div>`).join('') || '<p style="font-size:12px;color:var(--muted)">暂无数据</p>';
+      document.getElementById('hRisk').innerHTML = (d11.risks || []).slice(0, 4).map(r =>
+        `<div class="alert-item ${r.severity==='高'?'critical':'warn'}"><span class="sev">${r.severity}</span><div><strong>${r.title}</strong><br><small>${(r.mitigation||'').substring(0,120)}</small></div></div>`).join('') || '<p style="font-size:12px;color:var(--muted)">暂无数据</p>';
+    } catch(e) { showError(ct, '数据加载失败: '+e.message); }
   },
 
   // ====== FUNNEL: 漏斗诊断 ======
