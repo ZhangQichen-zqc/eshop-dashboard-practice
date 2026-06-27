@@ -741,30 +741,50 @@ const pageRenderers = {
 
   // ====== DIAGNOSIS: 综合诊断 ======
   async diagnosis(ct) {
-    ct.innerHTML = `<div class="page-header"><div class="page-title">🎯 综合诊断</div><div class="page-desc">经营健康度 · 机会与风险 · 运营动作 · 周报</div></div>
+    ct.innerHTML = `<div class="page-header"><div class="page-title">🎯 综合诊断</div><div class="page-desc">经营健康度评分 · 增长机会 · 风险识别 · 运营动作清单 · 周报导出</div></div>
       <div class="kpi-grid" id="dKpi"></div>
       <div class="chart-row cols-eq">
-        <div class="panel"><h4>🎯 TOP 增长机会</h4><div id="dOpp"></div></div>
-        <div class="panel"><h4>⚠️ 主要风险</h4><div id="dRisk"></div></div>
+        <div class="panel"><h4>📊 健康度雷达图</h4><canvas id="dRadar"></canvas></div>
+        <div class="panel"><h4>❤️ 健康度维度详情</h4><div id="dComponents"></div></div>
       </div>
-      <div class="chart-row cols-eq">
-        <div class="panel"><h4>📋 运营动作清单</h4><div id="dActions"></div></div>
-        <div class="panel"><h4>📄 经营周报</h4><div id="dReport"></div></div>
+      <div class="chart-row cols-3">
+        <div class="panel"><h4>🎯 增长机会</h4><div id="dOpp" style="max-height:300px;overflow-y:auto"></div></div>
+        <div class="panel"><h4>⚠️ 经营风险</h4><div id="dRisk" style="max-height:300px;overflow-y:auto"></div></div>
+        <div class="panel"><h4>📋 运营动作</h4><div id="dActions" style="max-height:300px;overflow-y:auto"></div></div>
+      </div>
+      <div style="text-align:center;margin-top:16px">
+        <a href="/api/r11/weekly-report" target="_blank" class="btn btn-primary">📄 导出经营周报</a>
       </div>`;
     try {
-      const [d11, report] = await Promise.all([cachedApi('/api/r11/summary'), cachedApi('/api/r11/weekly-report').catch(() => null)]);
+      const d11 = await cachedApi('/api/r11/summary');
       const h = d11.health || {};
+      const components = h.components || [];
+
+      // Health score KPI
+      const gradeColor = h.grade==='A'||h.grade==='B'?'#059669':h.grade==='C'?'#d97706':'#dc2626';
       document.getElementById('dKpi').innerHTML = `
-        <div class="kpi-card"><div class="kpi-icon" style="background:${h.grade==='A'||h.grade==='B'?'var(--success-light)':'var(--danger-light)'}">❤️</div><div class="kpi-label">健康度评分</div><div class="kpi-value">${h.total_score}/100</div><div class="kpi-sub">等级: ${h.grade}</div></div>
-        ${(h.components||[]).map(c => `<div class="kpi-card"><div class="kpi-icon" style="background:var(--info-light)">📊</div><div class="kpi-label">${c.dimension}</div><div class="kpi-value">${c.score}/${c.weight}</div><div class="progress-bar" style="margin-top:6px"><div class="fill ${c.score/c.weight>0.7?'fill-success':c.score/c.weight>0.4?'fill-warning':'fill-danger'}" style="width:${(c.score/c.weight*100).toFixed(0)}%"></div></div></div>`).join('')}`;
-      document.getElementById('dOpp').innerHTML = (d11.opportunities || []).map(o =>
-        `<div class="alert-item ${o.priority==='P0'?'critical':'warn'}"><span class="sev">${o.priority}</span><div><strong>${o.title}</strong><br><small>${o.expected_impact||o.description||''}</small></div></div>`).join('');
-      document.getElementById('dRisk').innerHTML = (d11.risks || []).map(r =>
-        `<div class="alert-item ${r.severity==='高'?'critical':'warn'}"><span class="sev">${r.severity}</span><div><strong>${r.title}</strong><br><small>${r.mitigation||''}</small></div></div>`).join('');
-      document.getElementById('dActions').innerHTML = (d11.actions || []).slice(0, 10).map(a =>
-        `<div class="alert-item info"><span class="sev">${a.priority||'P2'}</span><div><strong>${a.title||a.action_type||''}</strong><br><small>${a.detail||a.description||''}</small></div></div>`).join('') || '<p style="font-size:12px;color:var(--muted)">暂无动作</p>';
-      document.getElementById('dReport').innerHTML = report ? `<div class="alert-item success"><span class="sev">📄</span><div><strong>周报可用</strong><br><small>包含健康度、机会、风险、动作的完整经营周报</small></div></div><a href="/api/r11/weekly-report" target="_blank" class="btn btn-primary btn-sm" style="display:inline-block;margin-top:8px">📥 查看周报 JSON</a>` : '<p style="font-size:12px;color:var(--muted)">周报加载中...</p>';
-    } catch (e) { showError(ct, '诊断数据加载失败: ' + e.message); }
+        <div class="kpi-card" style="background:linear-gradient(135deg,${h.grade==='A'||h.grade==='B'?'#ecfdf5,#d1fae5':h.grade==='C'?'#fffbeb,#fef3c7':'#fef2f2,#fee2e2'});border:none;text-align:center">
+          <div style="font-size:48px;font-weight:800;color:${gradeColor}">${h.total_score||'--'}</div>
+          <div class="kpi-label">健康度评分 / 100</div>
+          <span class="tag ${h.grade==='A'||h.grade==='B'?'tag-success':h.grade==='C'?'tag-warning':'tag-danger'}">等级 ${h.grade||'--'}</span>
+        </div>
+        ${components.slice(0,5).map(c=>`<div class="kpi-card" style="background:linear-gradient(135deg,#fff,#f8fafc)"><div class="kpi-label">${c.dimension}</div><div class="kpi-value" style="font-size:18px">${c.score}/${c.weight}</div><div class="progress-bar" style="margin-top:8px"><div class="fill ${c.score/c.weight>0.7?'fill-success':c.score/c.weight>0.4?'fill-warning':'fill-danger'}" style="width:${(c.score/c.weight*100).toFixed(0)}%"></div></div></div>`).join('')}`;
+
+      // Radar chart
+      if(components.length) renderChart('dRadar','radar',{labels:components.map(c=>c.dimension),datasets:[{label:'得分率%',data:components.map(c=>(c.score/c.weight*100).toFixed(0)),backgroundColor:'rgba(79,70,229,.15)',borderColor:'#4f46e5',pointBackgroundColor:'#4f46e5'}]},{scales:{r:{min:0,max:100,ticks:{stepSize:20}}}});
+
+      document.getElementById('dComponents').innerHTML = components.map(c=>{
+        const pct = (c.score/c.weight*100).toFixed(0);
+        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px">
+          <span style="width:80px;font-weight:500">${c.dimension}</span>
+          <div style="flex:1;height:6px;background:var(--border-light);border-radius:3px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${pct>70?'#059669':pct>40?'#d97706':'#dc2626'};border-radius:3px;transition:width .6s"></div></div>
+          <span style="font-weight:600;width:36px;text-align:right">${pct}%</span></div>`;
+      }).join('');
+
+      document.getElementById('dOpp').innerHTML = (d11.opportunities||[]).slice(0,5).map(o=>`<div class="alert-item ${o.priority==='P0'?'critical':'warn'}" style="margin-bottom:6px"><span class="sev">${o.priority}</span><div><strong>${o.title}</strong><br><small style="font-size:11px">${o.expected_impact||o.description||''}</small></div></div>`).join('');
+      document.getElementById('dRisk').innerHTML = (d11.risks||[]).slice(0,5).map(r=>`<div class="alert-item ${r.severity==='高'?'critical':'warn'}" style="margin-bottom:6px"><span class="sev">${r.severity}</span><div><strong>${r.title}</strong><br><small style="font-size:11px">${r.mitigation||''}</small></div></div>`).join('');
+      document.getElementById('dActions').innerHTML = (d11.actions||[]).slice(0,8).map(a=>`<div class="alert-item info" style="margin-bottom:6px"><span class="sev">${a.priority||'P2'}</span><div><strong>${a.title||a.action_type||''}</strong><br><small style="font-size:11px">${a.detail||''}</small></div></div>`).join('') || '<p style="font-size:12px;color:var(--muted)">暂无动作</p>';
+    } catch(e) { showError(ct,'诊断数据加载失败: '+e.message); }
   },
 
   // ====== AI: AI 分析助手 ======
