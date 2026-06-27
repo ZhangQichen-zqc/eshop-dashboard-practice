@@ -12,6 +12,11 @@
     "start:dashboard": "python -m uvicorn app.main:app --app-dir analytics_dashboard --host 127.0.0.1 --port 8000",
     "test:dashboard": "python analytics_dashboard/tests/smoke_test.py",
     "build:mall-web": "npm run build --prefix client",
-    "verify": "npm run build:mall-web"
+    "verify": "npm run build:mall-web",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "docker:restart": "docker compose down && docker compose up -d --build"
   }
 }

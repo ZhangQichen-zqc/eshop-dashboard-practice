@@ -1,0 +1,43 @@
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Node
+**/node_modules/
+**/dist/
+**/package-lock.json
+
+# Python
+**/__pycache__/
+**/*.pyc
+**/venv/
+**/.venv/
+**/env/
+**/.pytest_cache/
+**/.mypy_cache/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Temp & logs
+*.log
+*.sqlite-shm
+*.sqlite-wal
+.cache/
+
+# Docs & exports (not needed at runtime)
+docs/
+exports/
+notebooks/
+lectures/
+practice/
+
+# Dev scripts
+scripts/
+client/

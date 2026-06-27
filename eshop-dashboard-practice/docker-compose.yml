@@ -1,0 +1,46 @@
+services:
+  # ====== 1. 商城 ETL API (Node.js) ======
+  mall-api:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: eshop-mall-api
+    ports:
+      - "38173:38173"
+    environment:
+      - PORT=38173
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:38173/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+    networks:
+      - eshop-net
+
+  # ====== 2. FastAPI 仪表盘 (Python) ======
+  dashboard:
+    build:
+      context: .
+      dockerfile: analytics_dashboard/Dockerfile
+    container_name: eshop-dashboard
+    ports:
+      - "8000:8000"
+    environment:
+      - SERVICE_HOST=0.0.0.0
+      - SERVICE_PORT=8000
+      - DATA_SOURCE_MODE=etl
+      - ETL_API_BASE_URL=http://mall-api:38173/api/etl
+      - LOG_LEVEL=INFO
+    depends_on:
+      mall-api:
+        condition: service_healthy     # 等 ETL API 健康检查通过后再启动
+    restart: unless-stopped
+    networks:
+      - eshop-net
+
+networks:
+  eshop-net:
+    driver: bridge
