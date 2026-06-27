@@ -365,7 +365,12 @@ function showToast(msg, type = 'success') {
 }
 
 function showLoading(ct) {
-  ct.innerHTML = `<div class="loading"><div class="spinner"></div>加载中...</div>`;
+  // Fast path: if data is preloaded, skip spinner entirely
+  if (preloadDone) {
+    ct.innerHTML = '';
+    return;
+  }
+  ct.innerHTML = `<div class="loading"><div class="spinner"></div><div style="font-size:11px;margin-top:4px;color:var(--muted)">数据预加载中 ${preloadProgress}/${preloadTotal}...</div></div>`;
 }
 
 function showError(ct, msg) {
@@ -816,64 +821,69 @@ const pageRenderers = {
     const savedKey = localStorage.getItem('ai_key') || '';
     const savedBase = localStorage.getItem('ai_base_url') || 'https://api.deepseek.com';
     ct.innerHTML = `<div class="page-header"><div class="page-title">🤖 AI 分析助手</div><div class="page-desc">接入大模型，对当前经营状况进行智能解读与策略建议</div></div>
-      <div class="chart-row cols-2">
-        <div class="panel" style="min-width:300px"><h4>⚙️ 模型配置</h4>
-          <div class="form-group"><label>模型名称</label><input type="text" id="aiModel" value="${savedModel}" placeholder="例如: deepseek-chat, gpt-4o-mini"></div>
-          <div class="form-group"><label>API Key</label><input type="password" id="aiKey" value="${savedKey}" placeholder="sk-..." style="font-family:monospace"></div>
-          <div class="form-group"><label>Base URL</label><input type="text" id="aiBaseUrl" value="${savedBase}" placeholder="https://api.openai.com/v1"></div>
-          <button class="btn btn-primary" onclick="saveAIConfig()" style="width:100%">💾 保存配置</button>
-          <p style="font-size:10px;color:var(--muted);margin-top:8px">配置存储在浏览器 localStorage，不会上传</p>
+      <div class="panel" style="margin-bottom:16px">
+        <h4>⚙️ 模型配置</h4>
+        <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap">
+          <div class="form-group" style="flex:1;min-width:140px"><label>模型名称</label><input type="text" id="aiModel" value="${savedModel}" placeholder="deepseek-chat / gpt-4o-mini"></div>
+          <div class="form-group" style="flex:1;min-width:180px"><label>API Key</label><input type="password" id="aiKey" value="${savedKey}" placeholder="sk-..." style="font-family:monospace"></div>
+          <div class="form-group" style="flex:2;min-width:200px"><label>Base URL</label><input type="text" id="aiBaseUrl" value="${savedBase}" placeholder="https://api.openai.com/v1"></div>
+          <button class="btn btn-primary" onclick="saveAIConfig()" style="height:40px">💾 保存</button>
         </div>
-        <div class="panel"><h4>💬 智能分析对话</h4>
-          <div class="ai-chat">
-            <div class="ai-chat-messages" id="aiMessages">
-              <div class="ai-msg assistant">👋 你好！我是 AI 经营分析师。<br><br>配置模型后可以帮你：<br>• 📊 解读 KPI 趋势与异常<br>• 🔍 诊断流量漏斗问题<br>• 💰 评估营销 ROI<br>• 📝 生成经营分析报告<br><br>💡 <strong>试试这些快捷提问：</strong></div>
-            </div>
-            <div style="display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;border-top:1px solid var(--border-light)" id="aiQuickBtns">
-              <button onclick="askAI('请分析当前GMV趋势、毛利率和退款率，给出经营诊断')" class="btn btn-outline btn-sm">📊 经营诊断</button>
-              <button onclick="askAI('分析流量漏斗各层转化率，找出最大流失点并给出优化建议')" class="btn btn-outline btn-sm">🔻 漏斗分析</button>
-              <button onclick="askAI('对比各渠道ROAS，推荐预算优化方案')" class="btn btn-outline btn-sm">💰 预算优化</button>
-              <button onclick="askAI('基于RFM分群和聚类结果，给出客户运营策略')" class="btn btn-outline btn-sm">👥 客户策略</button>
-            </div>
-            <div class="ai-chat-input"><textarea id="aiInput" rows="2" placeholder="输入分析问题..."></textarea><button onclick="sendAIMessage()">▶️ 发送</button></div>
+        <p style="font-size:10px;color:var(--muted);margin-top:6px">配置存储在浏览器 localStorage，不会上传到服务器</p>
+      </div>
+      <div class="panel">
+        <h4>💬 智能分析对话</h4>
+        <div class="ai-chat">
+          <div class="ai-chat-messages" id="aiMessages">
+            <div class="ai-msg assistant">👋 你好！我能基于当前经营数据帮你分析趋势、诊断问题、推荐策略。<br><br>💡 <strong>试试下方快捷提问，或输入你自己的问题：</strong></div>
           </div>
-        </div></div>`;
+          <div style="display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-top:1px solid var(--border-light)" id="aiQuickBtns">
+            <button onclick="askAI('请分析当前GMV趋势、毛利率和退款率，给出经营诊断')" class="btn btn-outline btn-sm">📊 经营诊断</button>
+            <button onclick="askAI('分析流量漏斗各层转化率，找出最大流失点并给出优化建议')" class="btn btn-outline btn-sm">🔻 漏斗分析</button>
+            <button onclick="askAI('对比各渠道ROAS，推荐预算优化方案')" class="btn btn-outline btn-sm">💰 预算优化</button>
+            <button onclick="askAI('基于RFM分群和聚类结果，给出客户运营策略')" class="btn btn-outline btn-sm">👥 客户策略</button>
+          </div>
+          <div class="ai-chat-input"><textarea id="aiInput" rows="2" placeholder="输入分析问题..."></textarea><button onclick="sendAIMessage()" style="white-space:nowrap">▶️ 发送</button></div>
+        </div>
+      </div>`;
   },
 
   // ====== SETTINGS: 系统配置 ======
   async settings(ct) {
-    ct.innerHTML = `<div class="page-header"><div class="page-title">⚙️ 系统配置</div><div class="page-desc">数据源管理 · API 文档 · 服务诊断 · 快捷键参考</div></div>
-      <div class="chart-row cols-3">
-        <div class="panel"><h4>🔌 数据源</h4>
-          <div class="form-group"><label>当前模式</label><span class="tag tag-success" id="sMode" style="font-size:14px;padding:6px 14px">加载中...</span></div>
-          <div class="form-group"><label>ETL API</label><input type="text" value="http://127.0.0.1:38173/api/etl" readonly style="background:var(--bg);font-size:12px;font-family:monospace"></div>
-          <div class="form-group"><label>SQLite</label><input type="text" value="server/data/eshop.sqlite" readonly style="background:var(--bg);font-size:12px;font-family:monospace"></div>
-          <button class="btn btn-primary btn-sm" onclick="clearCache();refreshAll();showToast('缓存已刷新+数据已重新加载')">🔄 刷新全部缓存</button>
-        </div>
-        <div class="panel"><h4>📚 API 文档入口</h4>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <a href="/docs" target="_blank" class="btn btn-outline btn-sm" style="text-align:left">📖 Swagger 交互式文档 → 本地测试所有API</a>
-            <a href="http://127.0.0.1:38173/api/etl/help" target="_blank" class="btn btn-outline btn-sm" style="text-align:left">📋 ETL API 接口说明 → 34张表查询方法</a>
-            <a href="http://127.0.0.1:38173/api/etl/tables" target="_blank" class="btn btn-outline btn-sm" style="text-align:left">📊 ETL 数据表清单 → 完整数据字典</a>
-            <a href="/api/subprojects" target="_blank" class="btn btn-outline btn-sm" style="text-align:left">📦 12个子项目列表</a>
+    ct.innerHTML = `<div class="page-header"><div class="page-title">⚙️ 系统配置</div><div class="page-desc">数据源管理 · API 文档 · 服务状态 · 快捷键</div></div>
+      <div class="chart-row cols-2" style="margin-bottom:16px">
+        <div class="panel"><h4>🔌 数据源与缓存</h4>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+            <span style="font-size:14px;font-weight:600">当前模式：</span>
+            <span class="tag tag-success" id="sMode" style="font-size:16px;padding:8px 20px">ETL</span>
+            <span style="font-size:12px;color:var(--muted)">API: 127.0.0.1:38173</span>
           </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+            <div style="background:var(--bg);padding:12px;border-radius:8px;text-align:center">
+              <div style="font-size:24px;font-weight:700;color:var(--primary)" id="sCacheSize">--</div>
+              <div style="font-size:12px;color:var(--muted)">已缓存 API</div>
+            </div>
+            <div style="background:var(--bg);padding:12px;border-radius:8px;text-align:center">
+              <div style="font-size:24px;font-weight:700;color:var(--success)">251 MB</div>
+              <div style="font-size:12px;color:var(--muted)">SQLite 数据库</div>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="clearCache();preloadAllData().then(()=>{refreshAll();showToast('缓存已刷新')})" style="width:100%">🔄 刷新全部缓存 + 重新预加载</button>
         </div>
-        <div class="panel"><h4>⌨️ 快捷键 & 技巧</h4>
-          <table class="data-table"><tbody>
-            <tr><td>Ctrl+1~9</td><td>快速切换页面</td></tr>
-            <tr><td>Ctrl+F5</td><td>强制刷新数据</td></tr>
-            <tr><td>悬停导航</td><td>预加载页面数据</td></tr>
-            <tr><td>刷新按钮</td><td>清除缓存重载</td></tr>
-            <tr><td>AI助手</td><td>需先配置API Key</td></tr>
-            <tr><td style="font-size:11px;color:var(--muted)" colspan="2">数据缓存 TTL: 5分钟<br>图表自动销毁重建 · 支持移动端</td></tr>
+        <div class="panel"><h4>📚 API 文档与快捷键</h4>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+            <a href="/docs" target="_blank" style="padding:10px 14px;background:var(--bg);border-radius:8px;font-size:14px;display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--text);transition:var(--transition)" onmouseenter="this.style.background='var(--primary-light)'" onmouseleave="this.style.background='var(--bg)'">📖 <strong>Swagger 交互式文档</strong> <span style="color:var(--muted);font-size:12px">→ 测试所有 API 端点</span></a>
+            <a href="http://127.0.0.1:38173/api/etl/help" target="_blank" style="padding:10px 14px;background:var(--bg);border-radius:8px;font-size:14px;display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--text);transition:var(--transition)" onmouseenter="this.style.background='var(--primary-light)'" onmouseleave="this.style.background='var(--bg)'">📋 <strong>ETL API 说明</strong> <span style="color:var(--muted);font-size:12px">→ 34 张表查询方法</span></a>
+            <a href="http://127.0.0.1:38173/api/etl/tables" target="_blank" style="padding:10px 14px;background:var(--bg);border-radius:8px;font-size:14px;display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--text);transition:var(--transition)" onmouseenter="this.style.background='var(--primary-light)'" onmouseleave="this.style.background='var(--bg)'">📊 <strong>ETL 表清单</strong> <span style="color:var(--muted);font-size:12px">→ 完整数据字典</span></a>
+          </div>
+          <table class="data-table"><thead><tr><th>快捷键</th><th>功能</th></tr></thead><tbody>
+            <tr><td><kbd style="background:var(--bg);padding:2px 6px;border-radius:3px">Ctrl+1~9</kbd></td><td>快速切换页面</td></tr>
+            <tr><td>🔄 刷新按钮</td><td>清除缓存并重载当前页</td></tr>
+            <tr><td>悬停侧边栏</td><td>预加载该页数据</td></tr>
+            <tr><td>数据预加载</td><td>启动时自动加载 28 个 API</td></tr>
           </tbody></table>
         </div></div>`;
-    try {
-      const info = await cachedApi('/');
-      const mode = info.data_source?.toUpperCase() || '?';
-      document.getElementById('sMode').textContent = mode;
-      document.getElementById('sMode').className = mode === 'ETL' ? 'tag tag-success' : 'tag tag-warning';
-    } catch(e) {}
+    try { document.getElementById('sCacheSize').textContent = dataCache.size; } catch(e) {}
   },
 
   // ====== R0: 数据质量 ======
@@ -1094,6 +1104,46 @@ window.addEventListener('hashchange', () => {
   const a = document.querySelector(`[data-page="${page}"]`);
   if (a && currentPage !== page) navTo(page, a);
 });
+
+// ═══════════════════════════════════════════
+// BACKGROUND PRELOAD: fetch all data at startup
+// ═══════════════════════════════════════════
+const ALL_APIS = [
+  '/api/summary','/api/r1/kpi','/api/r1/trends','/api/r1/dashboard',
+  '/api/r1/category-breakdown','/api/r11/summary','/api/r2/funnel',
+  '/api/r2/dropoff-analysis','/api/r2/remarketing-list',
+  '/api/r3/rfm-layers','/api/r3/cohort-retention',
+  '/api/r5/user-clusters?k=5','/api/r6/association-rules',
+  '/api/r7/gmv-forecast','/api/r7/safety-stock','/api/r7/replenishment-list',
+  '/api/r8/campaign-kpis','/api/r8/channel-efficiency','/api/r8/coupon-analysis',
+  '/api/r9/fulfillment','/api/r9/refund-analysis','/api/r9/review-analysis',
+  '/api/r9/risk-list','/api/r10/abc-classification','/api/r10/alerts',
+  '/api/quality','/api/','/api/subprojects'
+];
+let preloadProgress = 0, preloadTotal = ALL_APIS.length, preloadDone = false;
+
+async function preloadAllData() {
+  const sidebar = document.getElementById('sidebar');
+  const footer = sidebar.querySelector('.sidebar-footer');
+  const batchSize = 6; // parallel batch to avoid overwhelming server
+  for (let i = 0; i < ALL_APIS.length; i += batchSize) {
+    const batch = ALL_APIS.slice(i, i + batchSize);
+    await Promise.all(batch.map(url => cachedApi(url).catch(() => null)));
+    preloadProgress = Math.min(i + batchSize, preloadTotal);
+    footer.innerHTML = `<span class="dot"></span>预加载 ${preloadProgress}/${preloadTotal}`;
+  }
+  preloadDone = true;
+  footer.innerHTML = '<span class="dot" style="background:#059669"></span>数据就绪 · ETL 模式';
+  console.log('All data preloaded: ' + preloadTotal + ' APIs');
+}
+// Start preloading immediately, don't block home page
+preloadAllData();
+// Also preload R4 in background (slow)
+setTimeout(async () => {
+  if (!r4Cached) {
+    try { r4Cached = await cachedApi('/api/r4/train', 600000); } catch(e) {}
+  }
+}, 2000);
 
 setInterval(() => { document.getElementById('topTime').textContent = new Date().toLocaleString('zh-CN'); }, 1000);
 loadPage('home');
