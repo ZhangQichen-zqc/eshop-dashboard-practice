@@ -819,27 +819,38 @@ const pageRenderers = {
 
   // ====== SETTINGS: 系统配置 ======
   async settings(ct) {
-    ct.innerHTML = `<div class="page-header"><div class="page-title">⚙️ 系统配置</div><div class="page-desc">数据源 · API 文档 · 服务状态</div></div>
-      <div class="chart-row cols-eq">
-        <div class="panel"><h4>🔌 数据源配置</h4>
-          <div class="form-group"><label>当前模式</label><span class="tag tag-success" id="sMode">加载中...</span></div>
-          <div class="form-group"><label>ETL API 地址</label><input type="text" id="sEtl" value="http://127.0.0.1:38173/api/etl" readonly style="background:var(--bg)"></div>
-          <div class="form-group"><label>数据库路径</label><input type="text" value="server/data/eshop.sqlite (251MB)" readonly style="background:var(--bg)"></div>
-          <button class="btn btn-primary btn-sm" onclick="cachedApi('/api/reload').then(r=>showToast('缓存已刷新')).catch(e=>showToast('刷新失败','error'))">🔄 刷新缓存</button>
+    ct.innerHTML = `<div class="page-header"><div class="page-title">⚙️ 系统配置</div><div class="page-desc">数据源管理 · API 文档 · 服务诊断 · 快捷键参考</div></div>
+      <div class="chart-row cols-3">
+        <div class="panel"><h4>🔌 数据源</h4>
+          <div class="form-group"><label>当前模式</label><span class="tag tag-success" id="sMode" style="font-size:14px;padding:6px 14px">加载中...</span></div>
+          <div class="form-group"><label>ETL API</label><input type="text" value="http://127.0.0.1:38173/api/etl" readonly style="background:var(--bg);font-size:12px;font-family:monospace"></div>
+          <div class="form-group"><label>SQLite</label><input type="text" value="server/data/eshop.sqlite" readonly style="background:var(--bg);font-size:12px;font-family:monospace"></div>
+          <button class="btn btn-primary btn-sm" onclick="clearCache();refreshAll();showToast('缓存已刷新+数据已重新加载')">🔄 刷新全部缓存</button>
         </div>
-        <div class="panel"><h4>📚 API 文档</h4>
+        <div class="panel"><h4>📚 API 文档入口</h4>
           <div style="display:flex;flex-direction:column;gap:8px">
-            <a href="/docs" target="_blank" class="btn btn-outline btn-sm" style="width:100%;text-align:left">📖 FastAPI Swagger 交互式文档</a>
-            <a href="http://127.0.0.1:38173/api/etl/help" target="_blank" class="btn btn-outline btn-sm" style="width:100%;text-align:left">📋 ETL API 接口说明</a>
-            <a href="http://127.0.0.1:38173/api/etl/tables" target="_blank" class="btn btn-outline btn-sm" style="width:100%;text-align:left">📊 ETL 数据表清单</a>
-            <a href="/api/subprojects" target="_blank" class="btn btn-outline btn-sm" style="width:100%;text-align:left">📦 子项目列表</a>
+            <a href="/docs" target="_blank" class="btn btn-outline btn-sm" style="text-align:left">📖 Swagger 交互式文档 → 本地测试所有API</a>
+            <a href="http://127.0.0.1:38173/api/etl/help" target="_blank" class="btn btn-outline btn-sm" style="text-align:left">📋 ETL API 接口说明 → 34张表查询方法</a>
+            <a href="http://127.0.0.1:38173/api/etl/tables" target="_blank" class="btn btn-outline btn-sm" style="text-align:left">📊 ETL 数据表清单 → 完整数据字典</a>
+            <a href="/api/subprojects" target="_blank" class="btn btn-outline btn-sm" style="text-align:left">📦 12个子项目列表</a>
           </div>
+        </div>
+        <div class="panel"><h4>⌨️ 快捷键 & 技巧</h4>
+          <table class="data-table"><tbody>
+            <tr><td>Ctrl+1~9</td><td>快速切换页面</td></tr>
+            <tr><td>Ctrl+F5</td><td>强制刷新数据</td></tr>
+            <tr><td>悬停导航</td><td>预加载页面数据</td></tr>
+            <tr><td>刷新按钮</td><td>清除缓存重载</td></tr>
+            <tr><td>AI助手</td><td>需先配置API Key</td></tr>
+            <tr><td style="font-size:11px;color:var(--muted)" colspan="2">数据缓存 TTL: 5分钟<br>图表自动销毁重建 · 支持移动端</td></tr>
+          </tbody></table>
         </div></div>`;
     try {
       const info = await cachedApi('/');
-      document.getElementById('sMode').textContent = info.data_source?.toUpperCase() || 'UNKNOWN';
-      document.getElementById('sMode').className = info.data_source === 'etl' ? 'tag tag-success' : 'tag tag-warning';
-    } catch (e) { document.getElementById('sMode').textContent = 'ERROR'; }
+      const mode = info.data_source?.toUpperCase() || '?';
+      document.getElementById('sMode').textContent = mode;
+      document.getElementById('sMode').className = mode === 'ETL' ? 'tag tag-success' : 'tag tag-warning';
+    } catch(e) {}
   }
 };
 
