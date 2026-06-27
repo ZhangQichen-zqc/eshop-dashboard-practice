@@ -185,6 +185,10 @@ a{text-decoration:none;color:inherit}
 }
 
 .hidden{display:none!important}
+/* Performance: use GPU for transforms */
+.kpi-card,.panel,.sidebar-nav a,.funnel-layer{will-change:transform}
+/* Content-visibility for off-screen panels */
+.panel{content-visibility:auto;contain-intrinsic-size:auto 300px}
 </style>
 </head>
 <body>
@@ -336,15 +340,28 @@ function showError(ct, msg) {
 // ═══════════════════════════════════════════
 // PAGE LOADER
 // ═══════════════════════════════════════════
+let loadDebounceTimer = null;
 function loadPage(page) {
   const ct = document.getElementById('pageContent');
+  // Debounce: cancel stale page loads on rapid switching
+  if (loadDebounceTimer) clearTimeout(loadDebounceTimer);
   destroyAllCharts();
   showLoading(ct);
-  if (pageRenderers[page]) {
-    pageRenderers[page](ct).catch(e => showError(ct, e.message));
-  } else {
-    ct.innerHTML = '<div class="error-card">页面未找到</div>';
-  }
+  loadDebounceTimer = setTimeout(() => {
+    if (pageRenderers[page]) {
+      pageRenderers[page](ct).catch(e => showError(ct, e.message));
+    } else {
+      ct.innerHTML = '<div class="error-card">页面未找到</div>';
+    }
+  }, 50); // 50ms debounce for rapid switches
+}
+
+// Lazy chart rendering: defer non-critical charts
+function lazyRenderChart(id, fn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  // Use IntersectionObserver or simply defer
+  requestAnimationFrame(() => requestAnimationFrame(fn));
 }
 
 // ====== Preloaders ======
