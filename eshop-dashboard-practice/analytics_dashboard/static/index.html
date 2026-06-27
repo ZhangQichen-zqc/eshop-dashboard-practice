@@ -791,17 +791,29 @@ const pageRenderers = {
   async ai(ct) {
     const savedModel = localStorage.getItem('ai_model') || '';
     const savedKey = localStorage.getItem('ai_key') || '';
-    ct.innerHTML = `<div class="page-header"><div class="page-title">🤖 AI 分析助手</div><div class="page-desc">配置大模型，智能分析当前经营数据</div></div>
-      <div class="chart-row cols-eq">
-        <div class="panel"><h4>⚙️ 模型配置</h4>
-          <div class="form-group"><label>模型名称</label><input type="text" id="aiModel" value="${savedModel}" placeholder="例如: deepseek-chat, gpt-4o"></div>
-          <div class="form-group"><label>API Key</label><input type="password" id="aiKey" value="${savedKey}" placeholder="sk-..."></div>
-          <div class="form-group"><label>Base URL (可选)</label><input type="text" id="aiBaseUrl" value="${localStorage.getItem('ai_base_url')||'https://api.deepseek.com'}" placeholder="https://api.openai.com/v1"></div>
-          <button class="btn btn-primary" onclick="saveAIConfig()">💾 保存配置</button>
+    const savedBase = localStorage.getItem('ai_base_url') || 'https://api.deepseek.com';
+    ct.innerHTML = `<div class="page-header"><div class="page-title">🤖 AI 分析助手</div><div class="page-desc">接入大模型，对当前经营状况进行智能解读与策略建议</div></div>
+      <div class="chart-row cols-2">
+        <div class="panel" style="min-width:300px"><h4>⚙️ 模型配置</h4>
+          <div class="form-group"><label>模型名称</label><input type="text" id="aiModel" value="${savedModel}" placeholder="例如: deepseek-chat, gpt-4o-mini"></div>
+          <div class="form-group"><label>API Key</label><input type="password" id="aiKey" value="${savedKey}" placeholder="sk-..." style="font-family:monospace"></div>
+          <div class="form-group"><label>Base URL</label><input type="text" id="aiBaseUrl" value="${savedBase}" placeholder="https://api.openai.com/v1"></div>
+          <button class="btn btn-primary" onclick="saveAIConfig()" style="width:100%">💾 保存配置</button>
+          <p style="font-size:10px;color:var(--muted);margin-top:8px">配置存储在浏览器 localStorage，不会上传</p>
         </div>
         <div class="panel"><h4>💬 智能分析对话</h4>
-          <div class="ai-chat"><div class="ai-chat-messages" id="aiMessages"><div class="ai-msg assistant">👋 你好！我是 AI 经营分析师。配置模型后，可以帮你：<br>• 解读 KPI 趋势<br>• 诊断经营问题<br>• 推荐优化策略<br>• 生成分析报告<br><br>请先保存左侧的模型配置，然后输入你的问题。</div></div>
-            <div class="ai-chat-input"><textarea id="aiInput" rows="2" placeholder="输入你的分析问题..."></textarea><button onclick="sendAIMessage()">发送</button></div></div>
+          <div class="ai-chat">
+            <div class="ai-chat-messages" id="aiMessages">
+              <div class="ai-msg assistant">👋 你好！我是 AI 经营分析师。<br><br>配置模型后可以帮你：<br>• 📊 解读 KPI 趋势与异常<br>• 🔍 诊断流量漏斗问题<br>• 💰 评估营销 ROI<br>• 📝 生成经营分析报告<br><br>💡 <strong>试试这些快捷提问：</strong></div>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;border-top:1px solid var(--border-light)" id="aiQuickBtns">
+              <button onclick="askAI('请分析当前GMV趋势、毛利率和退款率，给出经营诊断')" class="btn btn-outline btn-sm">📊 经营诊断</button>
+              <button onclick="askAI('分析流量漏斗各层转化率，找出最大流失点并给出优化建议')" class="btn btn-outline btn-sm">🔻 漏斗分析</button>
+              <button onclick="askAI('对比各渠道ROAS，推荐预算优化方案')" class="btn btn-outline btn-sm">💰 预算优化</button>
+              <button onclick="askAI('基于RFM分群和聚类结果，给出客户运营策略')" class="btn btn-outline btn-sm">👥 客户策略</button>
+            </div>
+            <div class="ai-chat-input"><textarea id="aiInput" rows="2" placeholder="输入分析问题..."></textarea><button onclick="sendAIMessage()">▶️ 发送</button></div>
+          </div>
         </div></div>`;
   },
 
@@ -834,6 +846,7 @@ const pageRenderers = {
 // ═══════════════════════════════════════════
 // AI FUNCTIONS
 // ═══════════════════════════════════════════
+function askAI(msg) { document.getElementById('aiInput').value = msg; sendAIMessage(); }
 function saveAIConfig() {
   const model = document.getElementById('aiModel').value.trim();
   const key = document.getElementById('aiKey').value.trim();
@@ -886,6 +899,21 @@ async function sendAIMessage() {
     msgsDiv.innerHTML += `<div class="ai-msg assistant" style="color:var(--danger)">❌ API 调用失败：${e.message}。请检查 Base URL 和 API Key 是否正确。</div>`;
   }
   msgsDiv.scrollTop = msgsDiv.scrollHeight;
+}
+
+// User search
+async function searchUsers() {
+  const q = document.getElementById('cUserSearch').value.trim();
+  const ct = document.getElementById('cSearchResult');
+  if (!q) { ct.innerHTML = '<p style="font-size:12px;color:var(--muted)">请输入用户名或ID</p>'; return; }
+  ct.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const data = await cachedApi('/api/r3/search-users?keyword=' + encodeURIComponent(q) + '&limit=20');
+    const users = data.users || [];
+    ct.innerHTML = users.length ?
+      `<table class="data-table"><thead><tr><th>用户ID</th><th>分群</th><th>GMV</th></tr></thead><tbody>${users.map(u=>`<tr><td>${u.user_id||u.userId}</td><td>${u.segment||'--'}</td><td>¥${u.monetary||0}</td></tr>`).join('')}</tbody></table>` :
+      '<p style="font-size:12px;color:var(--muted);padding:8px">未找到匹配用户</p>';
+  } catch(e) { ct.innerHTML = `<div class="error-card">搜索失败: ${e.message}</div>`; }
 }
 
 // Product search for recs
