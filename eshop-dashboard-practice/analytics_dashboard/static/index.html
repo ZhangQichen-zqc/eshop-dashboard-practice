@@ -664,42 +664,44 @@ const pageRenderers = {
 
   // ====== FORECAST: 预测与库存 ======
   async forecast(ct) {
-    ct.innerHTML = `<div class="page-header"><div class="page-title">📈 预测与库存</div><div class="page-desc">GMV 时间序列预测 · 安全库存 · ABC 分类</div></div>
+    ct.innerHTML = `<div class="page-header"><div class="page-title">📈 预测与库存</div><div class="page-desc">时间序列 GMV 预测 · 安全库存计算 · ABC 商品分类 · 补货建议</div></div>
       <div class="kpi-grid" id="fcKpi"></div>
       <div class="chart-row cols-2">
-        <div class="panel"><h4>📉 GMV 预测 (历史+未来)</h4><canvas id="fcFore"></canvas></div>
-        <div class="panel"><h4>📦 TOP SKU 安全库存</h4><div id="fcStock"></div></div>
+        <div class="panel"><h4>📉 GMV 时间序列预测 <span style="font-weight:400;font-size:11px;color:var(--muted)">历史+未来30天</span></h4><canvas id="fcFore"></canvas></div>
+        <div class="panel"><h4>📦 安全库存 TOP 8</h4><div id="fcStock"></div></div>
       </div>
-      <div class="chart-row cols-eq">
-        <div class="panel"><h4>📊 ABC 分类分布</h4><canvas id="fcAbc"></canvas></div>
-        <div class="panel"><h4>⚠️ 库存预警</h4><div id="fcAlerts"></div></div>
+      <div class="chart-row cols-3">
+        <div class="panel"><h4>📊 ABC 销售额分布</h4><canvas id="fcAbc"></canvas></div>
+        <div class="panel"><h4>⚠️ 库存预警清单</h4><div id="fcAlerts"></div></div>
+        <div class="panel"><h4>🔄 补货建议</h4><div id="fcReplenish"></div></div>
       </div>`;
     try {
-      const [forecast, safety, abc, alerts] = await Promise.all([
+      const [forecast, safety, abc, alerts, replenish] = await Promise.all([
         cachedApi('/api/r7/gmv-forecast'), cachedApi('/api/r7/safety-stock'),
-        cachedApi('/api/r10/abc-classification'), cachedApi('/api/r10/alerts')
+        cachedApi('/api/r10/abc-classification'), cachedApi('/api/r10/alerts'),
+        cachedApi('/api/r7/replenishment-list')
       ]);
+      const bestModel = forecast.best_model || '--';
+      const models = forecast.models || {};
+      const bestMetrics = models[bestModel] || {};
       document.getElementById('fcKpi').innerHTML = `
-        <div class="kpi-card"><div class="kpi-icon" style="background:var(--primary-light)">📉</div><div class="kpi-label">最优模型</div><div class="kpi-value">${forecast.best_model || '--'}</div></div>
-        <div class="kpi-card"><div class="kpi-icon" style="background:var(--success-light)">📦</div><div class="kpi-label">售罄预警</div><div class="kpi-value">${alerts.stockout_count || 0}</div></div>
-        <div class="kpi-card"><div class="kpi-icon" style="background:var(--warning-light)">📋</div><div class="kpi-label">滞销预警</div><div class="kpi-value">${alerts.overstock_count || 0}</div></div>`;
-      const hist = forecast.history || {}, fcs = forecast.forecast || {};
-      renderChart('fcFore', 'line', {
-        labels: [...(hist.dates || []).slice(-365), ...(fcs.dates || [])],
-        datasets: [
-          { label: '历史 GMV', data: [...(hist.values || []).slice(-365), ...Array(fcs.values?.length || 0).fill(null)], borderColor: '#4f46e5', pointRadius: 0, tension:0.2 },
-          { label: '预测 GMV', data: [...Array(hist.values?.length || 0).fill(null), ...(fcs.values || [])], borderColor: '#dc2626', borderDash: [5, 3], pointRadius: 1 }
-        ]
-      });
-      document.getElementById('fcStock').innerHTML = `<table class="data-table"><thead><tr><th>SKU</th><th>日均需求</th><th>安全库存</th><th>波动系数</th></tr></thead><tbody>${(safety.top_skus || []).slice(0, 8).map(s => `<tr><td>${s.sku_id}</td><td>${s.avg_daily_demand||0}</td><td><strong>${s.safety_stock||0}</strong></td><td>${s.cv||0}</td></tr>`).join('')}</tbody></table>`;
-      const abcS = (abc.summary?.abc_sales) || {};
-      renderChart('fcAbc', 'doughnut', {
-        labels: ['A 类 (主力)', 'B 类 (中等)', 'C 类 (长尾)'],
-        datasets: [{ data: [abcS.A || 0, abcS.B || 0, abcS.C || 0], backgroundColor: ['#4f46e5', '#d97706', '#dc2626'] }]
-      });
-      document.getElementById('fcAlerts').innerHTML = (alerts.alerts || []).slice(0, 5).map(a =>
-        `<div class="alert-item ${a.type?.includes('缺货')?'critical':'warn'}"><span class="sev">${a.type||''}</span><div>${a.sku_id||''} — ${a.message||a.action||''}</div></div>`).join('') || '<p style="font-size:12px;color:var(--muted)">暂无预警</p>';
-    } catch (e) { showError(ct, '预测数据加载失败: ' + e.message); }
+        <div class="kpi-card" style="background:linear-gradient(135deg,#eef2ff,#e0e7ff);border:none"><div class="kpi-icon" style="background:#fff">📉</div><div class="kpi-label">最优模型</div><div class="kpi-value">${bestModel}</div><div class="kpi-sub">MAPE ${bestMetrics.mape||'--'}%</div></div>
+        <div class="kpi-card" style="background:linear-gradient(135deg,#fef2f2,#fee2e2);border:none"><div class="kpi-icon" style="background:#fff">⚠️</div><div class="kpi-label">缺货预警</div><div class="kpi-value">${alerts.stockout_count||0}</div><div class="kpi-sub down">个SKU</div></div>
+        <div class="kpi-card" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:none"><div class="kpi-icon" style="background:#fff">📋</div><div class="kpi-label">滞销预警</div><div class="kpi-value">${alerts.overstock_count||0}</div><div class="kpi-sub">个SKU</div></div>
+        <div class="kpi-card" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:none"><div class="kpi-icon" style="background:#fff">🔄</div><div class="kpi-label">紧急补货</div><div class="kpi-value">${(replenish.urgent||[]).length}</div><div class="kpi-sub">项待处理</div></div>`;
+      const hist = forecast.history||{}, fcs = forecast.forecast||{};
+      renderChart('fcFore','line',{
+        labels:[...(hist.dates||[]).slice(-365),...(fcs.dates||[])],
+        datasets:[
+          {label:'历史GMV',data:[...(hist.values||[]).slice(-365),...Array(fcs.values?.length||0).fill(null)],borderColor:'#4f46e5',pointRadius:0,tension:.2,fill:true,backgroundColor:'rgba(79,70,229,.05)'},
+          {label:'预测GMV',data:[...Array(hist.values?.length||0).fill(null),...(fcs.values||[])],borderColor:'#dc2626',borderDash:[5,3],pointRadius:1}
+        ]},{plugins:{filler:{propagate:false}}});
+      document.getElementById('fcStock').innerHTML = `<table class="data-table"><thead><tr><th>SKU</th><th>日均需求</th><th>安全库存</th><th>CV</th></tr></thead><tbody>${(safety.top_skus||[]).slice(0,8).map(s=>`<tr><td><strong>${s.sku_id}</strong></td><td>${s.avg_daily_demand||0}</td><td><strong>${s.safety_stock||0}</strong></td><td>${(s.cv||0).toFixed(1)}</td></tr>`).join('')}</tbody></table>`;
+      const abcS = abc.summary?.abc_sales||{};
+      renderChart('fcAbc','doughnut',{labels:['A类主力','B类中等','C类长尾'],datasets:[{data:[abcS.A||0,abcS.B||0,abcS.C||0],backgroundColor:['#4f46e5','#d97706','#dc2626'],borderWidth:0}]});
+      document.getElementById('fcAlerts').innerHTML = (alerts.alerts||[]).slice(0,5).map(a=>`<div class="alert-item ${a.type?.includes('缺货')?'critical':'warn'}"><span class="sev">${a.type||''}</span><div>${a.sku_id||''} — ${a.message||a.action||''}</div></div>`).join('')||'<p style="font-size:12px;color:var(--muted);padding:12px">✅ 暂无库存预警</p>';
+      document.getElementById('fcReplenish').innerHTML = (replenish.urgent||[]).length ? replenish.urgent.slice(0,5).map(r=>`<div class="alert-item critical"><span class="sev">🔄</span><div>${r.sku_id||''} — ${r.action||'建议紧急补货'}</div></div>`).join('') : '<p style="font-size:12px;color:var(--muted);padding:12px">✅ 无紧急补货需求</p>';
+    } catch(e) { showError(ct,'预测数据加载失败: '+e.message); }
   },
 
   // ====== MARKETING: 营销归因 ======
