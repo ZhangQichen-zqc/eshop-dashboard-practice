@@ -169,6 +169,22 @@ a{text-decoration:none;color:inherit}
 .fill-warning{background:var(--warning)}
 .fill-danger{background:var(--danger)}
 
+/* ====== Animations ====== */
+@keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.fade-in{animation:fadeInUp .4s ease-out}
+.fade-in-delay-1{animation:fadeInUp .4s ease-out .05s both}
+.fade-in-delay-2{animation:fadeInUp .4s ease-out .1s both}
+.fade-in-delay-3{animation:fadeInUp .4s ease-out .15s both}
+.kpi-card{animation:scaleIn .35s ease-out}
+.kpi-card:nth-child(2){animation-delay:.05s}
+.kpi-card:nth-child(3){animation-delay:.1s}
+.kpi-card:nth-child(4){animation-delay:.15s}
+.kpi-card:nth-child(5){animation-delay:.2s}
+.kpi-card:nth-child(6){animation-delay:.25s}
+.panel{animation:fadeInUp .4s ease-out}
+.skeleton{background:linear-gradient(90deg,var(--border-light) 25%,#e8ecf0 50%,var(--border-light) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:4px}
 /* ====== Responsive ====== */
 @media(max-width:1024px){
   .sidebar{transform:translateX(-100%);transition:transform .3s;box-shadow:0 0 40px rgba(0,0,0,.15)}
