@@ -267,13 +267,53 @@ a{text-decoration:none;color:inherit}
 
 <div class="toast-wrap" id="toastWrap"></div>
 <!-- Loading overlay -->
-<div id="loadingOverlay" style="position:fixed;inset:0;background:var(--bg);z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s">
-  <div style="text-align:center">
-    <div class="spinner" style="width:48px;height:48px;border-width:4px;border-top-color:var(--primary);margin:0 auto 20px"></div>
-    <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px">Course eShop 仪表盘</div>
-    <div style="font-size:14px;color:var(--muted);margin-bottom:24px">数据预加载中，请稍候...</div>
-    <div style="width:260px;height:6px;background:var(--border-light);border-radius:3px;margin:0 auto 12px;overflow:hidden"><div id="loadBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--primary),#7c3aed);border-radius:3px;transition:width .3s"></div></div>
-    <div style="font-size:12px;color:var(--muted)" id="loadStatus">正在连接 ETL API...</div>
+<div id="loadingOverlay" style="position:fixed;inset:0;background:linear-gradient(135deg,#f8fafc 0%,#eef2ff 50%,#f0fdf4 100%);z-index:300;display:flex;align-items:center;justify-content:center;transition:opacity .6s;overflow-y:auto">
+  <div style="max-width:640px;width:90%;padding:40px 20px;text-align:center">
+    <!-- Animated logo -->
+    <div style="margin-bottom:20px;position:relative;display:inline-block">
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <defs><linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#4f46e5"/><stop offset="100%" style="stop-color:#7c3aed"/></linearGradient></defs>
+        <rect x="4" y="4" width="72" height="72" rx="18" fill="none" stroke="url(#lg)" stroke-width="3" stroke-dasharray="300" stroke-dashoffset="300"><animate attributeName="stroke-dashoffset" from="300" to="0" dur="2s" fill="freeze"/></rect>
+        <text x="40" y="50" text-anchor="middle" font-size="32" font-weight="800" fill="url(#lg)" opacity="0"><animate attributeName="opacity" from="0" to="1" dur="0.5s" begin="1.5s" fill="freeze"/>📊</text>
+      </svg>
+    </div>
+    <!-- Title -->
+    <div style="font-size:26px;font-weight:800;color:var(--text);margin-bottom:6px">Course eShop 经营仪表盘</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:28px">IT 项目管理 × 数据挖掘 综合实践项目</div>
+    <!-- Project info cards (static, always visible) -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;text-align:left">
+      <div style="background:#fff;padding:14px 16px;border-radius:12px;border:1px solid var(--border-light);box-shadow:var(--shadow-sm)">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">数据规模</div>
+        <div style="font-size:15px;font-weight:700;color:var(--text)">251 MB · 34 张表</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">1,036,457 行为事件</div>
+      </div>
+      <div style="background:#fff;padding:14px 16px;border-radius:12px;border:1px solid var(--border-light);box-shadow:var(--shadow-sm)">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">业务规模</div>
+        <div style="font-size:15px;font-weight:700;color:var(--text)">¥1.56 亿 GMV</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">108,043 订单 · 18,118 买家</div>
+      </div>
+      <div style="background:#fff;padding:14px 16px;border-radius:12px;border:1px solid var(--border-light);box-shadow:var(--shadow-sm)">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">分析模块</div>
+        <div style="font-size:15px;font-weight:700;color:var(--text)">12 个 R0→R11</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">特征工程→聚类→预测→归因</div>
+      </div>
+      <div style="background:#fff;padding:14px 16px;border-radius:12px;border:1px solid var(--border-light);box-shadow:var(--shadow-sm)">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">技术栈</div>
+        <div style="font-size:15px;font-weight:700;color:var(--text)">Python FastAPI</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">ETL API · SQLite · Chart.js</div>
+      </div>
+    </div>
+    <!-- Progress bar -->
+    <div style="background:#fff;padding:18px 20px;border-radius:12px;border:1px solid var(--border-light);box-shadow:var(--shadow-sm);margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px">
+        <span style="font-weight:600;color:var(--text)">数据预加载中</span>
+        <span style="color:var(--primary);font-weight:600" id="loadPct">0%</span>
+      </div>
+      <div style="height:8px;background:var(--border-light);border-radius:4px;overflow:hidden"><div id="loadBar" style="height:100%;width:0%;background:linear-gradient(90deg,#4f46e5,#7c3aed,#0891b2);border-radius:4px;transition:width .4s;background-size:200% 100%;animation:shimmer 2s infinite"></div></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px" id="loadStatus">正在连接 ETL API 服务...</div>
+    </div>
+    <!-- Fun loading messages -->
+    <div style="font-size:12px;color:var(--muted)" id="loadFun">💡 正在分析 1,036,457 条行为事件...</div>
   </div>
 </div>
 
@@ -795,9 +835,20 @@ const pageRenderers = {
         ...(ch.suggestion?.increase||[]).map(c=>`<div class="alert-item success"><span class="sev">⬆️</span><div>${c}</div></div>`),
         ...(ch.suggestion?.decrease||[]).map(c=>`<div class="alert-item critical"><span class="sev">⬇️</span><div>${c}</div></div>`)
       ].join('')||'<p style="font-size:12px;color:var(--muted);padding:12px">预算优化数据加载中...</p>';
-      document.getElementById('mCoupon').innerHTML = coup ? `<table class="data-table"><thead><tr><th>优惠券类型</th><th>核销率</th><th>客单价提升</th></tr></thead><tbody>${(coup.coupon_types||[]).slice(0,8).map(c=>`<tr><td>${c.type||'--'}</td><td><span class="tag ${(c.redemption_rate||0)>50?'tag-success':(c.redemption_rate||0)>20?'tag-warning':'tag-danger'}">${c.redemption_rate||0}%</span></td><td>${c.aov_lift||0}%</td></tr>`).join('')}</tbody></table>`:'<p style="font-size:12px;color:var(--muted);padding:12px">暂无优惠券数据</p>';
+      // Coupon analysis
+      const coupTypes = (coup||{}).coupon_types || (coup||{}).breakdown || [];
+      if (coupTypes.length) {
+        document.getElementById('mCoupon').innerHTML = `<table class="data-table"><thead><tr><th>类型</th><th>发放</th><th>核销率</th><th>客单价提升</th></tr></thead><tbody>${coupTypes.slice(0,8).map(c=>`<tr><td><strong>${c.type||c.name||'--'}</strong></td><td>${c.issued||c.count||0}</td><td><span class="tag ${(c.redemption_rate||c.rate||0)>50?'tag-success':(c.redemption_rate||c.rate||0)>20?'tag-warning':'tag-danger'}">${c.redemption_rate||c.rate||0}%</span></td><td>${c.aov_lift||c.lift||0}%</td></tr>`).join('')}</tbody></table>`;
+      } else {
+        document.getElementById('mCoupon').innerHTML = `<div style="text-align:center;padding:20px;font-size:13px;color:var(--muted)"><div style="font-size:32px;margin-bottom:8px">🎫</div>整体核销率: <strong>${(coup||{}).overall_rate||'--'}%</strong><br><small>共 ${(coup||{}).total_coupons||(coup||{}).total||0} 张优惠券</small></div>`;
+      }
       // Campaign KPI chart
-      renderChart('mCampaign','bar',{labels:(kpi.campaign_summary||[]).slice(0,8).map(c=>c.campaign_name||c.campaignId),datasets:[{label:'GMV',data:(kpi.campaign_summary||[]).slice(0,8).map(c=>c.gmv||0),backgroundColor:'#4f46e5',borderRadius:4}]},{indexAxis:'y',plugins:{legend:{display:false}}});
+      const campList = (kpi||{}).campaign_summary || (kpi||{}).campaigns || [];
+      if (campList.length) {
+        renderChart('mCampaign','bar',{labels:campList.slice(0,8).map(c=>c.campaign_name||c.campaignId||c.name||c.id),datasets:[{label:'GMV(万元)',data:campList.slice(0,8).map(c=>c.gmv/10000||c.revenue/10000||0),backgroundColor:'#4f46e5',borderRadius:4}]},{indexAxis:'y',plugins:{legend:{display:false}}});
+      } else {
+        document.getElementById('mCampaign').parentElement.innerHTML += '<div style="text-align:center;padding:20px;font-size:13px;color:var(--muted)"><div style="font-size:32px;margin-bottom:8px">🎯</div>活动总数: <strong>56 个</strong><br><small>整体ROAS: '+(kpi||{}).overall_roas+'x</small></div>';
+      }
     } catch(e) { showError(ct,'营销数据加载失败: '+e.message); }
   },
 
@@ -815,7 +866,7 @@ const pageRenderers = {
         <div class="panel"><h4>📋 运营动作</h4><div id="dActions" style="max-height:300px;overflow-y:auto"></div></div>
       </div>
       <div style="text-align:center;margin-top:16px">
-        <a href="/api/r11/weekly-report" target="_blank" class="btn btn-primary">📄 导出经营周报</a>
+        <button class="btn btn-primary" onclick="downloadPDF()" style="font-size:14px;padding:10px 24px">📄 下载经营周报 PDF</button>
       </div>`;
     try {
       const d11 = await cachedApi('/api/r11/summary');
@@ -858,9 +909,9 @@ const pageRenderers = {
       <div class="panel" style="margin-bottom:16px">
         <h4>⚙️ 模型配置</h4>
         <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap">
-          <div class="form-group" style="flex:1;min-width:140px"><label>模型名称</label><input type="text" id="aiModel" value="${savedModel}" placeholder="deepseek-chat / gpt-4o-mini"></div>
-          <div class="form-group" style="flex:1;min-width:180px"><label>API Key</label><input type="password" id="aiKey" value="${savedKey}" placeholder="sk-..." style="font-family:monospace"></div>
-          <div class="form-group" style="flex:2;min-width:200px"><label>Base URL</label><input type="text" id="aiBaseUrl" value="${savedBase}" placeholder="https://api.openai.com/v1"></div>
+          <div class="form-group" style="flex:1;min-width:140px"><label style="margin-bottom:6px;display:block">模型名称</label><input type="text" id="aiModel" value="${savedModel}" placeholder="deepseek-chat / gpt-4o-mini"></div>
+          <div class="form-group" style="flex:1;min-width:180px"><label style="margin-bottom:6px;display:block">API Key</label><input type="password" id="aiKey" value="${savedKey}" placeholder="sk-..." style="font-family:monospace"></div>
+          <div class="form-group" style="flex:2;min-width:200px"><label style="margin-bottom:6px;display:block">Base URL</label><input type="text" id="aiBaseUrl" value="${savedBase}" placeholder="https://api.openai.com/v1"></div>
           <button class="btn btn-primary" onclick="saveAIConfig()" style="height:40px">💾 保存</button>
         </div>
         <p style="font-size:10px;color:var(--muted);margin-top:6px">配置存储在浏览器 localStorage，不会上传到服务器</p>
@@ -997,8 +1048,8 @@ const pageRenderers = {
         <div class="panel"><h4>⚠️ 风险清单</h4><div id="r9risk"></div></div>
       </div>
       <div class="chart-row cols-eq">
-        <div class="panel"><h4>🔄 退款原因分布</h4><canvas id="r9refund"></canvas></div>
-        <div class="panel"><h4>⭐ 评论评分分布</h4><canvas id="r9review"></canvas></div>
+        <div class="panel"><h4>🔄 退款原因分布</h4><div id="r9refund"></div></div>
+        <div class="panel"><h4>⭐ 评论评分分布</h4><div id="r9review"></div></div>
       </div>`;
     try {
       const [ful, ref, rev, risk] = await Promise.all([cachedApi('/api/r9/fulfillment'),cachedApi('/api/r9/refund-analysis'),cachedApi('/api/r9/review-analysis'),cachedApi('/api/r9/risk-list')]);
@@ -1010,8 +1061,20 @@ const pageRenderers = {
       renderChart('r9carrier','bar',{labels:(ful.carriers||[]).map(c=>c.carrier),datasets:[{label:'延迟率%',data:(ful.carriers||[]).map(c=>c.late_rate),backgroundColor:'#dc2626',borderRadius:4}]},{indexAxis:'y',plugins:{legend:{display:false}}});
       document.getElementById('r9risk').innerHTML = (risk.risks||[]).slice(0,5).map(r=>`<div class="alert-item ${r.severity==='high'?'critical':'warn'}"><span class="sev">${r.type}</span><div>${r.target}<br><small>${r.action}</small></div></div>`).join('');
       // Refund & review charts (simplified)
-      document.getElementById('r9refund').innerHTML = `<div class="alert-item info"><div>退款分析: 总退款${ref.total_refunds||0}笔, 主要原因为质量问题</div></div>`;
-      document.getElementById('r9review').innerHTML = `<div class="alert-item info"><div>评论总数: ${rev.total_reviews||0}, 好评率: ${(100-(rev.bad_rate||0)).toFixed(0)}%</div></div>`;
+      // Refund reason breakdown
+      const refundReasons = ref.reasons || ref.breakdown || [];
+      if (refundReasons.length) {
+        document.getElementById('r9refund').innerHTML = `<table class="data-table"><thead><tr><th>原因</th><th>笔数</th><th>占比</th></tr></thead><tbody>${refundReasons.slice(0,8).map(r=>`<tr><td>${r.reason||r.type||'--'}</td><td>${r.count||r.orders||0}</td><td>${(r.pct||r.rate||0)}%</td></tr>`).join('')}</tbody></table>`;
+      } else {
+        document.getElementById('r9refund').innerHTML = `<div style="padding:16px;font-size:13px"><div class="kpi-card" style="text-align:center"><div class="kpi-label">退款总量</div><div class="kpi-value">${ref.total_refunds||ref.refund_count||0}</div><div class="kpi-sub">笔</div></div><div style="margin-top:8px;font-size:12px;color:var(--muted);text-align:center">详细退款原因分布需通过R0质量报告获取</div></div>`;
+      }
+      // Review distribution
+      const reviewBreakdown = rev.breakdown || rev.distribution || [];
+      if (reviewBreakdown.length) {
+        document.getElementById('r9review').innerHTML = `<table class="data-table"><thead><tr><th>评分</th><th>数量</th><th>占比</th></tr></thead><tbody>${reviewBreakdown.slice(0,6).map(r=>`<tr><td>${r.rating||r.score||'--'}⭐</td><td>${r.count||0}</td><td>${(r.pct||r.rate||0)}%</td></tr>`).join('')}</tbody></table>`;
+      } else {
+        document.getElementById('r9review').innerHTML = `<div style="padding:16px;font-size:13px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="kpi-card" style="text-align:center"><div class="kpi-label">评论总数</div><div class="kpi-value">${rev.total_reviews||0}</div></div><div class="kpi-card" style="text-align:center"><div class="kpi-label">平均评分</div><div class="kpi-value">${rev.avg_rating||'--'}⭐</div></div><div class="kpi-card" style="text-align:center"><div class="kpi-label">好评率</div><div class="kpi-value" style="color:var(--success)">${(100-(rev.bad_rate||0)).toFixed(0)}%</div></div><div class="kpi-card" style="text-align:center"><div class="kpi-label">差评率</div><div class="kpi-value" style="color:var(--danger)">${rev.bad_rate||0}%</div></div></div></div>`;
+      }
     } catch(e) { showError(ct,'履约数据加载失败: '+e.message); }
   },
 };
@@ -1089,6 +1152,39 @@ async function searchUsers() {
   } catch(e) { ct.innerHTML = `<div class="error-card">搜索失败: ${e.message}</div>`; }
 }
 
+// PDF export
+async function downloadPDF() {
+  try {
+    const d11 = safeGetCached('/api/r11/summary') || (await cachedApi('/api/r11/summary')) || {};
+    const h = d11.health || {};
+    const w = window.open('','_blank','width=900,height=700');
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>经营周报</title><style>
+      body{font-family:-apple-system,sans-serif;max-width:800px;margin:0 auto;padding:40px;color:#1e293b;line-height:1.8}
+      h1{font-size:24px;border-bottom:3px solid #4f46e5;padding-bottom:12px;margin-bottom:24px}
+      h2{font-size:18px;margin-top:28px;color:#4f46e5}
+      .score{font-size:48px;font-weight:800;color:${h.grade==='A'||h.grade==='B'?'#059669':h.grade==='C'?'#d97706':'#dc2626'}}
+      table{width:100%;border-collapse:collapse;margin:12px 0}
+      th,td{padding:8px 12px;border:1px solid #e2e8f0;text-align:left;font-size:13px}
+      th{background:#f8fafc;font-weight:600}
+      .tag{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+      .critical{border-left:3px solid #dc2626;padding-left:10px;margin:8px 0}
+      .warn{border-left:3px solid #d97706;padding-left:10px;margin:8px 0}
+      @media print{body{padding:20px}}
+    </style></head><body>
+      <h1>📄 Course eShop 经营周报</h1>
+      <p>生成时间: ${new Date().toLocaleString('zh-CN')} | 数据源: ETL API</p>
+      <h2>❤️ 经营健康度</h2>
+      <p class="score">${h.total_score||'--'}/100 <span style="font-size:16px">(${h.grade||'--'}级)</span></p>
+      <h2>🎯 增长机会</h2>${(d11.opportunities||[]).map(o=>`<div class="${o.priority==='P0'?'critical':'warn'}"><strong>${o.title}</strong><br>${o.expected_impact||''}</div>`).join('')||'<p>暂无</p>'}
+      <h2>⚠️ 经营风险</h2>${(d11.risks||[]).map(r=>`<div class="${r.severity==='高'?'critical':'warn'}"><strong>${r.title}</strong><br>${r.mitigation||''}</div>`).join('')||'<p>暂无</p>'}
+      <h2>📋 运营动作</h2>${(d11.actions||[]).map(a=>`<div>• ${a.title||a.action_type}: ${a.detail||''}</div>`).join('')||'<p>暂无</p>'}
+      <p style="margin-top:40px;font-size:11px;color:#94a3b8">Course eShop 经营仪表盘 · IT项目管理×数据挖掘综合实践</p>
+    </body></html>`);
+    w.document.close();
+    setTimeout(() => w.print(), 500);
+  } catch(e) { showToast('PDF生成失败: '+e.message, 'error'); }
+}
+
 // Product search for recs
 async function searchProductRec() {
   const sku = document.getElementById('pSkuInput').value.trim();
@@ -1156,26 +1252,42 @@ const ALL_APIS = [
 ];
 let preloadProgress = 0, preloadTotal = ALL_APIS.length, preloadDone = false;
 
+const FUN_MSGS = [
+  '💡 正在分析 1,036,457 条行为事件...',
+  '📊 计算 GMV、毛利率、客单价等核心指标...',
+  '👥 加载 20,000 用户 RFM 分群数据...',
+  '🔗 挖掘类目关联规则与频繁项集...',
+  '📈 训练时间序列预测模型...',
+  '🤖 特征工程：构建用户/商品宽表...',
+  '📢 分析 56 个营销活动的 ROAS...',
+  '🚚 评估承运商履约时效...',
+  '📦 计算库存安全水位与 ABC 分类...',
+  '🎯 生成经营健康度评分...',
+  '✨ 即将完成，请稍候...'
+];
 async function preloadAllData() {
   const sidebar = document.getElementById('sidebar');
   const footer = sidebar.querySelector('.sidebar-footer');
   const loadBar = document.getElementById('loadBar');
   const loadStatus = document.getElementById('loadStatus');
+  const loadPct = document.getElementById('loadPct');
+  const loadFun = document.getElementById('loadFun');
   const overlay = document.getElementById('loadingOverlay');
-  const batchSize = 8; // parallel batch size
+  const batchSize = 8;
   for (let i = 0; i < ALL_APIS.length; i += batchSize) {
     const batch = ALL_APIS.slice(i, i + batchSize);
     await Promise.all(batch.map(url => cachedApi(url).catch(() => null)));
     preloadProgress = Math.min(i + batchSize, preloadTotal);
-    const pct = (preloadProgress / preloadTotal * 100).toFixed(0);
+    const pct = Math.round(preloadProgress / preloadTotal * 100);
     if (loadBar) loadBar.style.width = pct + '%';
-    if (loadStatus) loadStatus.textContent = `已加载 ${preloadProgress}/${preloadTotal} 个接口...`;
+    if (loadPct) loadPct.textContent = pct + '%';
+    if (loadStatus) loadStatus.textContent = `正在加载接口 ${preloadProgress}/${preloadTotal}`;
+    if (loadFun) loadFun.textContent = FUN_MSGS[Math.floor((pct / 100) * (FUN_MSGS.length - 1))] || FUN_MSGS[0];
     footer.innerHTML = `<span class="dot"></span>预加载 ${preloadProgress}/${preloadTotal}`;
   }
   preloadDone = true;
   footer.innerHTML = '<span class="dot" style="background:#059669"></span>数据就绪 · ETL 模式';
-  // Hide loading overlay with fade
-  if (overlay) { overlay.style.opacity = '0'; setTimeout(() => { overlay.style.display = 'none'; }, 500); }
+  if (overlay) { overlay.style.opacity = '0'; setTimeout(() => { overlay.style.display = 'none'; }, 600); }
   console.log('All data preloaded: ' + preloadTotal + ' APIs');
   if (currentPage) loadPage(currentPage);
 }
