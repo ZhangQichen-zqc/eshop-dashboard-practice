@@ -706,37 +706,37 @@ const pageRenderers = {
 
   // ====== MARKETING: 营销归因 ======
   async marketing(ct) {
-    ct.innerHTML = `<div class="page-header"><div class="page-title">📢 营销归因</div><div class="page-desc">渠道 ROAS · 活动 KPI · 预算优化</div></div>
+    ct.innerHTML = `<div class="page-header"><div class="page-title">📢 营销归因</div><div class="page-desc">渠道 ROAS 效率 · 广告花费与回报 · 优惠券分析 · 预算优化</div></div>
       <div class="kpi-grid" id="mKpi"></div>
-      <div class="chart-row cols-eq">
+      <div class="chart-row cols-3">
         <div class="panel"><h4>📊 渠道 ROAS 排名</h4><canvas id="mRoas"></canvas></div>
-        <div class="panel"><h4>💡 预算建议</h4><div id="mBudget"></div></div>
+        <div class="panel"><h4>📈 GMV × ROAS 气泡</h4><canvas id="mBubble"></canvas></div>
+        <div class="panel"><h4>💡 预算优化建议</h4><div id="mBudget"></div></div>
       </div>
-      <div class="chart-row cols-eq">
-        <div class="panel"><h4>🎫 优惠券分析</h4><div id="mCoupon"></div></div>
-        <div class="panel"><h4>📈 增量分析</h4><div id="mIncrement"></div></div>
+      <div class="chart-row cols-2">
+        <div class="panel"><h4>🎫 优惠券核销分析</h4><div id="mCoupon"></div></div>
+        <div class="panel"><h4>🎯 活动 KPI 速览</h4><canvas id="mCampaign"></canvas></div>
       </div>`;
     try {
       const [kpi, ch, coup] = await Promise.all([
         cachedApi('/api/r8/campaign-kpis'), cachedApi('/api/r8/channel-efficiency'), cachedApi('/api/r8/coupon-analysis')
       ]);
       document.getElementById('mKpi').innerHTML = `
-        <div class="kpi-card"><div class="kpi-icon" style="background:var(--primary-light)">💰</div><div class="kpi-label">总投放</div><div class="kpi-value">${F(kpi.total_spend)}</div></div>
-        <div class="kpi-card"><div class="kpi-icon" style="background:var(--success-light)">🎯</div><div class="kpi-label">活动 GMV</div><div class="kpi-value">${F(kpi.total_gmv)}</div></div>
-        <div class="kpi-card"><div class="kpi-icon" style="background:var(--info-light)">📊</div><div class="kpi-label">整体 ROAS</div><div class="kpi-value">${kpi.overall_roas}x</div></div>
-        <div class="kpi-card"><div class="kpi-icon" style="background:var(--warning-light)">🎫</div><div class="kpi-label">券核销率</div><div class="kpi-value">${coup.overall_rate}%</div></div>`;
+        <div class="kpi-card" style="background:linear-gradient(135deg,#eef2ff,#e0e7ff);border:none"><div class="kpi-icon" style="background:#fff">💰</div><div class="kpi-label">总广告花费</div><div class="kpi-value">${F(kpi.total_spend)}</div></div>
+        <div class="kpi-card" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:none"><div class="kpi-icon" style="background:#fff">🎯</div><div class="kpi-label">活动GMV</div><div class="kpi-value">${F(kpi.total_gmv)}</div></div>
+        <div class="kpi-card" style="background:linear-gradient(135deg,#ecfeff,#cffafe);border:none"><div class="kpi-icon" style="background:#fff">📊</div><div class="kpi-label">整体ROAS</div><div class="kpi-value">${kpi.overall_roas}x</div></div>
+        <div class="kpi-card" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:none"><div class="kpi-icon" style="background:#fff">🎫</div><div class="kpi-label">券核销率</div><div class="kpi-value">${coup.overall_rate}%</div></div>`;
       const chRank = ch.channel_ranking || [];
-      renderChart('mRoas', 'bar', {
-        labels: chRank.map(c => c.channel),
-        datasets: [{ label: 'ROAS', data: chRank.map(c => c.roas), backgroundColor: '#059669', borderRadius: 4 }]
-      }, { indexAxis: 'y', plugins: { legend: { display: false } } });
+      renderChart('mRoas','bar',{labels:chRank.map(c=>c.channel),datasets:[{label:'ROAS',data:chRank.map(c=>c.roas),backgroundColor:chRank.map(c=>c.roas>7?'#059669':c.roas>3?'#d97706':'#dc2626'),borderRadius:4}]},{indexAxis:'y',plugins:{legend:{display:false}}});
+      if(chRank.length) renderChart('mBubble','bubble',{datasets:[{label:'渠道',data:chRank.map(c=>({x:c.roas||0,y:c.gmv/1e4||0,r:Math.max(c.roas*2,6)})),backgroundColor:['#4f46e5','#7c3aed','#059669','#d97706','#dc2626','#0891b2']}]},{scales:{x:{title:{display:true,text:'ROAS'}},y:{title:{display:true,text:'GMV(万)'}}}});
       document.getElementById('mBudget').innerHTML = [
-        ...(ch.suggestion?.increase || []).map(c => `<div class="alert-item success"><span class="sev">⬆️ 加投</span>${c}</div>`),
-        ...(ch.suggestion?.decrease || []).map(c => `<div class="alert-item critical"><span class="sev">⬇️ 缩减</span>${c}</div>`)
-      ].join('') || '<p style="font-size:12px;color:var(--muted)">暂无预算建议</p>';
-      document.getElementById('mCoupon').innerHTML = coup ? `<table class="data-table"><thead><tr><th>类型</th><th>核销率</th><th>客单价提升</th></tr></thead><tbody>${(coup.coupon_types||[]).slice(0,5).map(c => `<tr><td>${c.type||'--'}</td><td>${c.redemption_rate||0}%</td><td>${c.aov_lift||0}%</td></tr>`).join('')}</tbody></table>` : '<p style="font-size:12px;color:var(--muted)">暂无优惠券数据</p>';
-      document.getElementById('mIncrement').innerHTML = '<p style="font-size:12px;color:var(--muted)">增量分析数据加载中...</p>';
-    } catch (e) { showError(ct, '营销数据加载失败: ' + e.message); }
+        ...(ch.suggestion?.increase||[]).map(c=>`<div class="alert-item success"><span class="sev">⬆️</span><div>${c}</div></div>`),
+        ...(ch.suggestion?.decrease||[]).map(c=>`<div class="alert-item critical"><span class="sev">⬇️</span><div>${c}</div></div>`)
+      ].join('')||'<p style="font-size:12px;color:var(--muted);padding:12px">预算优化数据加载中...</p>';
+      document.getElementById('mCoupon').innerHTML = coup ? `<table class="data-table"><thead><tr><th>优惠券类型</th><th>核销率</th><th>客单价提升</th></tr></thead><tbody>${(coup.coupon_types||[]).slice(0,8).map(c=>`<tr><td>${c.type||'--'}</td><td><span class="tag ${(c.redemption_rate||0)>50?'tag-success':(c.redemption_rate||0)>20?'tag-warning':'tag-danger'}">${c.redemption_rate||0}%</span></td><td>${c.aov_lift||0}%</td></tr>`).join('')}</tbody></table>`:'<p style="font-size:12px;color:var(--muted);padding:12px">暂无优惠券数据</p>';
+      // Campaign KPI chart
+      renderChart('mCampaign','bar',{labels:(kpi.campaign_summary||[]).slice(0,8).map(c=>c.campaign_name||c.campaignId),datasets:[{label:'GMV',data:(kpi.campaign_summary||[]).slice(0,8).map(c=>c.gmv||0),backgroundColor:'#4f46e5',borderRadius:4}]},{indexAxis:'y',plugins:{legend:{display:false}}});
+    } catch(e) { showError(ct,'营销数据加载失败: '+e.message); }
   },
 
   // ====== DIAGNOSIS: 综合诊断 ======
