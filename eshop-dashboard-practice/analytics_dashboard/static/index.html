@@ -575,53 +575,54 @@ const pageRenderers = {
 
   // ====== CUSTOMERS: 客户分析 ======
   async customers(ct) {
-    ct.innerHTML = `<div class="page-header"><div class="page-title">👥 客户分析</div><div class="page-desc">RFM 分群 · Cohort 留存 · 用户聚类</div></div>
+    ct.innerHTML = `<div class="page-header"><div class="page-title">👥 客户分析</div><div class="page-desc">RFM 分层 · Cohort 留存矩阵 · K-Means 聚类 · 用户搜索</div></div>
       <div class="kpi-grid" id="cKpi"></div>
-      <div class="chart-row cols-eq">
+      <div class="chart-row cols-3">
         <div class="panel"><h4>🧩 RFM 分群分布</h4><canvas id="cSeg"></canvas></div>
-        <div class="panel"><h4>📅 Cohort 留存矩阵</h4><canvas id="cCohort"></canvas></div>
+        <div class="panel"><h4>📅 Cohort 留存趋势</h4><canvas id="cCohort"></canvas></div>
+        <div class="panel"><h4>🔮 聚类散点图</h4><canvas id="cScatter"></canvas></div>
       </div>
-      <div class="chart-row cols-eq">
-        <div class="panel"><h4>🔮 用户聚类 (K-Means)</h4><canvas id="cCluster"></canvas></div>
-        <div class="panel"><h4>📋 分群详情</h4><div id="cDetail"></div></div>
+      <div class="chart-row cols-2">
+        <div class="panel"><h4>📊 聚类详情 + RFM 对比</h4><canvas id="cCluster"></canvas></div>
+        <div class="panel"><h4>🔍 用户搜索</h4>
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <input type="text" id="cUserSearch" placeholder="用户名/ID..." style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+            <button class="btn btn-primary btn-sm" onclick="searchUsers()">搜索</button>
+          </div>
+          <div id="cSearchResult" style="font-size:12px"></div>
+        </div>
       </div>`;
     try {
       const [rfm, cohorts, clusters] = await Promise.all([
         cachedApi('/api/r3/rfm-layers'), cachedApi('/api/r3/cohort-retention'),
         cachedApi('/api/r5/user-clusters?k=5')
       ]);
-      const segs = rfm.segments || [];
+      const segs = rfm.segments || [], totalUsers = segs.reduce((a,s)=>a+(s.user_count||0),0);
       document.getElementById('cKpi').innerHTML = `
-        <div class="kpi-card"><div class="kpi-icon" style="background:var(--primary-light)">👑</div><div class="kpi-label">核心价值客户</div><div class="kpi-value">${N(segs.find(s=>s.segment?.includes('核心'))?.user_count || 0)}</div></div>
-        <div class="kpi-card"><div class="kpi-icon" style="background:var(--warning-light)">⚠️</div><div class="kpi-label">流失风险</div><div class="kpi-value">${N(segs.find(s=>s.segment?.includes('流失'))?.user_count || 0)}</div></div>
-        <div class="kpi-card"><div class="kpi-icon" style="background:var(--info-light)">📊</div><div class="kpi-label">总分群</div><div class="kpi-value">${segs.length}</div></div>
-        <div class="kpi-card"><div class="kpi-icon" style="background:var(--success-light)">👥</div><div class="kpi-label">活跃买家</div><div class="kpi-value">18,118</div></div>`;
+        <div class="kpi-card" style="background:linear-gradient(135deg,#eef2ff,#e0e7ff);border:none"><div class="kpi-icon" style="background:#fff">👑</div><div class="kpi-label">核心价值客户</div><div class="kpi-value">${N(segs.find(s=>s.segment?.includes('核心'))?.user_count||0)}</div><div class="kpi-sub">GMV占比 ${segs.find(s=>s.segment?.includes('核心'))?.gmv_share||0}%</div></div>
+        <div class="kpi-card" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:none"><div class="kpi-icon" style="background:#fff">⚠️</div><div class="kpi-label">流失风险</div><div class="kpi-value">${N(segs.find(s=>s.segment?.includes('流失'))?.user_count||0)}</div><div class="kpi-sub">需激活召回</div></div>
+        <div class="kpi-card" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:none"><div class="kpi-icon" style="background:#fff">📊</div><div class="kpi-label">用户总数</div><div class="kpi-value">${N(totalUsers)}</div><div class="kpi-sub">${segs.length} 个分群</div></div>
+        <div class="kpi-card" style="background:linear-gradient(135deg,#ecfeff,#cffafe);border:none"><div class="kpi-icon" style="background:#fff">👥</div><div class="kpi-label">活跃买家</div><div class="kpi-value">18,118</div><div class="kpi-sub">近24月有购买</div></div>`;
       renderChart('cSeg', 'doughnut', {
-        labels: segs.map(s => s.segment),
-        datasets: [{ data: segs.map(s => s.user_count), backgroundColor: ['#4f46e5','#7c3aed','#0891b2','#059669','#d97706','#dc2626','#ec4899','#f59e0b'] }]
-      });
-      const matrix = cohorts.matrix || [];
-      if (matrix.length) {
-        renderChart('cCohort', 'line', {
-          labels: matrix.map(r => r.cohort),
-          datasets: [
-            { label: 'M1 留存', data: matrix.map(r => r.retention_1 || 0), borderColor: '#4f46e5', tension: 0.3, pointRadius: 3 },
-            { label: 'M3 留存', data: matrix.map(r => r.retention_3 || 0), borderColor: '#059669', tension: 0.3, pointRadius: 3 }
-          ]
-        });
-      }
-      const cls = clusters.clusters || [];
-      renderChart('cCluster', 'bar', {
-        labels: cls.map(c => c.name),
-        datasets: [
-          { label: '人数', data: cls.map(c => c.size), backgroundColor: '#4f46e5', borderRadius: 4 },
-          { label: 'Recency(天)', data: cls.map(c => c.avg_recency), backgroundColor: '#d97706', borderRadius: 4 }
-        ]
-      });
-      document.getElementById('cDetail').innerHTML = cls.length ?
-        `<table class="data-table"><thead><tr><th>分群</th><th>人数</th><th>Recency</th><th>Frequency</th><th>Monetary</th></tr></thead><tbody>${cls.map(c => `<tr><td><strong>${c.name}</strong></td><td>${N(c.size)}</td><td>${c.avg_recency}d</td><td>${c.avg_frequency}</td><td>¥${N(c.avg_monetary?.toFixed(0))}</td></tr>`).join('')}</tbody></table>` :
-        '<p style="font-size:12px;color:var(--muted)">聚类数据加载中...</p>';
-    } catch (e) { showError(ct, '客户分析加载失败: ' + e.message); }
+        labels: segs.map(s=>s.segment),
+        datasets:[{data:segs.map(s=>s.user_count),backgroundColor:['#4f46e5','#7c3aed','#0891b2','#059669','#d97706','#dc2626','#ec4899','#f59e0b'],borderWidth:0}]
+      },{plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}}});
+      const matrix = cohorts.matrix||[];
+      if(matrix.length) renderChart('cCohort','line',{
+        labels:matrix.map(r=>r.cohort),datasets:[
+          {label:'M1',data:matrix.map(r=>r.retention_1||0),borderColor:'#4f46e5',tension:.3,pointRadius:2,fill:false},
+          {label:'M3',data:matrix.map(r=>r.retention_3||0),borderColor:'#059669',tension:.3,pointRadius:2,fill:false}]});
+      const cls=clusters.clusters||[];
+      renderChart('cCluster','bar',{
+        labels:cls.map(c=>c.name),datasets:[
+          {label:'人数',data:cls.map(c=>c.size),backgroundColor:'#4f46e5',borderRadius:4},
+          {label:'Recency(天)',data:cls.map(c=>c.avg_recency),backgroundColor:'#d97706',borderRadius:4},
+          {label:'Frequency',data:cls.map(c=>c.avg_frequency),backgroundColor:'#059669',borderRadius:4}]});
+      // Scatter for clusters
+      if(cls.length) renderChart('cScatter','scatter',{
+        datasets:cls.map((c,i)=>({label:c.name,data:[{x:c.avg_recency||0,y:c.avg_monetary||0}],backgroundColor:['#4f46e5','#7c3aed','#059669','#d97706','#dc2626'][i],pointRadius:Math.sqrt(c.size)/30+6}))},
+        {scales:{x:{title:{display:true,text:'Recency(天)'}},y:{title:{display:true,text:'Monetary(¥)'}}}});
+    } catch(e) { showError(ct,'客户分析加载失败: '+e.message); }
   },
 
   // ====== PRODUCTS: 商品与购物篮 ======
