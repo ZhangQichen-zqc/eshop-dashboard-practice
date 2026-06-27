@@ -6,7 +6,7 @@ WORKDIR /app
 RUN npm config set registry https://registry.npmmirror.com
 
 COPY server/package*.json ./
-RUN npm ci --omit=dev
+RUN npm install --omit=dev --legacy-peer-deps
 
 COPY server/src ./src
 COPY server/data ./data

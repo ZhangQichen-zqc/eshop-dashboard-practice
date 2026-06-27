@@ -2,14 +2,9 @@ FROM python:3.12-slim-bookworm
 
 WORKDIR /app
 
-# 安装系统依赖（编译 scikit-learn 等需要）
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc g++ libsqlite3-dev curl \
-    && rm -rf /var/lib/apt/lists/*
-
 # 先复制依赖文件，利用 Docker 缓存层
 COPY analytics_dashboard/requirements.txt .
-# 使用清华 pip 镜像加速
+# 使用清华 pip 镜像加速安装（scikit-learn/numpy等有预编译wheel）
 RUN pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
 
 # 复制源代码
