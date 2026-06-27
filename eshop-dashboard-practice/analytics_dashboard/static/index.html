@@ -269,12 +269,50 @@ a{text-decoration:none;color:inherit}
 <!-- Loading overlay -->
 <div id="loadingOverlay" style="position:fixed;inset:0;background:linear-gradient(135deg,#f8fafc 0%,#eef2ff 50%,#f0fdf4 100%);z-index:300;display:flex;align-items:center;justify-content:center;transition:opacity .6s;overflow-y:auto">
   <div style="max-width:640px;width:90%;padding:40px 20px;text-align:center">
-    <!-- Animated logo -->
-    <div style="margin-bottom:20px;position:relative;display:inline-block">
-      <svg width="80" height="80" viewBox="0 0 80 80">
-        <defs><linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#4f46e5"/><stop offset="100%" style="stop-color:#7c3aed"/></linearGradient></defs>
-        <rect x="4" y="4" width="72" height="72" rx="18" fill="none" stroke="url(#lg)" stroke-width="3" stroke-dasharray="300" stroke-dashoffset="300"><animate attributeName="stroke-dashoffset" from="300" to="0" dur="2s" fill="freeze"/></rect>
-        <text x="40" y="50" text-anchor="middle" font-size="32" font-weight="800" fill="url(#lg)" opacity="0"><animate attributeName="opacity" from="0" to="1" dur="0.5s" begin="1.5s" fill="freeze"/>📊</text>
+    <!-- Animated loading illustration -->
+    <div style="margin-bottom:24px;position:relative;display:inline-block">
+      <svg width="200" height="120" viewBox="0 0 200 120">
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4f46e5"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient>
+          <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#059669"/><stop offset="100%" stop-color="#0891b2"/></linearGradient>
+          <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#d97706"/><stop offset="100%" stop-color="#dc2626"/></linearGradient>
+        </defs>
+        <!-- Floating dashboard window -->
+        <rect x="30" y="10" width="90" height="70" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="2" opacity="0.95">
+          <animate attributeName="y" values="10;6;10" dur="3s" repeatCount="indefinite"/>
+        </rect>
+        <!-- Chart bars in window -->
+        <rect x="40" y="55" width="8" height="15" rx="2" fill="url(#g1)"><animate attributeName="height" values="15;25;15" dur="1.5s" repeatCount="indefinite"/><animate attributeName="y" values="55;45;55" dur="1.5s" repeatCount="indefinite"/></rect>
+        <rect x="52" y="45" width="8" height="25" rx="2" fill="url(#g1)"><animate attributeName="height" values="25;18;25" dur="1.8s" repeatCount="indefinite"/><animate attributeName="y" values="45;52;45" dur="1.8s" repeatCount="indefinite"/></rect>
+        <rect x="64" y="35" width="8" height="35" rx="2" fill="url(#g1)"><animate attributeName="height" values="35;28;35" dur="1.3s" repeatCount="indefinite"/><animate attributeName="y" values="35;42;35" dur="1.3s" repeatCount="indefinite"/></rect>
+        <rect x="76" y="50" width="8" height="20" rx="2" fill="url(#g1)"><animate attributeName="height" values="20;30;20" dur="2s" repeatCount="indefinite"/><animate attributeName="y" values="50;40;50" dur="2s" repeatCount="indefinite"/></rect>
+        <rect x="88" y="42" width="8" height="28" rx="2" fill="url(#g1)"><animate attributeName="height" values="28;20;28" dur="1.6s" repeatCount="indefinite"/><animate attributeName="y" values="42;50;42" dur="1.6s" repeatCount="indefinite"/></rect>
+        <!-- Sparkles -->
+        <circle cx="125" cy="20" r="3" fill="#7c3aed"><animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/><animate attributeName="cy" values="20;15;20" dur="1s" repeatCount="indefinite"/></circle>
+        <circle cx="135" cy="35" r="2" fill="#0891b2"><animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite"/><animate attributeName="cy" values="35;28;35" dur="1.5s" repeatCount="indefinite"/></circle>
+        <circle cx="118" cy="45" r="2.5" fill="#d97706"><animate attributeName="opacity" values="1;0;1" dur="1.2s" repeatCount="indefinite"/><animate attributeName="cy" values="45;38;45" dur="1.2s" repeatCount="indefinite"/></circle>
+        <!-- Funnel shape -->
+        <polygon points="145,55 180,55 175,95 150,95" fill="none" stroke="url(#g2)" stroke-width="2.5" opacity="0.8">
+          <animateTransform attributeName="transform" type="scale" values="1;1.05;1" dur="2s" repeatCount="indefinite" additive="sum"/>
+        </polygon>
+        <line x1="145" y1="55" x2="180" y2="55" stroke="url(#g2)" stroke-width="4" stroke-linecap="round"/>
+        <line x1="147" y1="65" x2="178" y2="65" stroke="url(#g2)" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="149" y1="75" x2="176" y2="75" stroke="url(#g2)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="150" y1="85" x2="175" y2="85" stroke="url(#g2)" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Dots orbiting -->
+        <circle cx="30" cy="100" r="4" fill="url(#g1)">
+          <animateMotion dur="4s" repeatCount="indefinite" path="M30,100 C30,60 170,60 170,100 C170,140 30,140 30,100"/>
+        </circle>
+        <circle cx="30" cy="100" r="3" fill="url(#g2)">
+          <animateMotion dur="4s" repeatCount="indefinite" path="M30,100 C30,60 170,60 170,100 C170,140 30,140 30,100" begin="-2s"/>
+        </circle>
+        <!-- Data flow lines -->
+        <line x1="10" y1="15" x2="25" y2="15" stroke="#4f46e5" stroke-width="1.5" opacity="0.5">
+          <animate attributeName="x1" values="10;5;10" dur="2s" repeatCount="indefinite"/>
+        </line>
+        <line x1="10" y1="25" x2="25" y2="25" stroke="#4f46e5" stroke-width="1.5" opacity="0.3">
+          <animate attributeName="x1" values="10;5;10" dur="2.5s" repeatCount="indefinite"/>
+        </line>
       </svg>
     </div>
     <!-- Title -->
