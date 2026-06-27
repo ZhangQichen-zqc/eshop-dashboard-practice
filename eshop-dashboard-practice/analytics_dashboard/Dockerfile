@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # 先复制依赖文件，利用 Docker 缓存层
 COPY analytics_dashboard/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# 使用清华 pip 镜像加速
+RUN pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
 
 # 复制源代码
 COPY analytics_dashboard/ ./analytics_dashboard/
