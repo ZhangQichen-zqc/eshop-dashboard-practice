@@ -627,37 +627,39 @@ const pageRenderers = {
 
   // ====== PRODUCTS: 商品与购物篮 ======
   async products(ct) {
-    ct.innerHTML = `<div class="page-header"><div class="page-title">🛒 商品与购物篮</div><div class="page-desc">关联规则 · 捆绑推荐 · 频繁项集</div></div>
+    ct.innerHTML = `<div class="page-header"><div class="page-title">🛒 商品与购物篮</div><div class="page-desc">Apriori 关联规则 · 捆绑推荐 · 交叉销售 · 单品推荐</div></div>
       <div class="kpi-grid" id="pKpi"></div>
-      <div class="chart-row cols-2">
-        <div class="panel"><h4>🔗 品类关联规则</h4><canvas id="pRules"></canvas></div>
+      <div class="chart-row cols-3">
+        <div class="panel"><h4>🔗 规则 Support × Confidence</h4><canvas id="pRules"></canvas></div>
+        <div class="panel"><h4>📈 Lift 分布</h4><canvas id="pLift"></canvas></div>
         <div class="panel"><h4>🎁 捆绑推荐</h4><div id="pBundles"></div></div>
       </div>
-      <div class="chart-row cols-eq">
-        <div class="panel"><h4>📊 频繁项集 Top 10</h4><div id="pFreq"></div></div>
-        <div class="panel"><h4>🔍 单品推荐查询</h4><div id="pSearch"><input type="text" placeholder="输入 SKU ID..." id="pSkuInput" style="padding:8px;border:1px solid var(--border);border-radius:6px;width:100%;margin-bottom:8px;font-size:13px"><button class="btn btn-primary btn-sm" onclick="searchProductRec()">查询推荐</button><div id="pSearchResult" style="margin-top:8px;font-size:12px"></div></div></div>
+      <div class="chart-row cols-2">
+        <div class="panel"><h4>📊 关联规则详情 Top 15</h4><div id="pFreq"></div></div>
+        <div class="panel"><h4>🔍 单品推荐引擎</h4>
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <input type="text" id="pSkuInput" placeholder="输入 SKU ID..." style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:var(--font)">
+            <button class="btn btn-primary btn-sm" onclick="searchProductRec()">🔍 查询</button>
+          </div>
+          <div id="pSearchResult" style="font-size:12px"></div>
+        </div>
       </div>`;
     try {
       const rules = await cachedApi('/api/r6/association-rules');
-      const cr = rules.category_rules || [];
+      const cr = rules.category_rules || [], bundles = rules.bundles || [];
       document.getElementById('pKpi').innerHTML = `
-        <div class="kpi-card"><div class="kpi-icon" style="background:var(--primary-light)">🔗</div><div class="kpi-label">类目规则数</div><div class="kpi-value">${cr.length}</div></div>
-        <div class="kpi-card"><div class="kpi-icon" style="background:var(--success-light)">🎁</div><div class="kpi-label">捆绑推荐</div><div class="kpi-value">${(rules.bundles||[]).length}</div></div>
-        <div class="kpi-card"><div class="kpi-icon" style="background:var(--info-light)">📦</div><div class="kpi-label">SKU 规则数</div><div class="kpi-value">${rules.sku_rules_count || 0}</div></div>`;
-      if (cr.length) {
-        renderChart('pRules', 'scatter', {
-          datasets: [{
-            label: '关联规则', data: cr.map(r => ({ x: r.support || 0, y: r.confidence || 0 })),
-            backgroundColor: cr.map((_, i) => i < 3 ? '#4f46e5' : '#94a3b8'), pointRadius: 6
-          }]
-        }, { scales: { x: { title: { display: true, text: 'Support' } }, y: { title: { display: true, text: 'Confidence' } } } });
+        <div class="kpi-card" style="background:linear-gradient(135deg,#eef2ff,#e0e7ff);border:none"><div class="kpi-icon" style="background:#fff">🔗</div><div class="kpi-label">类目规则</div><div class="kpi-value">${cr.length}</div></div>
+        <div class="kpi-card" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:none"><div class="kpi-icon" style="background:#fff">🎁</div><div class="kpi-label">捆绑推荐</div><div class="kpi-value">${bundles.length}</div></div>
+        <div class="kpi-card" style="background:linear-gradient(135deg,#ecfeff,#cffafe);border:none"><div class="kpi-icon" style="background:#fff">📦</div><div class="kpi-label">SKU规则</div><div class="kpi-value">${rules.sku_rules_count||0}</div></div>
+        <div class="kpi-card" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:none"><div class="kpi-icon" style="background:#fff">⚠️</div><div class="kpi-label">强关联(Lift>1)</div><div class="kpi-value">${cr.filter(r=>(r.lift||0)>1).length}</div></div>`;
+      if(cr.length){
+        renderChart('pRules','scatter',{datasets:[{label:'规则',data:cr.map(r=>({x:r.support||0,y:r.confidence||0})),backgroundColor:cr.map(r=>(r.lift||0)>1?'#4f46e5':'#e2e8f0'),pointRadius:5}]},{scales:{x:{title:{display:true,text:'Support'}},y:{title:{display:true,text:'Confidence'}}}});
+        renderChart('pLift','bar',{labels:cr.slice(0,12).map(r=>(r.antecedents||[]).join(',')+'→'+(r.consequents||[]).join(',')),datasets:[{label:'Lift',data:cr.slice(0,12).map(r=>r.lift||0),backgroundColor:cr.slice(0,12).map(r=>(r.lift||0)>1?'#4f46e5':'#94a3b8'),borderRadius:4}]},{indexAxis:'y',plugins:{legend:{display:false}}});
       }
-      document.getElementById('pBundles').innerHTML = (rules.bundles || []).slice(0, 5).map(b =>
-        `<div class="alert-item success"><span class="sev">💰</span><div><strong>${b.bundle_name || b.name || '捆绑'}</strong><br><small>预期增量: ${b.expected_lift || b.lift || '--'}</small></div></div>`).join('') || '<p style="font-size:12px;color:var(--muted)">暂无捆绑推荐</p>';
-      document.getElementById('pFreq').innerHTML = cr.length ?
-        `<table class="data-table"><thead><tr><th>前项</th><th>后项</th><th>Lift</th><th>Confidence</th></tr></thead><tbody>${cr.slice(0, 10).map(r => `<tr><td>${(r.antecedents||[]).join(',')}</td><td>${(r.consequents||[]).join(',')}</td><td><span class="tag ${r.lift>1?'tag-success':'tag-warning'}">${(r.lift||0).toFixed(2)}</span></td><td>${((r.confidence||0)*100).toFixed(0)}%</td></tr>`).join('')}</tbody></table>` :
-        '<p style="font-size:12px;color:var(--muted)">类目间 lift 均 < 1.0，无强关联规则</p>';
-    } catch (e) { showError(ct, '商品分析加载失败: ' + e.message); }
+      document.getElementById('pBundles').innerHTML = bundles.length ? bundles.slice(0,6).map(b=>
+        `<div class="alert-item success"><span class="sev">💰</span><div><strong>${b.bundle_name||b.name||'捆绑包'}</strong><br><small>${b.expected_lift||b.description||''}</small></div></div>`).join('') : '<p style="font-size:12px;color:var(--muted);padding:12px">类目独立性高，暂无可推荐捆绑包<br>建议转为个性化推荐策略</p>';
+      document.getElementById('pFreq').innerHTML = cr.length ? `<table class="data-table"><thead><tr><th>前项</th><th>→</th><th>后项</th><th>Support</th><th>Lift</th><th>结果</th></tr></thead><tbody>${cr.slice(0,15).map(r=>`<tr><td>${(r.antecedents||[]).join(',')}</td><td>→</td><td>${(r.consequents||[]).join(',')}</td><td>${((r.support||0)*100).toFixed(1)}%</td><td>${(r.lift||0).toFixed(2)}</td><td><span class="tag ${(r.lift||0)>1.2?'tag-success':(r.lift||0)>1?'tag-warning':'tag-danger'}">${(r.lift||0)>1.2?'推荐':(r.lift||0)>1?'可关注':'弱关联'}</span></td></tr>`).join('')}</tbody></table>` : '<p style="font-size:12px;color:var(--muted);padding:12px">类目间无强关联（66对lift均<1.0），品类独立购买特征显著</p>';
+    } catch(e) { showError(ct,'商品分析加载失败: '+e.message); }
   },
 
   // ====== FORECAST: 预测与库存 ======
