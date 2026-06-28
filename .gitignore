@@ -31,6 +31,10 @@ env/
 .DS_Store
 Thumbs.db
 
+# 实验报告（不提交）
+*_experiment_report.*
+*实验报告.*
+
 # 备份目录
 server/data/backups/
 

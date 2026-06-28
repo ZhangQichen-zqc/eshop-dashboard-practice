@@ -1,7 +1,7 @@
 # 项目分工与协作记录
 
 > 课程：IT 项目管理 × 数据挖掘 — Course eShop 经营仪表盘  
-> 团队：hxy5437（黄兴宇） × zhangqichen（张启辰）  
+> 团队：胡熙媛（胡熙媛） × zhangqichen（张琪琛）  
 > 仓库：https://github.com/ZhangQichen-zqc/eshop-dashboard-practice  
 > 说明：两人分别独立提交报告，本文档记录完整的 Git 协作流程与项目管理实践
 
@@ -153,26 +153,26 @@ Week 4 (6/26)
 ```
 Git Log (main 分支):
 
-4484843 hxy5437    重构数据源架构：ETL API 优先，SQLite 降级
-b3716f1 hxy5437    重构数据源架构：ETL API 优先，SQLite 降级  ← (amend)
-21806ea hxy5437    完成阶段十六：仪表盘前端整体完善
-f956e23 hxy5437    完成阶段十五：综合决策中心 R11
-c166bc5 hxy5437    完成阶段十四：库存策略 R10
-e3d4f98 hxy5437    完成阶段十三：履约与售后 R9
-850f2df hxy5437    完成阶段十二：营销归因 R8
-efea208 hxy5437    完成阶段十一：时间序列预测 R7
-a274a4f hxy5437    完成阶段十：关联规则 R6
-a8018aa hxy5437    完成阶段九：客户聚类 R5
-a62e282 hxy5437    完成阶段八：复购预测模型 R4
-f4917c0 hxy5437    完成阶段七：RFM 用户运营 R3
-51ca719 hxy5437    完成阶段六：流量漏斗诊断 R2
-6f828b1 hxy5437    完成阶段五：经营驾驶舱 R1
-f72512e hxy5437    完成阶段四：特征工程 —— 用户与商品宽表
-1b26131 hxy5437    完成阶段三：数据质量检查 R0
-734aa72 hxy5437    完成阶段二：ETL 数据接入层 + FastAPI 仪表盘骨架
-a327b63 hxy5437    完成阶段一：数据探索与理解
-83effe7 hxy5437    更新 my_task.md：阶段零全部打钩完成
-25ebe9c hxy5437    完成阶段零：环境搭建与验证
+4484843 胡熙媛    重构数据源架构：ETL API 优先，SQLite 降级
+b3716f1 胡熙媛    重构数据源架构：ETL API 优先，SQLite 降级  ← (amend)
+21806ea 胡熙媛    完成阶段十六：仪表盘前端整体完善
+f956e23 胡熙媛    完成阶段十五：综合决策中心 R11
+c166bc5 胡熙媛    完成阶段十四：库存策略 R10
+e3d4f98 胡熙媛    完成阶段十三：履约与售后 R9
+850f2df 胡熙媛    完成阶段十二：营销归因 R8
+efea208 胡熙媛    完成阶段十一：时间序列预测 R7
+a274a4f 胡熙媛    完成阶段十：关联规则 R6
+a8018aa 胡熙媛    完成阶段九：客户聚类 R5
+a62e282 胡熙媛    完成阶段八：复购预测模型 R4
+f4917c0 胡熙媛    完成阶段七：RFM 用户运营 R3
+51ca719 胡熙媛    完成阶段六：流量漏斗诊断 R2
+6f828b1 胡熙媛    完成阶段五：经营驾驶舱 R1
+f72512e 胡熙媛    完成阶段四：特征工程 —— 用户与商品宽表
+1b26131 胡熙媛    完成阶段三：数据质量检查 R0
+734aa72 胡熙媛    完成阶段二：ETL 数据接入层 + FastAPI 仪表盘骨架
+a327b63 胡熙媛    完成阶段一：数据探索与理解
+83effe7 胡熙媛    更新 my_task.md：阶段零全部打钩完成
+25ebe9c 胡熙媛    完成阶段零：环境搭建与验证
 
 16a50b4 zhangqichen   Add detailed 654-step task checklist covering full project lifecycle
 bb55b2b zhangqichen   初始代码整理
@@ -190,13 +190,13 @@ main
   ├── bb55b2b  ← zhangqichen: 代码整理
   ├── 16a50b4  ← zhangqichen: 任务清单
   │
-  ├── 25ebe9c  ← hxy5437: 阶段零
-  ├── 83effe7  ← hxy5437: 更新任务清单
-  ├── a327b63  ← hxy5437: 阶段一
-  ├── 734aa72  ← hxy5437: 阶段二
-  ├── 1b26131  ← hxy5437: 阶段三
-  ├── ...      ← hxy5437: 阶段四~十六 (各阶段独立提交)
-  ├── 4484843  ← hxy5437: ETL 重构
+  ├── 25ebe9c  ← 胡熙媛: 阶段零
+  ├── 83effe7  ← 胡熙媛: 更新任务清单
+  ├── a327b63  ← 胡熙媛: 阶段一
+  ├── 734aa72  ← 胡熙媛: 阶段二
+  ├── 1b26131  ← 胡熙媛: 阶段三
+  ├── ...      ← 胡熙媛: 阶段四~十六 (各阶段独立提交)
+  ├── 4484843  ← 胡熙媛: ETL 重构
   │
   ▼ 待完成: Docker / 测试 / 文档
 ```
@@ -204,13 +204,13 @@ main
 **协作规范：**
 1. **提交粒度**：每完成一个阶段（约 20-50 步）提交一次，不跨阶段混交
 2. **提交信息格式**：`完成阶段XX：模块名称` + 关键成果列表
-3. **Co-Authored-By**：hxy5437 的提交标注 `Co-Authored-By: Claude <noreply@anthropic.com>`（AI 辅助编程）
+3. **Co-Authored-By**：胡熙媛 的提交标注 `Co-Authored-By: Claude <noreply@anthropic.com>`（AI 辅助编程）
 4. **身份管理**：两人使用独立 Git 用户名和邮箱，贡献清晰可追溯
 5. **推送策略**：完成即推（`git push origin main`），保持远端最新
 
 ### 3.3 两人具体分工
 
-#### hxy5437（黄兴宇）— 主力开发者
+#### 胡熙媛（胡熙媛）— 主力开发者
 
 | 角色 | 具体工作 |
 |------|------|
@@ -238,7 +238,7 @@ main
 - 创建文件：18 个（.py + .html + .md + .ipynb）
 - 代码行数：约 3,500 行 Python + 600 行 HTML/JS
 
-#### zhangqichen（张启辰）— 项目管理与模块负责人
+#### zhangqichen（张琪琛）— 项目管理与模块负责人
 
 | 角色 | 具体工作 |
 |------|------|
@@ -280,12 +280,12 @@ zhangqichen 编写 my_task.md (654 步)
          ▼
 两人 Review 任务清单，确认范围
          │
-         ├── hxy5437 负责: 讲义 1,4,6,7,9 章 + 工程架构 + 前端
+         ├── 胡熙媛 负责: 讲义 1,4,6,7,9 章 + 工程架构 + 前端
          ├── zhangqichen 负责: 讲义 2,3,5,8 章 + Docker + 测试 + 文档
          └── 共同负责: 环境搭建、履约 R9、库存 R10
          │
          ▼
-hxy5437 逐阶段实现 → git commit → git push
+胡熙媛 逐阶段实现 → git commit → git push
          │
          ▼
 zhangqichen git pull 同步代码 → Review → 补充分析/测试
@@ -300,10 +300,10 @@ zhangqichen git pull 同步代码 → Review → 补充分析/测试
 
 1. **需求提出（zhangqichen）**：在 config.py 中新增 `DATA_SOURCE_MODE` 配置项，默认值 `"etl"`
 2. **方案设计（两人讨论）**：确定「严格 ETL 模式」方案——启动时强制检查 ETL API，不可用则报错；保留 SQLite 作为复杂 SQL 计算引擎
-3. **代码实现（hxy5437）**：重构 `data_access.py`（~200 行改动），将 ETLClient 类前置、`_use_etl()` 改为严格检查、所有 `load_*` 函数改为 ETL 优先、`get_db_connection()` 保留为计算引擎
-4. **功能验证（hxy5437）**：启动商城 API → 启动仪表盘 → 验证 health 返回 `"data_source": "etl"` → 验证前端所有页面加载正常
+3. **代码实现（胡熙媛）**：重构 `data_access.py`（~200 行改动），将 ETLClient 类前置、`_use_etl()` 改为严格检查、所有 `load_*` 函数改为 ETL 优先、`get_db_connection()` 保留为计算引擎
+4. **功能验证（胡熙媛）**：启动商城 API → 启动仪表盘 → 验证 health 返回 `"data_source": "etl"` → 验证前端所有页面加载正常
 5. **文档更新（两人）**：更新 attribution.md 记录分工和变更日志
-6. **Git 提交（hxy5437）**：`git commit -m "重构数据源架构：ETL API 优先，SQLite 降级"` → `git push`
+6. **Git 提交（胡熙媛）**：`git commit -m "重构数据源架构：ETL API 优先，SQLite 降级"` → `git push`
 
 ### 4.3 冲突处理
 
@@ -323,27 +323,27 @@ zhangqichen git pull 同步代码 → Review → 补充分析/测试
 | 任务清单 | zhangqichen | `my_task.md` | ✅ |
 | 项目设计文档 | 共同 | `项目解析与设计文档.md` | ✅ |
 | 分工说明 | 共同 | `attribution.md` | ✅ |
-| 指标口径文档 | hxy5437 | `docs/metric_definitions.md` | ✅ |
-| 数据清单 | hxy5437 | `docs/data_inventory.md` | ✅ |
-| 初步业务发现 | hxy5437 | `docs/initial_findings.md` | ✅ |
-| 数据探索 Notebook | hxy5437 | `notebooks/01_data_exploration.ipynb` | ✅ |
-| FastAPI 仪表盘 | hxy5437 | `analytics_dashboard/app/` | ✅ |
-| 数据读取层 | hxy5437 | `analytics_dashboard/app/data_access.py` | ✅ |
+| 指标口径文档 | 胡熙媛 | `docs/metric_definitions.md` | ✅ |
+| 数据清单 | 胡熙媛 | `docs/data_inventory.md` | ✅ |
+| 初步业务发现 | 胡熙媛 | `docs/initial_findings.md` | ✅ |
+| 数据探索 Notebook | 胡熙媛 | `notebooks/01_data_exploration.ipynb` | ✅ |
+| FastAPI 仪表盘 | 胡熙媛 | `analytics_dashboard/app/` | ✅ |
+| 数据读取层 | 胡熙媛 | `analytics_dashboard/app/data_access.py` | ✅ |
 | 配置模块 | zhangqichen | `analytics_dashboard/app/config.py` | ✅ |
 | 数据质量 R0 | 共同 | `subprojects/data_quality.py` | ✅ |
 | 经营驾驶舱 R1 | zhangqichen | `subprojects/business_health.py` | ✅ |
-| 流量漏斗 R2 | hxy5437 | `subprojects/traffic_funnel.py` | ✅ |
+| 流量漏斗 R2 | 胡熙媛 | `subprojects/traffic_funnel.py` | ✅ |
 | RFM 运营 R3 | zhangqichen | `subprojects/rfm_user_ops.py` | ✅ |
 | 特征工程 | zhangqichen | `subprojects/feature_engineering.py` | ✅ |
-| 复购预测 R4 | hxy5437 | `subprojects/repurchase_prediction.py` | ✅ |
+| 复购预测 R4 | 胡熙媛 | `subprojects/repurchase_prediction.py` | ✅ |
 | 客户聚类 R5 | zhangqichen | `subprojects/customer_clustering.py` | ✅ |
-| 关联规则 R6 | hxy5437 | `subprojects/association_rules.py` | ✅ |
-| 时间序列 R7 | hxy5437 | `subprojects/sales_forecast.py` | ✅ |
+| 关联规则 R6 | 胡熙媛 | `subprojects/association_rules.py` | ✅ |
+| 时间序列 R7 | 胡熙媛 | `subprojects/sales_forecast.py` | ✅ |
 | 营销归因 R8 | zhangqichen | `subprojects/marketing_attribution.py` | ✅ |
 | 履约售后 R9 | 共同 | `subprojects/fulfillment_analysis.py` | ✅ |
 | 库存策略 R10 | 共同 | `subprojects/inventory_strategy.py` | ✅ |
-| 决策中心 R11 | hxy5437 | `subprojects/decision_board.py` | ✅ |
-| 仪表盘前端 | hxy5437 | `static/index.html` | ✅ |
+| 决策中心 R11 | 胡熙媛 | `subprojects/decision_board.py` | ✅ |
+| 仪表盘前端 | 胡熙媛 | `static/index.html` | ✅ |
 | Docker 部署 | zhangqichen | `Dockerfile`, `docker-compose.yml` | ⏳ |
 | 测试套件 | zhangqichen | `tests/` | ⏳ |
 | 经营决策报告 | zhangqichen | 待提交 | ⏳ |
@@ -355,7 +355,7 @@ zhangqichen git pull 同步代码 → Review → 补充分析/测试
 
 老师要求**两人分别提交独立报告**，内容不可完全重合。建议侧重方向：
 
-### hxy5437 报告侧重
+### 胡熙媛 报告侧重
 
 1. **数据挖掘流程**：分类（R4）→ 关联（R6）→ 时序（R7）→ 综合决策（R11）的完整方法链
 2. **工程实践**：ETL 架构设计、FastAPI 实现、数据源抽象模式
